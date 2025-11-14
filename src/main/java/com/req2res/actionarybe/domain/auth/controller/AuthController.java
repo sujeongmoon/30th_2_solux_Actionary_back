@@ -1,7 +1,7 @@
 package com.req2res.actionarybe.domain.auth.controller;
 
 import com.req2res.actionarybe.domain.user.repository.UserRepository;
-import com.req2res.actionarybe.global.common.ApiResponse;
+import com.req2res.actionarybe.global.Response;
 import com.req2res.actionarybe.domain.auth.dto.*;
 import com.req2res.actionarybe.global.security.JwtTokenProvider;
 import com.req2res.actionarybe.domain.user.entity.User;
@@ -21,7 +21,7 @@ public class AuthController {
     private final UserRepository userRepository;
 
     @PostMapping("/login")
-    public ResponseEntity<ApiResponse<LoginResponseDTO>> login(@Valid @RequestBody LoginRequestDTO req) {
+    public ResponseEntity<Response<LoginResponseDTO>> login(@Valid @RequestBody LoginRequestDTO req) {
         // 로그인 인증 (Security 내부가 비밀번호 비교함)
         authManager.authenticate( //오류남
                 new UsernamePasswordAuthenticationToken(req.getLoginId(), req.getPassword())
@@ -43,6 +43,6 @@ public class AuthController {
         );
 
         // 최종 응답 반환
-        return ResponseEntity.ok(ApiResponse.ok("로그인에 성공하였습니다.", data));
+        return ResponseEntity.ok(Response.success("로그인에 성공하였습니다.", data));
     }
 }

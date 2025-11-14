@@ -3,7 +3,7 @@ package com.req2res.actionarybe.login;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-public class LoginTest {
+public class PwEncryptTest {
     public static void main(String[] args) {
         PasswordEncoder encoder = new BCryptPasswordEncoder();
         String rawPassword = "password456";
