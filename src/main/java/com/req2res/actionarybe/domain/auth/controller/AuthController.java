@@ -23,7 +23,7 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<Response<LoginResponseDTO>> login(@Valid @RequestBody LoginRequestDTO req) {
         // 로그인 인증 (Security 내부가 비밀번호 비교함)
-        authManager.authenticate( //오류남
+        authManager.authenticate( //오류나면? -> id는 DB에 있는데, pw 잘못됐을 가능성 높음
                 new UsernamePasswordAuthenticationToken(req.getLoginId(), req.getPassword())
         );
 
