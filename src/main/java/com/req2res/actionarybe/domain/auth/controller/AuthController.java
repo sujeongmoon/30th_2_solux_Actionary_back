@@ -27,8 +27,9 @@ public class AuthController {
                 new UsernamePasswordAuthenticationToken(req.getLoginId(), req.getPassword())
         );
 
-        // JWT 토큰 생성
-        String token = tokenProvider.createToken(req.getLoginId());
+        // JWT 토큰 생성 (access & refresh)
+        String accessToken = tokenProvider.createToken(req.getLoginId());
+        String refreshToken = tokenProvider.createRefreshToken(req.getLoginId());
 
         // DB에서 유저 조회
         User u = userRepository.findByLoginId(req.getLoginId())
@@ -39,7 +40,8 @@ public class AuthController {
                 u.getId(),
                 u.getNickname(),
                 u.getImageUrl(),
-                token
+                accessToken,
+                refreshToken
         );
 
         // 최종 응답 반환
