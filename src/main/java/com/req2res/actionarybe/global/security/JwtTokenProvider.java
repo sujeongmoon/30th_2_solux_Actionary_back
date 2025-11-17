@@ -37,6 +37,18 @@ public class JwtTokenProvider {
                 .compact();
     }
 
+    public String createRefreshToken(String loginId) {
+        final long refreshTokenValidityMs = 1209600000; // 2주
+        Date now = new Date();
+        Date exp = new Date(now.getTime() + refreshTokenValidityMs);
+        return Jwts.builder()
+                .setSubject(loginId)
+                .setIssuedAt(now)
+                .setExpiration(exp)
+                .signWith(secretKey, SignatureAlgorithm.HS256)
+                .compact();
+    }
+
     public boolean validate(String token) {
         try {
             Jwts.parserBuilder().setSigningKey(secretKey).build().parseClaimsJws(token);
