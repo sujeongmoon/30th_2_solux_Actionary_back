@@ -1,0 +1,8 @@
+###투두 생성 API
+POST http://localhost:8080/api/todos
+Content-Type: application/json
+
+{
+  "title": "운동 30분 하기",
+  "date": "2025-10-31"
+}

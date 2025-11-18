@@ -18,6 +18,11 @@ public enum ErrorCode {
 
 	// 각 Service에서 필요한 ErrorCode 추가
 
+	//todo
+	TODO_INVALID_TITLE(HttpStatus.BAD_REQUEST, "할 일 제목은 비어 있을 수 없습니다."),
+	TODO_INVALID_DATE(HttpStatus.BAD_REQUEST, "날짜 형식이 잘못되었습니다."),
+	TODO_CATEGORY_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 카테고리입니다."),
+
 	//user
 	EMAIL_DUPLICATED(HttpStatus.CONFLICT, "중복된 이메일입니다"),
 	MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 사용자입니다."),
