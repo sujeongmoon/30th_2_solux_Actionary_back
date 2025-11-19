@@ -4,6 +4,8 @@ import com.req2res.actionarybe.domain.auth.dto.SignupRequestDTO;
 import com.req2res.actionarybe.domain.auth.dto.SignupResponseDTO;
 import com.req2res.actionarybe.domain.user.entity.User;
 import com.req2res.actionarybe.domain.user.repository.UserRepository;
+import com.req2res.actionarybe.global.exception.CustomException;
+import com.req2res.actionarybe.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -23,8 +25,8 @@ public class SignupService {
     public SignupResponseDTO signup(SignupRequestDTO req) {
 
         // 1. 중복 검사
-        if (userRepository.existsByLoginId((req.getLoginId()))){
-            throw new RuntimeException("이미 존재하는 아이디입니다.");
+        if (userRepository.existsByLoginId(req.getLoginId())) {
+            throw new CustomException(ErrorCode.LOGIN_ID_DUPLICATED);
         }
 
         // 2. 비밀번호 암호화

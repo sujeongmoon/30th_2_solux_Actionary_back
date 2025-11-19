@@ -20,15 +20,14 @@ import com.req2res.actionarybe.global.Response;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
-	@ExceptionHandler(CustomException.class)
-	protected ResponseEntity<Response<?>> handleDuplicateException(CustomException ex) {
-		ErrorCode errorCode = ex.getErrorCode();
+    @ExceptionHandler(CustomException.class)
+    protected ResponseEntity<Response<?>> handleCustomException(CustomException ex) {
+        ex.printStackTrace();
+        ErrorCode errorCode = ex.getErrorCode();
+        return new ResponseEntity<>(Response.fail(errorCode.getMessage()), errorCode.getStatus());
+    }
 
-		ex.printStackTrace();
-		return new ResponseEntity<>(Response.fail(errorCode.getMessage()), errorCode.getStatus());
-	}
-
-	@ExceptionHandler(MethodArgumentNotValidException.class)
+    @ExceptionHandler(MethodArgumentNotValidException.class)
 	protected ResponseEntity<Response<?>> handleMethodArgumentNotValidException(MethodArgumentNotValidException ex) {
 		String message = ex.getBindingResult().getFieldErrors().stream()
 			.map(FieldError::getDefaultMessage)
