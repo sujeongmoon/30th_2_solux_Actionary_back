@@ -9,13 +9,11 @@ import java.util.List;
 public interface TodoRepository extends JpaRepository<Todo, Long> {
 
     // 날짜만으로 투두 조회 (카테고리 필터 없음)
-    List<Todo> findAllByDate(LocalDate date);
+    List<Todo> findAllByDateAndIsDeletedFalse(LocalDate date);
 
     // 날짜 + 카테고리로 투두 조회
-    List<Todo> findAllByDateAndCategoryId(LocalDate date, Long categoryId);
+    List<Todo> findAllByDateAndCategoryIdAndIsDeletedFalse(LocalDate date, Long categoryId);
 
-    //특정 유저가 어떤 날짜 범위에 가진 투두들 전체 조회
-    //같은 유저 + 같은 날짜의 투두들을 조회하기 위한 메서드
-    List<Todo> findAllByUserIdAndDate(Long userId,LocalDate date);
-
+    // 특정 유저 + 특정 날짜의 투두 조회
+    List<Todo> findAllByUserIdAndDateAndIsDeletedFalse(Long userId, LocalDate date);
 }

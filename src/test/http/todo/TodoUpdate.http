@@ -1,3 +1,12 @@
+### 투두 수정 (제목 + 카테고리 변경)
+PATCH http://localhost:8080/api/todos/1
+Content-Type: application/json
+
+{
+  "title": "운영체제 과제하기 (수정)",
+  "categoryId": 4
+}
+
 ### 투두 수정 (제목만 변경)
 PATCH http://localhost:8080/api/todos/1
 Content-Type: application/json
@@ -11,6 +20,8 @@ PATCH http://localhost:8080/api/todos/101
 Content-Type: application/json
 
 {}
+
+###---------투두 상태 변화 API------------
 
 ### 투두 상태 DONE 으로 변경
 PATCH http://localhost:8080/api/todos/1/status

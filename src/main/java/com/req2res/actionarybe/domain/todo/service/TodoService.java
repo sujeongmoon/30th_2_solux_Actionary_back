@@ -8,6 +8,7 @@ import com.req2res.actionarybe.domain.todo.repository.TodoRepository;
 import com.req2res.actionarybe.global.exception.CustomException;
 import com.req2res.actionarybe.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -70,11 +71,11 @@ public class TodoService {
         List<Todo> todos;
         //categoryId 들어왔을 때
         if (categoryId != null) {
-            todos = todoRepository.findAllByDateAndCategoryId(date, categoryId);
+            todos = todoRepository.findAllByDateAndCategoryIdAndIsDeletedFalse(date, categoryId);
         }
         // categoryId 안들어왔을 때
         else {
-            todos = todoRepository.findAllByDate(date);
+            todos = todoRepository.findAllByDateAndIsDeletedFalse(date);
         }
 
         // 해당 날짜에 투두가 하나도 없을 때 404
@@ -181,7 +182,7 @@ public class TodoService {
 
         // 날짜 그대로 사용 (LocalDate로 저장되어 있으니까!)
         List<Todo> todosOfDay =
-                todoRepository.findAllByUserIdAndDate(userId, targetDate);
+                todoRepository.findAllByUserIdAndDateAndIsDeletedFalse(userId, targetDate);
 
         boolean allDone = todosOfDay.stream()
                 .allMatch(todo -> todo.getStatus() == Todo.Status.DONE);
@@ -190,5 +191,26 @@ public class TodoService {
             // TODO: 알림 생성 메서드 호출
             // notificationService.createAllTodosDoneNotification(userId, targetDate);
         }
+    }
+
+    /*//5. 투두 삭제 API
+    //soft delete 기법 사용
+    public void deleteTodo(Long todoId) {
+        // 투두가 존재하지 않을 때 -> 404
+        Todo todo = todoRepository.findById(todoId)
+                .orElseThrow(() -> new CustomException(ErrorCode.TODO_NOT_FOUND));
+
+        //이미 삭제 되었을 때
+        if (todo.isDeleted()) {
+            throw new CustomException(ErrorCode.TODO_DELETE_CONFLICT);
+        }
+
+
+        try {
+            todo.setDeleted(true);
+        } catch (DataIntegrityViolationException e) {
+            // 다른 엔티티에서 FK로 참조 중인 경우 등
+            throw new CustomException(ErrorCode.TODO_DELETE_CONFLICT);
+        }*/
     }
 }

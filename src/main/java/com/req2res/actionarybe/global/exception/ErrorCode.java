@@ -25,6 +25,7 @@ public enum ErrorCode {
 	TODO_STATUS_CONFLICT(HttpStatus.CONFLICT, "이미 해당 상태로 처리된 투두입니다."),
 	TODO_INVALID_STATUS(HttpStatus.BAD_REQUEST, "status 값은 DONE 또는 FAILED만 허용됩니다."),
 	TODO_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 투두입니다."),
+	TODO_DELETE_CONFLICT(HttpStatus.CONFLICT, "이미 삭제되었거나 다른 엔티티에서 참조 중인 투두입니다."),
 
 	//user
 	EMAIL_DUPLICATED(HttpStatus.CONFLICT, "중복된 이메일입니다"),
