@@ -1,4 +1,4 @@
-package com.req2res.actionarybe.login;
+package com.req2res.actionarybe.auth;
 
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;

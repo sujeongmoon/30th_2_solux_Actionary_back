@@ -1,5 +1,6 @@
 package com.req2res.actionarybe.domain.auth.controller;
 
+import com.req2res.actionarybe.domain.auth.service.SignupService;
 import com.req2res.actionarybe.domain.user.repository.UserRepository;
 import com.req2res.actionarybe.global.Response;
 import com.req2res.actionarybe.domain.auth.dto.*;
@@ -12,13 +13,20 @@ import org.springframework.security.authentication.*;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/users")
+@RequestMapping("/api/auth")
 @RequiredArgsConstructor
 public class AuthController {
 
     private final AuthenticationManager authManager;
     private final JwtTokenProvider tokenProvider;
     private final UserRepository userRepository;
+    private final SignupService signupService;
+
+    @PostMapping("/signup")
+    public ResponseEntity<Response<SignupResponseDTO>> signup(@Valid @RequestBody SignupRequestDTO req){
+        SignupResponseDTO result = signupService.signup(req);
+        return ResponseEntity.ok(Response.success("회원가입에 성공하였습니다.", result));
+    }
 
     @PostMapping("/login")
     public ResponseEntity<Response<LoginResponseDTO>> login(@Valid @RequestBody LoginRequestDTO req) {

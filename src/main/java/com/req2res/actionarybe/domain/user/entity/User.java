@@ -68,8 +68,7 @@ public class User extends Timestamped {
                 ? "http://.../default_profile.png" : imageUrl;
         this.nickname = (nickname == null || nickname.isBlank())
                 ? generateDefaultNickname() : nickname;
-        this.badgeId=(nickname == null || nickname.isBlank())
-                ? 0:badgeId;
+        this.badgeId=badgeId;
         // createdAt, updatedAt은 Timestamped에서 자동으로 위에 필드 변수에 넣어줄거라, 외부에서 주입받을 필요X
     }
 

@@ -2,18 +2,20 @@ package com.req2res.actionarybe.domain.auth.dto;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
+@Builder
 public class SignupRequestDTO {
 
     @NotBlank
     private String profileImageUrl;
 
     @NotBlank
-    private Long loginId;
+    private String loginId;
 
     @NotBlank
     private String password;
