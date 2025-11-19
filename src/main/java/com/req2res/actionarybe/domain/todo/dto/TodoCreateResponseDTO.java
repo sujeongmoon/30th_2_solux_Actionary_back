@@ -29,7 +29,7 @@ public class TodoCreateResponseDTO {
         return TodoCreateResponseDTO.builder()
                 .todoId(todo.getId())
                 .title(todo.getTitle())
-                .date(todo.getDate().toLocalDate()) // LocalDateTime -> LocalDate
+                .date(todo.getDate())
                 .categoryId(todo.getCategoryId())
                 .status(todo.getStatus().name())
                 .createdAt(todo.getCreatedAt())

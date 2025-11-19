@@ -32,7 +32,8 @@ public class SecurityConfig {
 
                         //임시 추가
                         //todo
-                        .requestMatchers("/api/todos").permitAll()
+                        .requestMatchers("/api/todos","/api/todos/**").permitAll()
+
 
                         .anyRequest().authenticated()
                 )

@@ -4,7 +4,7 @@ import com.req2res.actionarybe.global.Timestamped;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 @Entity
 @Table(name = "todo")
@@ -26,7 +26,7 @@ public class Todo extends Timestamped {
     private String title;  // 두두 제목
 
     @Column(nullable = false)
-    private LocalDateTime date;   // 목표 날짜
+    private LocalDate date;   // 목표 날짜
 
     @Enumerated(EnumType.STRING)
     @Builder.Default
