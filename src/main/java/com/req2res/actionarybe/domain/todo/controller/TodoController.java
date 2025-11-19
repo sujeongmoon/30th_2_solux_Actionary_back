@@ -107,5 +107,20 @@ public class TodoController {
                 Response.success(message, data)
         );
     }
+
+    //5. 투두 삭제 API
+    @DeleteMapping("/{todoId}")
+    public ResponseEntity<Response<Void>> deleteTodo(@PathVariable Long todoId) {
+
+        // TODO: 토큰 인증 추가
+        // 이후에 Security 붙이면 여기서 userId 꺼내서
+        // 자신의 투두인지 검증하고 삭제하는 로직 추가하면 됨.
+
+        todoService.deleteTodo(todoId);
+
+        return ResponseEntity.ok(
+                Response.success("투두가 삭제되었습니다.", null)
+        );
+    }
 }
 

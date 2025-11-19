@@ -71,11 +71,11 @@ public class TodoService {
         List<Todo> todos;
         //categoryId 들어왔을 때
         if (categoryId != null) {
-            todos = todoRepository.findAllByDateAndCategoryIdAndIsDeletedFalse(date, categoryId);
+            todos = todoRepository.findAllByDateAndCategoryId(date, categoryId);
         }
         // categoryId 안들어왔을 때
         else {
-            todos = todoRepository.findAllByDateAndIsDeletedFalse(date);
+            todos = todoRepository.findAllByDate(date);
         }
 
         // 해당 날짜에 투두가 하나도 없을 때 404
@@ -182,7 +182,7 @@ public class TodoService {
 
         // 날짜 그대로 사용 (LocalDate로 저장되어 있으니까!)
         List<Todo> todosOfDay =
-                todoRepository.findAllByUserIdAndDateAndIsDeletedFalse(userId, targetDate);
+                todoRepository.findAllByUserIdAndDate(userId, targetDate);
 
         boolean allDone = todosOfDay.stream()
                 .allMatch(todo -> todo.getStatus() == Todo.Status.DONE);
@@ -193,24 +193,20 @@ public class TodoService {
         }
     }
 
-    /*//5. 투두 삭제 API
-    //soft delete 기법 사용
+    //5. 투두 삭제 API
+    //Hard delete 기법 사용
     public void deleteTodo(Long todoId) {
-        // 투두가 존재하지 않을 때 -> 404
+
+        // 투두 없음 -> 404
         Todo todo = todoRepository.findById(todoId)
                 .orElseThrow(() -> new CustomException(ErrorCode.TODO_NOT_FOUND));
 
-        //이미 삭제 되었을 때
-        if (todo.isDeleted()) {
+        try {
+            // 하드 삭제
+            todoRepository.delete(todo);
+        } catch (DataIntegrityViolationException e) {
+            // FK로 다른 엔티티에서 참조 중이면 -> 409
             throw new CustomException(ErrorCode.TODO_DELETE_CONFLICT);
         }
-
-
-        try {
-            todo.setDeleted(true);
-        } catch (DataIntegrityViolationException e) {
-            // 다른 엔티티에서 FK로 참조 중인 경우 등
-            throw new CustomException(ErrorCode.TODO_DELETE_CONFLICT);
-        }*/
     }
 }
