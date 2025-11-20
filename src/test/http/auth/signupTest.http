@@ -3,7 +3,7 @@ Content-Type: application/json
 
 {
   "profileImageUrl": "https://cdn.example.com/profiles/user123.jpg",
-  "loginId": "jaehyun99",
+  "loginId": "ja  ehyun99",
   "password": "securePass!2025",
   "phoneNumber": "010-8765-4321",
   "email": "jaehyun.kim99@example.com",

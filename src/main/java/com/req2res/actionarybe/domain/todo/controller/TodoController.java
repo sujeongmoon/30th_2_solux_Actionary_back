@@ -2,11 +2,17 @@ package com.req2res.actionarybe.domain.todo.controller;
 
 import com.req2res.actionarybe.domain.todo.dto.*;
 import com.req2res.actionarybe.domain.todo.service.TodoService;
+import com.req2res.actionarybe.domain.user.entity.User;
+import com.req2res.actionarybe.domain.user.repository.UserRepository;
 import com.req2res.actionarybe.global.Response;
+import com.req2res.actionarybe.global.exception.CustomException;
+import com.req2res.actionarybe.global.exception.ErrorCode;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -18,19 +24,20 @@ import java.time.LocalDate;
 public class TodoController {
 
     private final TodoService todoService;
+    private final UserRepository userRepository;
 
     //1. 투두 생성 API
     @PostMapping
     public Response<TodoCreateResponseDTO> createTodo(
-            // 원래는 토큰에서 사용자 정보 꺼내야 함
-            // @RequestHeader("Authorization") String authorization,
-            // @AuthenticationPrincipal User user,
+            @AuthenticationPrincipal UserDetails userDetails,
             @RequestBody @Valid TodoCreateRequestDTO request
     ) {
+        String loginId = userDetails.getUsername();
 
-        // TODO: 로그인 기능 구현 후 아래 부분을 실제 유저 정보로 교체
-        // Long userId = user.getId();
-        Long userId = 1L; // 임시 유저 ID (테스트용)
+        User user = userRepository.findByLoginId(loginId)
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND));
+
+        Long userId = user.getId();
 
         TodoCreateResponseDTO data = todoService.createTodo(userId, request);
 
@@ -41,13 +48,10 @@ public class TodoController {
     /**
      * - 카테고리 설정: GET /api/todos?date=2025-10-31&categoryId=3
      * - 카테고리 미설정: GET /api/todos?date=2025-10-31
-     *
-     * 지금은 인증 기능 미완성이라 토큰 사용 부분은 주석 처리해둠.
      */
     @GetMapping
     public ResponseEntity<Response<DailyTodosResponseDTO>> getTodosByDate(
-            // TODO: 로그인 연동 후 주석 해제
-            // @AuthenticationPrincipal CustomUserDetails userDetails,
+            @AuthenticationPrincipal UserDetails userDetails,
 
             // ?date=2025-10-31 형식으로 들어오는 쿼리 파라미터
             @RequestParam
@@ -58,10 +62,14 @@ public class TodoController {
             @RequestParam(required = false)
             Long categoryId
     ) {
-        // TODO: 토큰 붙이면 여기서 userId 꺼내서 서비스에 넘기면 됨
-        // Long userId = userDetails.getId();
+        String loginId = userDetails.getUsername();
 
-        DailyTodosResponseDTO data = todoService.getTodosByDate(date, categoryId);
+        User user = userRepository.findByLoginId(loginId)
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND));
+
+        Long userId = user.getId();
+
+        DailyTodosResponseDTO data = todoService.getTodosByDate(userId, date, categoryId);
 
         return ResponseEntity.ok(
                 Response.success("투두 목록 조회에 성공했습니다.", data)
@@ -72,15 +80,17 @@ public class TodoController {
     @PatchMapping("/{todoId}")
     public ResponseEntity<Response<TodoResponseDTO>> updateTodo(
             @PathVariable Long todoId,
-            @RequestBody TodoUpdateRequestDTO request
-
-            // TODO: 로그인 구현 후 활성화
-            // @AuthenticationPrincipal CustomUserDetails userDetails
+            @RequestBody TodoUpdateRequestDTO request,
+            @AuthenticationPrincipal UserDetails userDetails
     ) {
-        // TODO: userId 꺼내서 소유자 검증
-        // Long userId = userDetails.getId();
+        String loginId = userDetails.getUsername();
 
-        TodoResponseDTO data = todoService.updateTodo(todoId, request);
+        User user = userRepository.findByLoginId(loginId)
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND));
+
+        Long userId = user.getId();
+
+        TodoResponseDTO data = todoService.updateTodo(userId, todoId, request);
 
         return ResponseEntity.ok(
                 Response.success("투두가 수정되었습니다.", data)
@@ -90,14 +100,18 @@ public class TodoController {
     // 4. 투두 달성/실패 처리 API
     @PatchMapping("/{todoId}/status")
     public ResponseEntity<Response<TodoStatusResponseDTO>> updateTodoStatus(
+            @AuthenticationPrincipal UserDetails userDetails,
             @PathVariable Long todoId,
             @RequestBody TodoStatusUpdateRequestDTO request
-            // TODO: 로그인 구현 후 활성화
-            // @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
-        // TODO: userId = userDetails.getId(); 이후 서비스에 넘겨서 소유자 검증 추가 가능
+        String loginId = userDetails.getUsername();
 
-        TodoStatusResponseDTO data = todoService.updateTodoStatus(todoId, request);
+        User user = userRepository.findByLoginId(loginId)
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND));
+
+        Long userId = user.getId();
+
+        TodoStatusResponseDTO data = todoService.updateTodoStatus(userId, todoId, request);
 
         String message = data.getStatus().equals("DONE")
                 ? "할 일이 완료되었습니다."
@@ -110,13 +124,19 @@ public class TodoController {
 
     //5. 투두 삭제 API
     @DeleteMapping("/{todoId}")
-    public ResponseEntity<Response<Void>> deleteTodo(@PathVariable Long todoId) {
+    public ResponseEntity<Response<Void>> deleteTodo(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @PathVariable Long todoId)
+    {
+        String loginId = userDetails.getUsername();
 
-        // TODO: 토큰 인증 추가
-        // 이후에 Security 붙이면 여기서 userId 꺼내서
-        // 자신의 투두인지 검증하고 삭제하는 로직 추가하면 됨.
+        User user = userRepository.findByLoginId(loginId)
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND));
 
-        todoService.deleteTodo(todoId);
+        Long userId = user.getId();
+
+        // 3) 서비스에 userId까지 넘겨서 “본인 투두인지 검증 후 삭제”
+        todoService.deleteTodo(userId, todoId);
 
         return ResponseEntity.ok(
                 Response.success("투두가 삭제되었습니다.", null)

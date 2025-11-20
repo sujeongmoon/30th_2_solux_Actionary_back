@@ -11,8 +11,8 @@ public interface TodoRepository extends JpaRepository<Todo, Long> {
     // 날짜만으로 투두 조회 (카테고리 필터 없음)
     List<Todo> findAllByDate(LocalDate date);
 
-    // 날짜 + 카테고리로 투두 조회
-    List<Todo> findAllByDateAndCategoryId(LocalDate date, Long categoryId);
+    // 특정 유저 + 날짜 + 카테고리로 투두 조회
+    List<Todo> findAllByUserIdAndDateAndCategoryId(Long userId, LocalDate date, Long categoryId);
 
     // 특정 유저 + 특정 날짜의 투두 조회
     List<Todo> findAllByUserIdAndDate(Long userId, LocalDate date);

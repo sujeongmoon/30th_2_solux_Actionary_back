@@ -1,5 +1,6 @@
 ### 투두 수정 (제목 + 카테고리 변경)
 PATCH http://localhost:8080/api/todos/1
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJqYWVoeXVuOTkiLCJpYXQiOjE3NjM2NDQzODcsImV4cCI6MTc2MzY0Nzk4N30.ppwI7cKSNR20z1vF0oSwlAJPOX8LephnY8yIimnSTH0
 Content-Type: application/json
 
 {
@@ -9,6 +10,7 @@ Content-Type: application/json
 
 ### 투두 수정 (제목만 변경)
 PATCH http://localhost:8080/api/todos/1
+Authorization: Bearer <여기에_위에서_받은_accessToken_붙이기>
 Content-Type: application/json
 
 {
@@ -17,6 +19,7 @@ Content-Type: application/json
 
 ### 투두 수정 (body 비었을 때 → 400 기대)
 PATCH http://localhost:8080/api/todos/101
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJqYWVoeXVuOTkiLCJpYXQiOjE3NjM2NDQzODcsImV4cCI6MTc2MzY0Nzk4N30.ppwI7cKSNR20z1vF0oSwlAJPOX8LephnY8yIimnSTH0
 Content-Type: application/json
 
 {}
@@ -25,14 +28,16 @@ Content-Type: application/json
 
 ### 투두 상태 DONE 으로 변경
 PATCH http://localhost:8080/api/todos/1/status
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJqYWVoeXVuOTkiLCJpYXQiOjE3NjM2NDQzODcsImV4cCI6MTc2MzY0Nzk4N30.ppwI7cKSNR20z1vF0oSwlAJPOX8LephnY8yIimnSTH0
 Content-Type: application/json
 
 {
-  "status": "FAILED"
+  "status": "DONE"
 }
 
 ### 투두 상태 FAILED 로 변경
 PATCH http://localhost:8080/api/todos/1/status
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJqYWVoeXVuOTkiLCJpYXQiOjE3NjM2NDQzODcsImV4cCI6MTc2MzY0Nzk4N30.ppwI7cKSNR20z1vF0oSwlAJPOX8LephnY8yIimnSTH0
 Content-Type: application/json
 
 {
@@ -41,6 +46,7 @@ Content-Type: application/json
 
 ### 잘못된 status 값 (400 Bad Request 기대)
 PATCH http://localhost:8080/api/todos/1/status
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJqYWVoeXVuOTkiLCJpYXQiOjE3NjM2NDQzODcsImV4cCI6MTc2MzY0Nzk4N30.ppwI7cKSNR20z1vF0oSwlAJPOX8LephnY8yIimnSTH0
 Content-Type: application/json
 
 {

@@ -30,11 +30,6 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/login","/api/auth/signup").permitAll()
 
-                        //임시 추가
-                        //todo
-                        .requestMatchers("/api/todos","/api/todos/**").permitAll()
-
-
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(new JwtAuthenticationFilter(tokenProvider),

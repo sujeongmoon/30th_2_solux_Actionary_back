@@ -60,25 +60,22 @@ public class TodoService {
     //2. 특정 날짜 투두 목록 조회 API
     //특정 날짜(필수) + 카테고리(선택)로 투두 목록 조회
     @Transactional(readOnly = true)
-    public DailyTodosResponseDTO getTodosByDate(LocalDate date, Long categoryId) {
+    public DailyTodosResponseDTO getTodosByDate(Long userId, LocalDate date, Long categoryId) {
 
-        // date가 null로 들어올 일은 거의 없지만 / 방어 코드
         if (date == null) {
             throw new CustomException(ErrorCode.BAD_REQUEST, "date 값은 필수입니다.");
         }
 
-        // 카테고리 여부에 따른 분기
         List<Todo> todos;
-        //categoryId 들어왔을 때
+
         if (categoryId != null) {
-            todos = todoRepository.findAllByDateAndCategoryId(date, categoryId);
-        }
-        // categoryId 안들어왔을 때
-        else {
-            todos = todoRepository.findAllByDate(date);
+            // userId + date + categoryId 기준
+            todos = todoRepository.findAllByUserIdAndDateAndCategoryId(userId, date, categoryId);
+        } else {
+            // userId + date 기준
+            todos = todoRepository.findAllByUserIdAndDate(userId, date);
         }
 
-        // 해당 날짜에 투두가 하나도 없을 때 404
         if (todos.isEmpty()) {
             throw new CustomException(ErrorCode.NOT_FOUND, "해당 날짜에 투두가 아예 없습니다.");
         }
@@ -94,7 +91,7 @@ public class TodoService {
     }
 
     // 3. 투두 수정 API
-    public TodoResponseDTO updateTodo(Long todoId, TodoUpdateRequestDTO request) {
+    public TodoResponseDTO updateTodo(Long userId, Long todoId, TodoUpdateRequestDTO request) {
 
         // body가 완전히 비어 있는 경우 → 400 Bad Request
         if ((request.getTitle() == null || request.getTitle().isBlank())
@@ -126,8 +123,9 @@ public class TodoService {
     }
 
     //4. 투두 달성/실패 처리 API
-    public TodoStatusResponseDTO updateTodoStatus(Long todoId,
+    public TodoStatusResponseDTO updateTodoStatus(Long userId, Long todoId,
                                                   TodoStatusUpdateRequestDTO request) {
+
 
         String statusStr = request.getStatus();
 
@@ -153,17 +151,20 @@ public class TodoService {
         Todo todo = todoRepository.findById(todoId)
                 .orElseThrow(() -> new CustomException(ErrorCode.TODO_NOT_FOUND));
 
-        // TODO: 소유자 검증 (userId == 인증된 사용자) - 로그인 구현 후 추가
+        // 3) 사용자 검증
+        if (!todo.getUserId().equals(userId)) {
+             throw new CustomException(ErrorCode.FORBIDDEN, "본인의 투두만 상태를 변경할 수 있습니다.");
+        }
 
-        // 3) 이미 같은 상태라면 409 Conflict
+        // 4) 이미 같은 상태라면 409 Conflict
         if (todo.getStatus() == newStatus) {
             throw new CustomException(ErrorCode.TODO_STATUS_CONFLICT);
         }
 
-        // 4) 상태 변경
+        // 5) 상태 변경
         todo.setStatus(newStatus);
 
-        // 5) DONE으로 바뀐 경우: 하루 투두 모두 완료했는지 확인
+        // 6) DONE으로 바뀐 경우: 하루 투두 모두 완료했는지 확인
         if (newStatus == Todo.Status.DONE) {
             checkAllTodosDoneAndNotify(todo);
         }
@@ -195,18 +196,18 @@ public class TodoService {
 
     //5. 투두 삭제 API
     //Hard delete 기법 사용
-    public void deleteTodo(Long todoId) {
+    public void deleteTodo(Long userId, Long todoId) {
 
         // 투두 없음 -> 404
         Todo todo = todoRepository.findById(todoId)
                 .orElseThrow(() -> new CustomException(ErrorCode.TODO_NOT_FOUND));
 
-        try {
-            // 하드 삭제
-            todoRepository.delete(todo);
-        } catch (DataIntegrityViolationException e) {
-            // FK로 다른 엔티티에서 참조 중이면 -> 409
-            throw new CustomException(ErrorCode.TODO_DELETE_CONFLICT);
+        // 소유자 검증 -> 403
+        if (!todo.getUserId().equals(userId)) {
+            throw new CustomException(ErrorCode.FORBIDDEN, "본인의 투두만 삭제할 수 있습니다.");
         }
+
+        // 3) 실제 삭제 (하드 삭제)
+        todoRepository.delete(todo);
     }
 }
