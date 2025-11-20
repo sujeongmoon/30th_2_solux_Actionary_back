@@ -1,6 +1,6 @@
 ###투두 생성 API
 POST http://localhost:8080/api/todos
-Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJqYWVoeXVuOTkiLCJpYXQiOjE3NjM2NDQzODcsImV4cCI6MTc2MzY0Nzk4N30.ppwI7cKSNR20z1vF0oSwlAJPOX8LephnY8yIimnSTH0
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJqYWVoeXVuOTkiLCJpYXQiOjE3NjM2NDQ5OTYsImV4cCI6MTc2MzY0ODU5Nn0.JPfctEXq8rup0QGVp2YWRPk2yKzjSC6KLbRjOqXCSLs
 Content-Type: application/json
 
 {
