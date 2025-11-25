@@ -2,7 +2,9 @@ package com.req2res.actionarybe.domain.bookmark.controller;
 
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -44,6 +46,16 @@ public class BookmarkController {
 		User user = userService.findUserByLoginId(userDetails.getUsername());
 		BookmarkListResponseDto response = bookmarkService.getBookmarks(user);
 		return Response.success("북마크를 조회했습니다.", response);
+	}
+
+	@DeleteMapping("/{bookmarkId}")
+	public Response<BookmarkListResponseDto> deleteBookmark(
+		@AuthenticationPrincipal UserDetails userDetails,
+		@PathVariable Long bookmarkId
+	) {
+		User user = userService.findUserByLoginId(userDetails.getUsername());
+		bookmarkService.deleteBookmark(user, bookmarkId);
+		return Response.success("북마크를 삭제했습니다.", null);
 	}
 
 }

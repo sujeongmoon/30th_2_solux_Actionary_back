@@ -19,7 +19,9 @@ public enum ErrorCode {
 	// 각 Service에서 필요한 ErrorCode 추가
 
 	// bookmark
-	BOOKMARK_LINK_NOT_FOUND(HttpStatus.NOT_FOUND, "BOOKMARK_LINK_NOT_FOUND"),
+	BOOKMARK_LINK_NOT_FOUND(HttpStatus.NOT_FOUND, "북마크 링크는 비어있을 수 없습니다."),
+	BOOKMARK_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 북마크입니다."),
+	BOOKMARK_NOT_MATCH_MEMBER(HttpStatus.BAD_REQUEST, "사용자의 북마크가 아닙니다."),
 
 	//todo
 	TODO_INVALID_TITLE(HttpStatus.BAD_REQUEST, "할 일 제목은 비어 있을 수 없습니다."),

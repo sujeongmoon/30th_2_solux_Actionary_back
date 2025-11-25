@@ -52,6 +52,17 @@ public class BookmarkService {
 		return BookmarkListResponseDto.from(bookmarks);
 	}
 
+	public void deleteBookmark(User user, Long bookmarkId) {
+		Bookmark bookmark = bookmarkRepository.findById(bookmarkId).
+			orElseThrow(() -> new CustomException(ErrorCode.BOOKMARK_NOT_FOUND));
+
+		if (!bookmark.getUser().equals(user)) {
+			throw new CustomException(ErrorCode.BOOKMARK_NOT_MATCH_MEMBER);
+		}
+
+		bookmarkRepository.delete(bookmark);
+	}
+
 	public List<Bookmark> findBookmarksByUser(User user) {
 		return bookmarkRepository.findAllByUser(user);
 	}
