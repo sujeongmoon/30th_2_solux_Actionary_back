@@ -7,11 +7,11 @@ on:
     branches: [ "main", "develop" ]
 
 jobs:
-  ci:
-    name: CI
+  build-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
+      #CI
       - name: Checkout source
         uses: actions/checkout@v6
 
@@ -27,16 +27,7 @@ jobs:
       - name: Build & Test
         run: ./gradlew clean test bootJar
 
-  cd:
-    name: CD
-    needs: ci
-    #    if: github.ref == 'refs/heads/main' -> 추후 CD 완료시 주석 해제
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout source
-        uses: actions/checkout@v6
-
+      #CD
       - name: Docker build and push
         run: |
           docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
