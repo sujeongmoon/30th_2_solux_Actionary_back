@@ -1,11 +1,12 @@
 ###투두 생성 API
 POST http://localhost:8080/api/todos
-Authorization: Bearer {{accessToken}}
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJqYWVoeXVuOTkiLCJpYXQiOjE3NjY1NjAwOTcsImV4cCI6MTc2NjU2MzY5N30.QxDP4HKPV8guLWcNKYaX0Lb1LpV1QW34ryZ3lRTlv70
 Content-Type: application/json
 
 {
   "title": "운동 30분 하기",
-  "date": "2025-11-19"
+  "date": "2025-11-19",
+  "categoryId": 1
 }
 
 

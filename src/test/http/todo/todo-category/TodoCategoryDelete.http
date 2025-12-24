@@ -1,3 +1,3 @@
 ### 카테고리 삭제
-DELETE http://localhost:8080/api/todo-categories/2
-Authorization: Bearer {{accessToken}}
+DELETE http://localhost:8080/api/todo-categories/1
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJqYWVoeXVuOTkiLCJpYXQiOjE3NjY1NjAwOTcsImV4cCI6MTc2NjU2MzY5N30.QxDP4HKPV8guLWcNKYaX0Lb1LpV1QW34ryZ3lRTlv70
