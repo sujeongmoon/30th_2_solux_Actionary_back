@@ -4,6 +4,7 @@ Authorization: Bearer {{accessToken}}
 Content-Type: application/json
 
 {
-  "name": "공부",
-  "color": "#FF6B6B"
+  "name": "이름",
+  "color": "#43434"
 }
+

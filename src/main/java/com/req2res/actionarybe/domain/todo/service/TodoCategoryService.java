@@ -1,5 +1,7 @@
 package com.req2res.actionarybe.domain.todo.service;
 
+import com.req2res.actionarybe.domain.todo.dto.category.TodoCategoryUpdateRequestDTO;
+import com.req2res.actionarybe.domain.todo.dto.category.TodoCategoryUpdateResponseDTO;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,6 +20,7 @@ public class TodoCategoryService {
 
     private final TodoCategoryRepository todoCategoryRepository;
 
+    //1) 카테고리 생성
     @Transactional
     public TodoCategoryCreateResponseDTO createCategory(Long userId,
                                                         TodoCategoryCreateRequestDTO request) {
@@ -43,6 +46,45 @@ public class TodoCategoryService {
                 saved.getName(),
                 saved.getColor(),
                 saved.getCreatedAt()
+        );
+    }
+
+    //2) 카테고리 수정
+    @Transactional
+    public TodoCategoryUpdateResponseDTO updateCategory(Long userId, Long categoryId,
+                                                        TodoCategoryUpdateRequestDTO request) {
+
+        // 400: 둘 다 비어있을 때
+        boolean isNameEmpty = (request.getName() == null || request.getName().isBlank());
+        boolean isColorEmpty = (request.getColor() == null || request.getColor().isBlank());
+        if (isNameEmpty && isColorEmpty) {
+            throw new CustomException(ErrorCode.BAD_REQUEST, "수정할 내용이 없습니다.");
+        }
+
+        // 404: 존재하지 않거나 (또는 내 카테고리가 아닌 경우)
+        TodoCategory category = todoCategoryRepository.findByIdAndUserId(categoryId, userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.TODO_CATEGORY_NOT_FOUND));
+
+
+        // name 수정 (값이 들어온 경우만)
+        if (!isNameEmpty) {
+            // 중복 이름 방지(본인 카테고리 내)
+            if (!request.getName().equals(category.getName())
+                    && todoCategoryRepository.existsByUserIdAndName(userId, request.getName())) {
+                throw new CustomException(ErrorCode.TODO_CATEGORY_DUPLICATED);
+            }
+            category.updateName(request.getName());
+        }
+
+        // color 수정 (값이 들어온 경우만)
+        if (!isColorEmpty) {
+            category.updateColor(request.getColor());
+        }
+
+        return new TodoCategoryUpdateResponseDTO(
+                category.getId(),
+                category.getName(),
+                category.getColor()
         );
     }
 }
