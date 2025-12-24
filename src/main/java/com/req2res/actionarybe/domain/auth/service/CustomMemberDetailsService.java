@@ -1,7 +1,7 @@
 package com.req2res.actionarybe.domain.auth.service;
 
-import com.req2res.actionarybe.domain.user.entity.User;
-import com.req2res.actionarybe.domain.user.repository.UserRepository;
+import com.req2res.actionarybe.domain.Member.entity.Member;
+import com.req2res.actionarybe.domain.Member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.*;
@@ -11,12 +11,12 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class CustomUserDetailsService implements UserDetailsService {
-    private final UserRepository userRepository;
+public class CustomMemberDetailsService implements UserDetailsService {
+    private final MemberRepository memberRepository;
 
     @Override
     public UserDetails loadUserByUsername(String loginId) throws UsernameNotFoundException {
-        User u = userRepository.findByLoginId(loginId)
+        Member u = memberRepository.findByLoginId(loginId)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
         return new org.springframework.security.core.userdetails.User(
                 u.getLoginId(), u.getPassword(), List.of(new SimpleGrantedAuthority("ROLE_USER"))

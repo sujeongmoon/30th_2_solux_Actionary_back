@@ -1,6 +1,6 @@
 package com.req2res.actionarybe.domain.study.entity;
 
-import com.req2res.actionarybe.domain.user.entity.User;
+import com.req2res.actionarybe.domain.Member.entity.Member;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -34,5 +34,5 @@ public class StudyLike {
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "user_id", nullable = false)
-	private User user;
+	private Member member;
 }

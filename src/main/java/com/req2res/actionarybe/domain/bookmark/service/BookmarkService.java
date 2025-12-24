@@ -9,7 +9,7 @@ import com.req2res.actionarybe.domain.bookmark.dto.BookmarkRequestDto;
 import com.req2res.actionarybe.domain.bookmark.dto.BookmarkResponseDto;
 import com.req2res.actionarybe.domain.bookmark.entity.Bookmark;
 import com.req2res.actionarybe.domain.bookmark.repository.BookmarkRepository;
-import com.req2res.actionarybe.domain.user.entity.User;
+import com.req2res.actionarybe.domain.Member.entity.Member;
 import com.req2res.actionarybe.global.exception.CustomException;
 import com.req2res.actionarybe.global.exception.ErrorCode;
 
@@ -22,7 +22,7 @@ public class BookmarkService {
 
 	private final BookmarkRepository bookmarkRepository;
 
-	public BookmarkResponseDto createBookmark(User user, @Valid BookmarkRequestDto request) {
+	public BookmarkResponseDto createBookmark(Member member, @Valid BookmarkRequestDto request) {
 
 		String bookmarkName;
 
@@ -36,7 +36,7 @@ public class BookmarkService {
 		}
 
 		Bookmark bookmark = Bookmark.builder()
-			.user(user)
+			.member(member)
 			.name(request.getBookmarkName())
 			.link(request.getLink())
 			.build();
@@ -46,24 +46,24 @@ public class BookmarkService {
 		return BookmarkResponseDto.from(bookmark);
 	}
 
-	public BookmarkListResponseDto getBookmarks(User user) {
+	public BookmarkListResponseDto getBookmarks(Member member) {
 
-		List<Bookmark> bookmarks = this.findBookmarksByUser(user);
+		List<Bookmark> bookmarks = this.findBookmarksByMember(member);
 		return BookmarkListResponseDto.from(bookmarks);
 	}
 
-	public void deleteBookmark(User user, Long bookmarkId) {
+	public void deleteBookmark(Member member, Long bookmarkId) {
 		Bookmark bookmark = bookmarkRepository.findById(bookmarkId).
 			orElseThrow(() -> new CustomException(ErrorCode.BOOKMARK_NOT_FOUND));
 
-		if (!bookmark.getUser().equals(user)) {
+		if (!bookmark.getMember().equals(member)) {
 			throw new CustomException(ErrorCode.BOOKMARK_NOT_MATCH_MEMBER);
 		}
 
 		bookmarkRepository.delete(bookmark);
 	}
 
-	public List<Bookmark> findBookmarksByUser(User user) {
-		return bookmarkRepository.findAllByUser(user);
+	public List<Bookmark> findBookmarksByMember(Member member) {
+		return bookmarkRepository.findAllByMember(member);
 	}
 }

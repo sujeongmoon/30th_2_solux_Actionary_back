@@ -2,11 +2,10 @@ package com.req2res.actionarybe.domain.auth.controller;
 
 import com.req2res.actionarybe.domain.auth.service.LoginService;
 import com.req2res.actionarybe.domain.auth.service.SignupService;
-import com.req2res.actionarybe.domain.user.repository.UserRepository;
+import com.req2res.actionarybe.domain.Member.repository.MemberRepository;
 import com.req2res.actionarybe.global.Response;
 import com.req2res.actionarybe.domain.auth.dto.*;
 import com.req2res.actionarybe.global.security.JwtTokenProvider;
-import com.req2res.actionarybe.domain.user.entity.User;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -20,7 +19,7 @@ public class AuthController {
 
     private final AuthenticationManager authManager;
     private final JwtTokenProvider tokenProvider;
-    private final UserRepository userRepository;
+    private final MemberRepository memberRepository;
     private final SignupService signupService;
     private final LoginService loginService;
 
