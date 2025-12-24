@@ -34,7 +34,7 @@ public enum ErrorCode {
 	//to-do-category
 	TODO_CATEGORY_DUPLICATED(HttpStatus.CONFLICT, "같은 이름의 카테고리가 이미 존재합니다."),
 	TODO_CATEGORY_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 카테고리가 존재하지 않습니다."),
-
+	TODO_CATEGORY_IN_USE(HttpStatus.CONFLICT, "해당 카테고리를 사용 중인 투두가 있어 삭제할 수 없습니다."),
 
 	//user
 	EMAIL_DUPLICATED(HttpStatus.CONFLICT, "중복된 이메일입니다"),

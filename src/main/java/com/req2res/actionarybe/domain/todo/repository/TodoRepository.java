@@ -13,4 +13,7 @@ public interface TodoRepository extends JpaRepository<Todo, Long> {
 
     // 특정 유저 + 특정 날짜의 투두 조회
     List<Todo> findAllByUserIdAndDate(Long userId, LocalDate date);
+
+    // 특정 유저 + 특정 카테고리 ID로 조회
+    boolean existsByUserIdAndCategoryId(Long userId, Long categoryId);
 }

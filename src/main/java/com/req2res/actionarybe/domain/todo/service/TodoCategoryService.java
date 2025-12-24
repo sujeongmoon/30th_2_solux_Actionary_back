@@ -2,6 +2,7 @@ package com.req2res.actionarybe.domain.todo.service;
 
 import com.req2res.actionarybe.domain.todo.dto.category.TodoCategoryUpdateRequestDTO;
 import com.req2res.actionarybe.domain.todo.dto.category.TodoCategoryUpdateResponseDTO;
+import com.req2res.actionarybe.domain.todo.repository.TodoRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,6 +19,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class TodoCategoryService {
 
+    private final TodoRepository todoRepository;
     private final TodoCategoryRepository todoCategoryRepository;
 
     //1) 카테고리 생성
@@ -86,6 +88,24 @@ public class TodoCategoryService {
                 category.getName(),
                 category.getColor()
         );
+    }
+
+    //3) 투두 카테고리 삭제 API
+    @Transactional
+    public void deleteCategory(Long userId, Long categoryId) {
+
+        // 404: 존재하지 않음(또는 내 카테고리 아님)
+        TodoCategory category = todoCategoryRepository.findByIdAndUserId(categoryId, userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.TODO_CATEGORY_NOT_FOUND));
+
+        // 409: 이 카테고리를 참조하는 To-do가 있으면 삭제 불가
+        boolean isUsed = todoRepository.existsByUserIdAndCategoryId(userId, categoryId);
+        if (isUsed) {
+            throw new CustomException(ErrorCode.TODO_CATEGORY_IN_USE);
+        }
+
+        // 하드 삭제
+        todoCategoryRepository.delete(category);
     }
 }
 

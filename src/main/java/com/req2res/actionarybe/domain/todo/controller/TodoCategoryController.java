@@ -66,5 +66,23 @@ public class TodoCategoryController {
                 categoryId, request);
         return ResponseEntity.ok(Response.success("카테고리가 수정되었습니다.", data));
     }
+
+    //3. 카테고리 삭제 API
+    @DeleteMapping("/{categoryId}")
+    public ResponseEntity<Response<Void>> delete(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @PathVariable Long categoryId
+    ) {
+        String loginId = userDetails.getUsername();
+
+        User user = userRepository.findByLoginId(loginId)
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND));
+
+        Long userId = user.getId();
+
+        todoCategoryService.deleteCategory(userId, categoryId);
+
+        return ResponseEntity.ok(Response.success("카테고리가 삭제되었습니다.", null));
+    }
 }
 
