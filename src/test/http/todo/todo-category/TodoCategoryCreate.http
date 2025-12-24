@@ -1,6 +1,6 @@
 ### 투두 카테고리 생성
 POST http://localhost:8080/api/todo-categories
-Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJqYWVoeXVuOTkiLCJpYXQiOjE3NjY1NTU3NTcsImV4cCI6MTc2NjU1OTM1N30.TBuRmZ5z3O_GRahFotBMMJZOx7jwbSKSi2fV6GnuYYw
+Authorization: Bearer {{accessToken}}
 Content-Type: application/json
 
 {

@@ -1,6 +1,6 @@
 ###투두 생성 API
 POST http://localhost:8080/api/todos
-Authorization: {{accessToken}}
+Authorization: Bearer {{accessToken}}
 Content-Type: application/json
 
 {
