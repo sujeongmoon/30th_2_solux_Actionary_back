@@ -23,14 +23,19 @@ public enum ErrorCode {
 	BOOKMARK_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 북마크입니다."),
 	BOOKMARK_NOT_MATCH_MEMBER(HttpStatus.BAD_REQUEST, "사용자의 북마크가 아닙니다."),
 
-	//todo
+	//to-do
 	TODO_INVALID_TITLE(HttpStatus.BAD_REQUEST, "할 일 제목은 비어 있을 수 없습니다."),
 	TODO_INVALID_DATE(HttpStatus.BAD_REQUEST, "날짜 형식이 잘못되었습니다."),
-	TODO_CATEGORY_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 카테고리입니다."),
 	TODO_STATUS_CONFLICT(HttpStatus.CONFLICT, "이미 해당 상태로 처리된 투두입니다."),
 	TODO_INVALID_STATUS(HttpStatus.BAD_REQUEST, "status 값은 DONE 또는 FAILED만 허용됩니다."),
 	TODO_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 투두입니다."),
 	TODO_DELETE_CONFLICT(HttpStatus.CONFLICT, "이미 삭제되었거나 다른 엔티티에서 참조 중인 투두입니다."),
+
+	//to-do-category
+	TODO_CATEGORY_DUPLICATED(HttpStatus.CONFLICT, "같은 이름의 카테고리가 이미 존재합니다."),
+	TODO_CATEGORY_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 카테고리가 존재하지 않습니다."),
+	TODO_CATEGORY_IN_USE(HttpStatus.CONFLICT, "해당 카테고리에 미완료 투두가 있어 삭제할 수 없습니다."),
+
 
 	//user
 	EMAIL_DUPLICATED(HttpStatus.CONFLICT, "중복된 이메일입니다"),
