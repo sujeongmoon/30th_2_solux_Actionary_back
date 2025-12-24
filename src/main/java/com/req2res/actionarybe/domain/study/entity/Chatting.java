@@ -1,6 +1,6 @@
 package com.req2res.actionarybe.domain.study.entity;
 
-import com.req2res.actionarybe.domain.user.entity.User;
+import com.req2res.actionarybe.domain.member.entity.Member;
 import com.req2res.actionarybe.global.Timestamped;
 
 import jakarta.persistence.Column;
@@ -35,7 +35,7 @@ public class Chatting extends Timestamped {
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "sender_id", nullable = false)
-	private User sender;
+	private Member sender;
 
 	@Column(nullable = false)
 	private String message;

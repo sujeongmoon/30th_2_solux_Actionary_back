@@ -1,6 +1,6 @@
 package com.req2res.actionarybe.domain.auth.dto;
 
-import com.req2res.actionarybe.domain.user.entity.User;
+import com.req2res.actionarybe.domain.member.entity.Member;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -16,11 +16,11 @@ public class SignupResponseDTO {
     private String loginId;
     private String nickname;
 
-    public static SignupResponseDTO from(User user) {
+    public static SignupResponseDTO from(Member member) {
         return SignupResponseDTO.builder()
-                .userId(user.getId())
-                .loginId(user.getLoginId())
-                .nickname(user.getNickname())
+                .userId(member.getId())
+                .loginId(member.getLoginId())
+                .nickname(member.getNickname())
                 .build();
     }
 }
