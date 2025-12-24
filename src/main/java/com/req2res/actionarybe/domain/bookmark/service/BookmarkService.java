@@ -9,7 +9,7 @@ import com.req2res.actionarybe.domain.bookmark.dto.BookmarkRequestDto;
 import com.req2res.actionarybe.domain.bookmark.dto.BookmarkResponseDto;
 import com.req2res.actionarybe.domain.bookmark.entity.Bookmark;
 import com.req2res.actionarybe.domain.bookmark.repository.BookmarkRepository;
-import com.req2res.actionarybe.domain.Member.entity.Member;
+import com.req2res.actionarybe.domain.member.entity.Member;
 import com.req2res.actionarybe.global.exception.CustomException;
 import com.req2res.actionarybe.global.exception.ErrorCode;
 

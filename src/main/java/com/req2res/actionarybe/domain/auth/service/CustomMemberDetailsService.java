@@ -1,7 +1,7 @@
 package com.req2res.actionarybe.domain.auth.service;
 
-import com.req2res.actionarybe.domain.Member.entity.Member;
-import com.req2res.actionarybe.domain.Member.repository.MemberRepository;
+import com.req2res.actionarybe.domain.member.entity.Member;
+import com.req2res.actionarybe.domain.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.*;

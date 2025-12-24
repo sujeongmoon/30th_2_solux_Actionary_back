@@ -2,7 +2,7 @@ package com.req2res.actionarybe.domain.auth.controller;
 
 import com.req2res.actionarybe.domain.auth.service.LoginService;
 import com.req2res.actionarybe.domain.auth.service.SignupService;
-import com.req2res.actionarybe.domain.Member.repository.MemberRepository;
+import com.req2res.actionarybe.domain.member.repository.MemberRepository;
 import com.req2res.actionarybe.global.Response;
 import com.req2res.actionarybe.domain.auth.dto.*;
 import com.req2res.actionarybe.global.security.JwtTokenProvider;

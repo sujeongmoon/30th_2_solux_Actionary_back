@@ -2,8 +2,8 @@ package com.req2res.actionarybe.domain.auth.service;
 
 import com.req2res.actionarybe.domain.auth.dto.LoginRequestDTO;
 import com.req2res.actionarybe.domain.auth.dto.LoginResponseDTO;
-import com.req2res.actionarybe.domain.Member.entity.Member;
-import com.req2res.actionarybe.domain.Member.repository.MemberRepository;
+import com.req2res.actionarybe.domain.member.entity.Member;
+import com.req2res.actionarybe.domain.member.repository.MemberRepository;
 import com.req2res.actionarybe.global.security.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;

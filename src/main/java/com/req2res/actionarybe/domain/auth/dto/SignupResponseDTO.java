@@ -1,6 +1,6 @@
 package com.req2res.actionarybe.domain.auth.dto;
 
-import com.req2res.actionarybe.domain.Member.entity.Member;
+import com.req2res.actionarybe.domain.member.entity.Member;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;

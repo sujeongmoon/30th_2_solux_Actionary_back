@@ -1,4 +1,4 @@
-package com.req2res.actionarybe.domain.Member.entity;
+package com.req2res.actionarybe.domain.member.entity;
 
 import com.req2res.actionarybe.global.Timestamped;
 import jakarta.persistence.*;

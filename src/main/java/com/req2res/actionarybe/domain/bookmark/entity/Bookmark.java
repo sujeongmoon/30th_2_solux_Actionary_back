@@ -1,6 +1,6 @@
 package com.req2res.actionarybe.domain.bookmark.entity;
 
-import com.req2res.actionarybe.domain.Member.entity.Member;
+import com.req2res.actionarybe.domain.member.entity.Member;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

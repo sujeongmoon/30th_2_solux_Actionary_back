@@ -1,6 +1,6 @@
-package com.req2res.actionarybe.domain.Member.repository;
+package com.req2res.actionarybe.domain.member.repository;
 
-import com.req2res.actionarybe.domain.Member.entity.Member;
+import com.req2res.actionarybe.domain.member.entity.Member;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

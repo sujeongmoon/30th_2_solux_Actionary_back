@@ -1,9 +1,9 @@
-package com.req2res.actionarybe.domain.Member.service;
+package com.req2res.actionarybe.domain.member.service;
 
 import org.springframework.stereotype.Service;
 
-import com.req2res.actionarybe.domain.Member.entity.Member;
-import com.req2res.actionarybe.domain.Member.repository.MemberRepository;
+import com.req2res.actionarybe.domain.member.entity.Member;
+import com.req2res.actionarybe.domain.member.repository.MemberRepository;
 import com.req2res.actionarybe.global.exception.CustomException;
 import com.req2res.actionarybe.global.exception.ErrorCode;
 

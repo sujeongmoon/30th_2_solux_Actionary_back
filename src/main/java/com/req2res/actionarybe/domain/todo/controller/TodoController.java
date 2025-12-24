@@ -2,8 +2,8 @@ package com.req2res.actionarybe.domain.todo.controller;
 
 import com.req2res.actionarybe.domain.todo.dto.*;
 import com.req2res.actionarybe.domain.todo.service.TodoService;
-import com.req2res.actionarybe.domain.Member.entity.Member;
-import com.req2res.actionarybe.domain.Member.repository.MemberRepository;
+import com.req2res.actionarybe.domain.member.entity.Member;
+import com.req2res.actionarybe.domain.member.repository.MemberRepository;
 import com.req2res.actionarybe.global.Response;
 import com.req2res.actionarybe.global.exception.CustomException;
 import com.req2res.actionarybe.global.exception.ErrorCode;

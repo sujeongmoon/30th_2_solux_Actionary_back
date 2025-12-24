@@ -14,8 +14,8 @@ import com.req2res.actionarybe.domain.bookmark.dto.BookmarkListResponseDto;
 import com.req2res.actionarybe.domain.bookmark.dto.BookmarkRequestDto;
 import com.req2res.actionarybe.domain.bookmark.dto.BookmarkResponseDto;
 import com.req2res.actionarybe.domain.bookmark.service.BookmarkService;
-import com.req2res.actionarybe.domain.Member.entity.Member;
-import com.req2res.actionarybe.domain.Member.service.MemberService;
+import com.req2res.actionarybe.domain.member.entity.Member;
+import com.req2res.actionarybe.domain.member.service.MemberService;
 import com.req2res.actionarybe.global.Response;
 
 import jakarta.validation.Valid;
