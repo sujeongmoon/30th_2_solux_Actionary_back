@@ -1,10 +1,10 @@
 ### 투두 카테고리 생성
 POST http://localhost:8080/api/todo-categories
-Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJqYWVoeXVuOTkiLCJpYXQiOjE3NjY1NjAwOTcsImV4cCI6MTc2NjU2MzY5N30.QxDP4HKPV8guLWcNKYaX0Lb1LpV1QW34ryZ3lRTlv70
+Authorization: Bearer {{accessToken}}
 Content-Type: application/json
 
 {
-  "name": "이름",
+  "name": "운동",
   "color": "#43434"
 }
 

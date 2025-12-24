@@ -1,8 +1,7 @@
 package com.req2res.actionarybe.domain.todo.controller;
 
 import com.req2res.actionarybe.domain.todo.dto.TodoCreateRequestDTO;
-import com.req2res.actionarybe.domain.todo.dto.category.TodoCategoryUpdateRequestDTO;
-import com.req2res.actionarybe.domain.todo.dto.category.TodoCategoryUpdateResponseDTO;
+import com.req2res.actionarybe.domain.todo.dto.category.*;
 import com.req2res.actionarybe.domain.todo.service.TodoService;
 import com.req2res.actionarybe.domain.user.entity.User;
 import com.req2res.actionarybe.domain.user.repository.UserRepository;
@@ -14,13 +13,13 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import com.req2res.actionarybe.domain.todo.dto.category.TodoCategoryCreateRequestDTO;
-import com.req2res.actionarybe.domain.todo.dto.category.TodoCategoryCreateResponseDTO;
 import com.req2res.actionarybe.domain.todo.service.TodoCategoryService;
 import com.req2res.actionarybe.global.Response;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -83,6 +82,22 @@ public class TodoCategoryController {
         todoCategoryService.deleteCategory(userId, categoryId);
 
         return ResponseEntity.ok(Response.success("카테고리가 삭제되었습니다.", null));
+    }
+
+    // 4. 카테고리 목록 조회
+    @GetMapping
+    public ResponseEntity<Response<List<TodoCategoryListItemDTO>>> getMyCategories(
+            @AuthenticationPrincipal UserDetails userDetails
+    ) {
+        String loginId = userDetails.getUsername();
+
+        User user = userRepository.findByLoginId(loginId)
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND));
+
+        Long userId = user.getId();
+
+        List<TodoCategoryListItemDTO> data = todoCategoryService.getCategory(userId);
+        return ResponseEntity.ok(Response.success("", data));
     }
 }
 

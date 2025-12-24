@@ -1,14 +1,11 @@
 package com.req2res.actionarybe.domain.todo.service;
 
-import com.req2res.actionarybe.domain.todo.dto.category.TodoCategoryUpdateRequestDTO;
-import com.req2res.actionarybe.domain.todo.dto.category.TodoCategoryUpdateResponseDTO;
+import com.req2res.actionarybe.domain.todo.dto.category.*;
 import com.req2res.actionarybe.domain.todo.entity.Todo;
 import com.req2res.actionarybe.domain.todo.repository.TodoRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.req2res.actionarybe.domain.todo.dto.category.TodoCategoryCreateRequestDTO;
-import com.req2res.actionarybe.domain.todo.dto.category.TodoCategoryCreateResponseDTO;
 import com.req2res.actionarybe.domain.todo.entity.TodoCategory;
 import com.req2res.actionarybe.domain.todo.repository.TodoCategoryRepository;
 import com.req2res.actionarybe.global.exception.CustomException;
@@ -111,6 +108,22 @@ public class TodoCategoryService {
         }
 
         todoCategoryRepository.delete(category);
+    }
+
+    //4) 카테고리 목록 조회
+    @Transactional(readOnly = true)
+    public List<TodoCategoryListItemDTO> getCategory(Long userId) {
+
+        List<TodoCategory> categories = todoCategoryRepository.findAllByUserIdOrderByCreatedAtAsc(userId);
+
+        return categories.stream()
+                .map(c -> new TodoCategoryListItemDTO(
+                        c.getId(),
+                        c.getName(),
+                        c.getColor(),
+                        c.getCreatedAt()
+                ))
+                .toList();
     }
 
 }
