@@ -1,0 +1,3 @@
+### 카테고리 삭제
+DELETE http://localhost:8080/api/todo-categories/1
+Authorization: Bearer {{accessToken}}

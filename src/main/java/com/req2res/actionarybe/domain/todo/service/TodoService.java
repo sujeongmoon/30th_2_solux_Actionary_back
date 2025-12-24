@@ -4,11 +4,11 @@ package com.req2res.actionarybe.domain.todo.service;
 import com.req2res.actionarybe.domain.notification.service.NotificationService;
 import com.req2res.actionarybe.domain.todo.dto.*;
 import com.req2res.actionarybe.domain.todo.entity.Todo;
+import com.req2res.actionarybe.domain.todo.repository.TodoCategoryRepository;
 import com.req2res.actionarybe.domain.todo.repository.TodoRepository;
 import com.req2res.actionarybe.global.exception.CustomException;
 import com.req2res.actionarybe.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,6 +21,7 @@ import java.util.List;
 public class TodoService {
 
     private final TodoRepository todoRepository;
+    private final TodoCategoryRepository todoCategoryRepository;
     //private final NotificationService notificationService; -> TODO: 나중에 투두 달성/실패 처리 API에서 알림 생성 메서드 주입 예정
 
 
@@ -37,13 +38,14 @@ public class TodoService {
             throw new CustomException(ErrorCode.TODO_INVALID_DATE);
         }
 
-        // TODO: 추후에 투두카테고리 레포지 생성하고, 주석 풀기
-        //해당 CategoryId가 존재하지 않을 떄
-        /*if (request.getCategoryId() != null &&
-                !todoCategoryRepository.existsById(request.getCategoryId())) {
-            throw new CustomException(ErrorCode.TODO_CATEGORY_NOT_FOUND);
-        }*/
+        // categoryId가 들어온 경우에만 검증
+        if (request.getCategoryId() != null) {
 
+            // 해당 categoryId가 "내 카테고리"로 존재하지 않으면 404
+            if (!todoCategoryRepository.existsByIdAndUserId(request.getCategoryId(), userId)) {
+                throw new CustomException(ErrorCode.TODO_CATEGORY_NOT_FOUND);
+            }
+        }
 
         Todo todo = Todo.builder()
                 .userId(userId)
@@ -104,11 +106,6 @@ public class TodoService {
                 .orElseThrow(() ->
                         new CustomException(ErrorCode.NOT_FOUND, "해당 투두가 존재하지 않습니다."));
 
-        /*
-        TODO: 이미 삭제된 투두라면 409 Conflict로 예외 처리
-        // 삭제 플래그(isDeleted) 등이 생기면 여기서 검사하면 됨.
-        */
-
         // 제목 수정 (값이 들어왔을 때만)
         if (request.getTitle() != null && !request.getTitle().isBlank()) {
             todo.setTitle(request.getTitle());
@@ -125,7 +122,6 @@ public class TodoService {
     //4. 투두 달성/실패 처리 API
     public TodoStatusResponseDTO updateTodoStatus(Long userId, Long todoId,
                                                   TodoStatusUpdateRequestDTO request) {
-
 
         String statusStr = request.getStatus();
 

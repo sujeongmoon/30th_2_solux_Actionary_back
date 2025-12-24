@@ -25,4 +25,13 @@ public class TodoCategory extends Timestamped {
 
     @Column
     private String color;
+
+    //----메소드----
+    public void updateName(String name) {
+        this.name = name;
+    }
+
+    public void updateColor(String color) {
+        this.color = color;
+    }
 }
