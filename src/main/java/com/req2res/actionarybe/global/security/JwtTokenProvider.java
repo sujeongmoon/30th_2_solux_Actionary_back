@@ -26,11 +26,12 @@ public class JwtTokenProvider {
         this.accessTokenValidityMs = accessMs;
     }
 
-    public String createToken(String loginId) {
+    public String createToken(Long id,String loginId) {
         Date now = new Date();
         Date exp = new Date(now.getTime() + accessTokenValidityMs);
         return Jwts.builder()
                 .setSubject(loginId)
+                .claim("id",id)
                 .setIssuedAt(now)
                 .setExpiration(exp)
                 .signWith(secretKey, SignatureAlgorithm.HS256)
@@ -61,5 +62,14 @@ public class JwtTokenProvider {
                 .parseClaimsJws(token).getBody().getSubject();
         var principal = new User(loginId, "", AuthorityUtils.createAuthorityList("ROLE_USER"));
         return new UsernamePasswordAuthenticationToken(principal, token, principal.getAuthorities());
+    }
+
+    public Long getMemberIdFromToken(String token) {
+        return Jwts.parserBuilder()
+                .setSigningKey(secretKey)
+                .build()
+                .parseClaimsJws(token)
+                .getBody()
+                .get("id", Long.class);
     }
 }

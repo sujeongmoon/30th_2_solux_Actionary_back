@@ -25,11 +25,14 @@ public class LoginService {
                 new UsernamePasswordAuthenticationToken(req.getLoginId(), req.getPassword())
         );
 
-        String accessToken = tokenProvider.createToken(req.getLoginId());
-        String refreshToken = tokenProvider.createRefreshToken(req.getLoginId());
-
+        // 1. 로그인 인증 후, DB에서 member 정보 조회
         Member member = memberRepository.findByLoginId(req.getLoginId())
                 .orElseThrow(() -> new BadCredentialsException("Invalid loginId"));
+
+        // 2. JWT 생성 시 memberId와 loginId 모두 포함
+        String accessToken = tokenProvider.createToken(member.getId(), member.getLoginId());
+        String refreshToken = tokenProvider.createRefreshToken(member.getLoginId());
+
 
         return new LoginResponseDTO(
                 member.getId(),

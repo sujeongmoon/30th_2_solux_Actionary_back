@@ -1,5 +1,6 @@
 package com.req2res.actionarybe.domain.auth.controller;
 
+import com.req2res.actionarybe.domain.auth.service.DeleteService;
 import com.req2res.actionarybe.domain.auth.service.LoginService;
 import com.req2res.actionarybe.domain.auth.service.SignupService;
 import com.req2res.actionarybe.domain.member.repository.MemberRepository;
@@ -22,6 +23,7 @@ public class AuthController {
     private final MemberRepository memberRepository;
     private final SignupService signupService;
     private final LoginService loginService;
+    private final DeleteService deleteService;
 
     @PostMapping("/signup")
     public ResponseEntity<Response<SignupResponseDTO>> signup(@Valid @RequestBody SignupRequestDTO req){
@@ -30,10 +32,17 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<Response<LoginResponseDTO>> login(
-            @Valid @RequestBody LoginRequestDTO req) {
+    public ResponseEntity<Response<LoginResponseDTO>> login(@Valid @RequestBody LoginRequestDTO req) {
 
         LoginResponseDTO result = loginService.login(req);
         return ResponseEntity.ok(Response.success("로그인에 성공하였습니다.", result));
+    }
+
+    @DeleteMapping("/withdraw")
+    public ResponseEntity<Response<Void>> withdraw(@RequestHeader("Authorization") String authHeader){
+        String token=authHeader.substring(7);
+        Long memberId=tokenProvider.getMemberIdFromToken(token);
+        deleteService.withdrawMember(memberId);
+        return ResponseEntity.ok(Response.success("회원 탈퇴에 성공하였습니다.",null));
     }
 }
