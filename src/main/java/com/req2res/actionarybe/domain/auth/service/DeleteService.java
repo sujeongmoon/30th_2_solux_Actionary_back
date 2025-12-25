@@ -10,6 +10,9 @@ public class DeleteService {
     public final MemberRepository memberRepository;
 
     public void withdrawMember(Long id){
+        if(!memberRepository.existsById(id)){
+            throw new IllegalArgumentException("해당 ID의 회원이 존재하지 않습니다: " + id);
+        }
         memberRepository.deleteById(id);
     }
 }
