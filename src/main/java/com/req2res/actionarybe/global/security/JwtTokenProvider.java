@@ -81,4 +81,14 @@ public class JwtTokenProvider {
                 userDetails.getAuthorities()
         );
     }
+
+    public String getLoginIdFromToken(String token) {
+        return Jwts.parserBuilder()
+                .setSigningKey(secretKey)
+                .build()
+                .parseClaimsJws(token)
+                .getBody()
+                .getSubject();
+    }
+
 }

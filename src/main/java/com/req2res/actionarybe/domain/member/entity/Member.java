@@ -72,4 +72,8 @@ public class Member extends Timestamped {
     private String generateDefaultNickname() {
         return "user" + System.currentTimeMillis();
     }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
+    }
 }

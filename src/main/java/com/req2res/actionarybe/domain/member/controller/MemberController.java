@@ -1,10 +1,12 @@
 package com.req2res.actionarybe.domain.member.controller;
 
 import com.req2res.actionarybe.domain.member.dto.LoginMemberResponseDTO;
+import com.req2res.actionarybe.domain.member.dto.UpdateProfileRequestDTO;
 import com.req2res.actionarybe.domain.member.service.MemberService;
 import com.req2res.actionarybe.global.Response;
 import com.req2res.actionarybe.global.security.CustomUserDetails;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -26,4 +28,15 @@ public class MemberController {
         LoginMemberResponseDTO result = memberService.getLoginMemberInfo(id);
         return ResponseEntity.ok(Response.success("로그인 유저 정보 조회 성공", result));
     }
+
+    @PatchMapping("/profile")
+    public ResponseEntity<Response<UpdateProfileRequestDTO>> profile(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @RequestBody @Valid UpdateProfileRequestDTO updateProfileRequestDTO
+    ) {
+        Long id=userDetails.getId();
+        memberService.updateProfile(id,updateProfileRequestDTO.getImageUrl());
+        return ResponseEntity.ok(Response.success("프로필 사진 변경에 성공했습니다.",null));
+    }
+
 }
