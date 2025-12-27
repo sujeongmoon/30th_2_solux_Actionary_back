@@ -47,7 +47,7 @@ public class Study {
 	private int memberLimit;
 
 	@Column
-	private boolean isPublic;
+	private Boolean isPublic;
 
 	@Column //암호화
 	private String password;
