@@ -3,6 +3,7 @@ package com.req2res.actionarybe.domain.member.entity;
 import com.req2res.actionarybe.global.Timestamped;
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDate;
 
@@ -11,7 +12,7 @@ import java.time.LocalDate;
 @Table(name = "member",
         indexes = { @Index(name="idx_member_login_id", columnList="loginId", unique = true),
                 @Index(name="idx_member_email", columnList="email", unique = true) })
-//@EntityListeners(AuditingEntityListener.class)
+@EntityListeners(AuditingEntityListener.class)
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Member extends Timestamped {

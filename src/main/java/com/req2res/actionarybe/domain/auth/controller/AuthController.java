@@ -3,7 +3,6 @@ package com.req2res.actionarybe.domain.auth.controller;
 import com.req2res.actionarybe.domain.auth.service.DeleteService;
 import com.req2res.actionarybe.domain.auth.service.LoginService;
 import com.req2res.actionarybe.domain.auth.service.SignupService;
-import com.req2res.actionarybe.domain.member.repository.MemberRepository;
 import com.req2res.actionarybe.global.Response;
 import com.req2res.actionarybe.domain.auth.dto.*;
 import com.req2res.actionarybe.global.security.JwtTokenProvider;
@@ -18,9 +17,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class AuthController {
 
-    private final AuthenticationManager authManager;
     private final JwtTokenProvider tokenProvider;
-    private final MemberRepository memberRepository;
     private final SignupService signupService;
     private final LoginService loginService;
     private final DeleteService deleteService;

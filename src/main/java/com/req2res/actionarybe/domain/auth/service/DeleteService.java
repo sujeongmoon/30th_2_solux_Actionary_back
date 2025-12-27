@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class DeleteService {
-    public final MemberRepository memberRepository;
+    private final MemberRepository memberRepository;
 
     public void withdrawMember(Long id){
         if(!memberRepository.existsById(id)){
