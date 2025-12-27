@@ -1,5 +1,6 @@
 package com.req2res.actionarybe.global.security;
 
+import com.req2res.actionarybe.domain.member.service.CustomMemberDetailsService;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
@@ -18,10 +19,14 @@ public class JwtTokenProvider {
     private final SecretKey secretKey;
     private final long accessTokenValidityMs;
 
+    private final CustomMemberDetailsService userDetailsService;
+
     public JwtTokenProvider(
+            CustomMemberDetailsService userDetailsService, // ✅ 추가
             @Value("${jwt.secret:local-demo-secret-change-me-12345678901234567890}") String secret,
             @Value("${jwt.access-token-expiration-ms:3600000}") long accessMs
     ) {
+        this.userDetailsService = userDetailsService; // ✅ 추가
         this.secretKey = Keys.hmacShaKeyFor(secret.getBytes());
         this.accessTokenValidityMs = accessMs;
     }
@@ -31,7 +36,6 @@ public class JwtTokenProvider {
         Date exp = new Date(now.getTime() + accessTokenValidityMs);
         return Jwts.builder()
                 .setSubject(loginId)
-                .claim("id",id)
                 .setIssuedAt(now)
                 .setExpiration(exp)
                 .signWith(secretKey, SignatureAlgorithm.HS256)
@@ -58,18 +62,23 @@ public class JwtTokenProvider {
     }
 
     public Authentication getAuthentication(String token) {
-        String loginId = Jwts.parserBuilder().setSigningKey(secretKey).build()
-                .parseClaimsJws(token).getBody().getSubject();
-        var principal = new User(loginId, "", AuthorityUtils.createAuthorityList("ROLE_USER"));
-        return new UsernamePasswordAuthenticationToken(principal, token, principal.getAuthorities());
-    }
 
-    public Long getMemberIdFromToken(String token) {
-        return Jwts.parserBuilder()
+        String loginId = Jwts.parserBuilder()
                 .setSigningKey(secretKey)
                 .build()
                 .parseClaimsJws(token)
                 .getBody()
-                .get("id", Long.class);
+                .getSubject();
+
+        // CustomUserDetailsService를 통해 CustomUserDetails 생성
+        CustomUserDetails userDetails =
+                (CustomUserDetails) userDetailsService.loadUserByUsername(loginId);
+
+        // principal에 CustomUserDetails 넣기
+        return new UsernamePasswordAuthenticationToken(
+                userDetails,
+                null,
+                userDetails.getAuthorities()
+        );
     }
 }

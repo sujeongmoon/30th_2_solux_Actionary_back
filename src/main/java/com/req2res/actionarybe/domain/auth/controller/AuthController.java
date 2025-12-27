@@ -5,11 +5,13 @@ import com.req2res.actionarybe.domain.auth.service.LoginService;
 import com.req2res.actionarybe.domain.auth.service.SignupService;
 import com.req2res.actionarybe.global.Response;
 import com.req2res.actionarybe.domain.auth.dto.*;
+import com.req2res.actionarybe.global.security.CustomUserDetails;
 import com.req2res.actionarybe.global.security.JwtTokenProvider;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.*;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -30,16 +32,14 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<Response<LoginResponseDTO>> login(@Valid @RequestBody LoginRequestDTO req) {
-
         LoginResponseDTO result = loginService.login(req);
         return ResponseEntity.ok(Response.success("로그인에 성공하였습니다.", result));
     }
 
     @DeleteMapping("/withdraw")
-    public ResponseEntity<Response<Void>> withdraw(@RequestHeader("Authorization") String authHeader){
-        String token=authHeader.substring(7);
-        Long memberId=tokenProvider.getMemberIdFromToken(token);
-        deleteService.withdrawMember(memberId);
+    public ResponseEntity<Response<Void>> withdraw(@AuthenticationPrincipal CustomUserDetails userDetails){
+        Long id = userDetails.getId();
+        deleteService.withdrawMember(id);
         return ResponseEntity.ok(Response.success("회원 탈퇴에 성공하였습니다.",null));
     }
 }
