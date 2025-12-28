@@ -54,7 +54,7 @@ public class BookmarkService {
 
 	public void deleteBookmark(Member member, Long bookmarkId) {
 		Bookmark bookmark = bookmarkRepository.findById(bookmarkId).
-			orElseThrow(() -> new CustomException(ErrorCode.BOOKMARK_NOT_FOUND));
+				orElseThrow(() -> new CustomException(ErrorCode.BOOKMARK_NOT_FOUND));
 
 		if (!bookmark.getMember().equals(member)) {
 			throw new CustomException(ErrorCode.BOOKMARK_NOT_MATCH_MEMBER);
