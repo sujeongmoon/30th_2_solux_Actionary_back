@@ -55,4 +55,6 @@ public class Study {
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "creator_user_id")
 	private Member creator;
+
 }
+

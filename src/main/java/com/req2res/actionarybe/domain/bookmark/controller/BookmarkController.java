@@ -31,8 +31,8 @@ public class BookmarkController {
 
 	@PostMapping
 	public Response<BookmarkResponseDto> createBookmark(
-		@AuthenticationPrincipal UserDetails userDetails,
-		@RequestBody @Valid BookmarkRequestDto request
+			@AuthenticationPrincipal UserDetails userDetails,
+			@RequestBody @Valid BookmarkRequestDto request
 	) {
 		Member member = memberService.findMemberByLoginId(userDetails.getUsername());
 		BookmarkResponseDto response = bookmarkService.createBookmark(member, request);
@@ -41,7 +41,7 @@ public class BookmarkController {
 
 	@GetMapping
 	public Response<BookmarkListResponseDto> getBookmarks(
-		@AuthenticationPrincipal UserDetails userDetails
+			@AuthenticationPrincipal UserDetails userDetails
 	) {
 		Member member = memberService.findMemberByLoginId(userDetails.getUsername());
 		BookmarkListResponseDto response = bookmarkService.getBookmarks(member);
@@ -50,8 +50,8 @@ public class BookmarkController {
 
 	@DeleteMapping("/{bookmarkId}")
 	public Response<BookmarkListResponseDto> deleteBookmark(
-		@AuthenticationPrincipal UserDetails userDetails,
-		@PathVariable Long bookmarkId
+			@AuthenticationPrincipal UserDetails userDetails,
+			@PathVariable Long bookmarkId
 	) {
 		Member member = memberService.findMemberByLoginId(userDetails.getUsername());
 		bookmarkService.deleteBookmark(member, bookmarkId);
