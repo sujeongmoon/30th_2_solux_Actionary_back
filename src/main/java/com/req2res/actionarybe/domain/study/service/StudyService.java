@@ -8,7 +8,10 @@ import com.req2res.actionarybe.domain.member.entity.Member;
 import com.req2res.actionarybe.domain.study.dto.StudyRequestDto;
 import com.req2res.actionarybe.domain.study.dto.StudyResponseDto;
 import com.req2res.actionarybe.domain.study.entity.Study;
+import com.req2res.actionarybe.domain.study.repository.StudyParticipantRepository;
 import com.req2res.actionarybe.domain.study.repository.StudyRepository;
+import com.req2res.actionarybe.global.exception.CustomException;
+import com.req2res.actionarybe.global.exception.ErrorCode;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +21,7 @@ import lombok.RequiredArgsConstructor;
 public class StudyService {
 
 	private final StudyRepository studyRepository;
+	private final StudyParticipantRepository studyParticipantRepository;
 
 	public StudyResponseDto createStudy(Member member, @Valid StudyRequestDto request) {
 
@@ -44,5 +48,20 @@ public class StudyService {
 		studyRepository.save(study);
 
 		return StudyResponseDto.from(study);
+	}
+
+	public void deleteStudy(Member member, Long studyId) {
+		Study study = studyRepository.findById(studyId).
+			orElseThrow(() -> new CustomException(ErrorCode.STUDY_NOT_FIND));
+
+		if (!study.getCreator().equals(member)) {
+			throw new CustomException(ErrorCode.STUDY_NOT_MATCH_MEMBER);
+		}
+
+		if (studyParticipantRepository.countByStudyAndUpdatedAtIsNull(study) != 0) {
+			throw new CustomException(ErrorCode.STUDY_NOT_MATCH_MEMBER);
+		}
+
+		studyRepository.delete(study);
 	}
 }

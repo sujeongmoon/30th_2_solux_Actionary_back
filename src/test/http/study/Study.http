@@ -25,5 +25,17 @@ Content-Type: application/json
   "description": "눈송이 인증 받아요",
   "memberLimit": 15,
   "isPublic": true,
-  "password": ""
+  "password": "000000"
 }
+
+
+### 스터디 삭제
+DELETE http://localhost:8080/api/studies/1
+Authorization: {{accessToken}}
+Content-Type: application/json
+
+
+### 스터디 삭제(존재하지 않는 스터디 - 404 실패)
+DELETE http://localhost:8080/api/studies/999999999999
+Authorization: {{accessToken}}
+Content-Type: application/json
