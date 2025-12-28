@@ -36,10 +36,10 @@ public class BookmarkService {
 		}
 
 		Bookmark bookmark = Bookmark.builder()
-				.member(member)
-				.name(request.getBookmarkName())
-				.link(request.getLink())
-				.build();
+			.member(member)
+			.name(request.getBookmarkName())
+			.link(request.getLink())
+			.build();
 
 		bookmarkRepository.save(bookmark);
 

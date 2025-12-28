@@ -9,6 +9,7 @@ import com.req2res.actionarybe.domain.member.entity.Member;
 
 public interface BookmarkRepository extends JpaRepository<Bookmark, Long> {
 
-	List<Bookmark> findAllByMember(Member member);
+    List<Bookmark> findAllByMember(Member member);
+
 
 }
