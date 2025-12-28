@@ -2,8 +2,8 @@ package com.req2res.actionarybe.domain.todo.controller;
 
 import com.req2res.actionarybe.domain.todo.dto.*;
 import com.req2res.actionarybe.domain.todo.service.TodoService;
-import com.req2res.actionarybe.domain.user.entity.User;
-import com.req2res.actionarybe.domain.user.repository.UserRepository;
+import com.req2res.actionarybe.domain.member.entity.Member;
+import com.req2res.actionarybe.domain.member.repository.MemberRepository;
 import com.req2res.actionarybe.global.Response;
 import com.req2res.actionarybe.global.exception.CustomException;
 import com.req2res.actionarybe.global.exception.ErrorCode;
@@ -29,7 +29,7 @@ import java.time.LocalDate;
 public class TodoController {
 
     private final TodoService todoService;
-    private final UserRepository userRepository;
+    private final MemberRepository memberRepository;
 
     // 1. 투두 생성 API
     @Operation(
@@ -49,10 +49,10 @@ public class TodoController {
     ) {
         String loginId = userDetails.getUsername();
 
-        User user = userRepository.findByLoginId(loginId)
+        Member member = memberRepository.findByLoginId(loginId)
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND));
 
-        Long userId = user.getId();
+        Long userId = member.getId();
 
         TodoCreateResponseDTO data = todoService.createTodo(userId, request);
 
@@ -86,10 +86,10 @@ public class TodoController {
     ) {
         String loginId = userDetails.getUsername();
 
-        User user = userRepository.findByLoginId(loginId)
+        Member member = memberRepository.findByLoginId(loginId)
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND));
 
-        Long userId = user.getId();
+        Long userId = member.getId();
 
         DailyTodosResponseDTO data = todoService.getTodosByDate(userId, date, categoryId);
 
@@ -118,10 +118,10 @@ public class TodoController {
     ) {
         String loginId = userDetails.getUsername();
 
-        User user = userRepository.findByLoginId(loginId)
+        Member member = memberRepository.findByLoginId(loginId)
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND));
 
-        Long userId = user.getId();
+        Long userId = member.getId();
 
         TodoResponseDTO data = todoService.updateTodo(userId, todoId, request);
 
@@ -149,10 +149,10 @@ public class TodoController {
     ) {
         String loginId = userDetails.getUsername();
 
-        User user = userRepository.findByLoginId(loginId)
+        Member member = memberRepository.findByLoginId(loginId)
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND));
 
-        Long userId = user.getId();
+        Long userId = member.getId();
 
         TodoStatusResponseDTO data = todoService.updateTodoStatus(userId, todoId, request);
 
@@ -182,10 +182,10 @@ public class TodoController {
     ) {
         String loginId = userDetails.getUsername();
 
-        User user = userRepository.findByLoginId(loginId)
+        Member member = memberRepository.findByLoginId(loginId)
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND));
 
-        Long userId = user.getId();
+        Long userId = member.getId();
 
         todoService.deleteTodo(userId, todoId);
 
