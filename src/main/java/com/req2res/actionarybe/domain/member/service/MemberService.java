@@ -1,6 +1,7 @@
 package com.req2res.actionarybe.domain.member.service;
 
 import com.req2res.actionarybe.domain.member.dto.LoginMemberResponseDTO;
+import com.req2res.actionarybe.domain.member.dto.UpdateNicknameResponseDTO;
 import com.req2res.actionarybe.domain.member.dto.UpdateProfileRequestDTO;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
@@ -20,7 +21,7 @@ public class MemberService {
 
 	public Member findMemberByLoginId(String loginId) {
 		return memberRepository.findByLoginId(loginId)
-			.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND));
+			.orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
 	}
 
     public LoginMemberResponseDTO getLoginMemberInfo(Long id) {
@@ -45,6 +46,19 @@ public class MemberService {
 
         return new UpdateProfileRequestDTO(
                 member.getImageUrl() // @Transactional: '메서드' 단위 -> 위에서 set한 현재값 바로 반영됨 (이전값 반영 걱정X)
+        );
+    }
+
+    // 닉네임 변경
+    @Transactional
+    public UpdateNicknameResponseDTO updateNickname(Long id, String nickname){
+        Member member = memberRepository.findById(id)
+                .orElseThrow(()->new CustomException(ErrorCode.MEMBER_NOT_FOUND));
+        member.setNickname(nickname);
+
+        return new UpdateNicknameResponseDTO(
+                member.getId(),
+                member.getNickname()
         );
     }
 }

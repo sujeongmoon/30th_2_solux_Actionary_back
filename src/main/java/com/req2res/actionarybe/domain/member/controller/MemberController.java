@@ -1,6 +1,8 @@
 package com.req2res.actionarybe.domain.member.controller;
 
 import com.req2res.actionarybe.domain.member.dto.LoginMemberResponseDTO;
+import com.req2res.actionarybe.domain.member.dto.UpdateNicknameRequestDTO;
+import com.req2res.actionarybe.domain.member.dto.UpdateNicknameResponseDTO;
 import com.req2res.actionarybe.domain.member.dto.UpdateProfileRequestDTO;
 import com.req2res.actionarybe.domain.member.service.MemberService;
 import com.req2res.actionarybe.global.Response;
@@ -8,6 +10,7 @@ import com.req2res.actionarybe.global.security.CustomUserDetails;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -39,4 +42,14 @@ public class MemberController {
         return ResponseEntity.ok(Response.success("프로필 사진 변경에 성공했습니다.",null));
     }
 
+    @PatchMapping("/nickname")
+    public ResponseEntity<Response<UpdateNicknameResponseDTO>> nickname(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @RequestBody @Valid UpdateNicknameRequestDTO updateNickNameRequestDTO
+    ){
+        Long id = userDetails.getId();
+        String nickname=updateNickNameRequestDTO.getNickname();
+        UpdateNicknameResponseDTO result=memberService.updateNickname(id,nickname);
+        return ResponseEntity.ok(Response.success("닉네임 변경에 성공했습니다.",result));
+    }
 }

@@ -76,4 +76,7 @@ public class Member extends Timestamped {
     public void setImageUrl(String imageUrl) {
         this.imageUrl = imageUrl;
     }
+    public void setNickname(String nickname) {
+        this.nickname=nickname;
+    }
 }

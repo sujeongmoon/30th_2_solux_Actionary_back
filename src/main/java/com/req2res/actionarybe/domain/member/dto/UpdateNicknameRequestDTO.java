@@ -7,8 +7,10 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public class UpdateProfileRequestDTO {
-    @Schema(example = "https://example.com/uploads/2025/01/28/image_abc123.jpg")
-    @NotBlank(message = "imageUrl은 필수입니다.")
-    String imageUrl;
+public class UpdateNicknameRequestDTO {
+
+    @NotBlank(message = "loginId는 필수입니다.")
+    @Schema(example = "new_nickname")
+    String nickname;
+
 }
