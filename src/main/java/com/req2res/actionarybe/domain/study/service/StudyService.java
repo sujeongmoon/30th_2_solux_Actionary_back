@@ -7,6 +7,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.req2res.actionarybe.domain.member.entity.Member;
 import com.req2res.actionarybe.domain.study.dto.StudyDetailResponseDto;
@@ -75,6 +76,7 @@ public class StudyService {
 		studyRepository.delete(study);
 	}
 
+	@Transactional
 	public StudyResponseDto updateStudy(Member member, @Valid StudyRequestDto request, Long studyId) {
 		Study study = studyRepository.findById(studyId).
 			orElseThrow(() -> new CustomException(ErrorCode.STUDY_NOT_FIND));
