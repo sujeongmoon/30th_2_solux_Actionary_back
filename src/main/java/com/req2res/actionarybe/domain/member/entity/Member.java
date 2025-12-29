@@ -53,9 +53,7 @@ public class Member extends Timestamped {
 
     @Builder
     public Member(String loginId, String password, String name, String email,
-
                 String phoneNumber, LocalDate birthday, String imageUrl, String nickname, Long badgeId) {
-
         this.loginId = loginId;
         this.password = password;
         this.name = name;
@@ -74,4 +72,3 @@ public class Member extends Timestamped {
         return "user" + System.currentTimeMillis();
     }
 }
-

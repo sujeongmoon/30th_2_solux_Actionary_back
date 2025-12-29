@@ -1,5 +1,6 @@
 package com.req2res.actionarybe.domain.todo.service;
 
+
 import com.req2res.actionarybe.domain.notification.service.NotificationService;
 import com.req2res.actionarybe.domain.todo.dto.*;
 import com.req2res.actionarybe.domain.todo.entity.Todo;
@@ -21,7 +22,7 @@ public class TodoService {
 
     private final TodoRepository todoRepository;
     private final TodoCategoryRepository todoCategoryRepository;
-    //private final NotificationService notificationService; -> TODO: 나중에 투두 달성/실패 처리 API에서 알림 생성 메서드 주입 예정
+    private final NotificationService notificationService;
 
 
     //1. 투두 생성 API
@@ -184,8 +185,7 @@ public class TodoService {
                 .allMatch(todo -> todo.getStatus() == Todo.Status.DONE);
 
         if (allDone) {
-            // TODO: 알림 생성 메서드 호출
-            // notificationService.createAllTodosDoneNotification(userId, targetDate);
+            notificationService.notifyTodoAllDone(userId, targetDate);
         }
     }
 

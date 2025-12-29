@@ -1,0 +1,9 @@
+@access_token = 여기에 토큰
+
+### 알림 전체 조회 (limit 없음)
+GET http://localhost:8080/api/notifications
+Authorization: Bearer {{access_token}}
+
+### 알림 최신 20개 조회
+GET http://localhost:8080/api/notifications?limit=2
+Authorization: Bearer {{access_token}}

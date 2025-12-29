@@ -61,6 +61,7 @@ public class Study extends Timestamped {
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "creator_user_id")
 	private Member creator;
+  
 
 	public void updateStudy(@Valid StudyRequestDto request, Member member) {
 
@@ -81,4 +82,3 @@ public class Study extends Timestamped {
 		this.creator = member;
 	}
 }
-

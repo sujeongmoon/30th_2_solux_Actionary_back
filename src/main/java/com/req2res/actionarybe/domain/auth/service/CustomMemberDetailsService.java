@@ -23,4 +23,3 @@ public class CustomMemberDetailsService implements UserDetailsService {
         );
     }
 }
-
