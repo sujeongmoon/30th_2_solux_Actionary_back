@@ -5,9 +5,11 @@ import com.req2res.actionarybe.domain.notification.entity.NotificationType;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @Getter
+@AllArgsConstructor(staticName = "of")
 public class NotificationCreateRequestDTO {
 
     @Schema(description = "알림을 받을 사용자 ID", example = "7")
