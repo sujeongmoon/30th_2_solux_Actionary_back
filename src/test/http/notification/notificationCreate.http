@@ -1,0 +1,39 @@
+### 1) 알림 생성 성공 (POINT)
+POST http://localhost:8080/api/notifications
+Content-Type: application/json
+Authorization: Bearer {{access_token}}
+
+{
+  "receiverId": 7,
+  "type": "POINT",
+  "title": "포인트가 적립되었습니다.",
+  "content": "공부시간 기록으로 100P가 적립되었어요.",
+  "link": "/mypage/points"
+}
+
+### 2) 알림 생성 성공 (COMMENT)
+POST http://localhost:8080/api/notifications
+Content-Type: application/json
+Authorization: Bearer {{access_token}}
+
+{
+  "receiverId": 1,
+  "type": "COMMENT",
+  "title": "내 게시글에 댓글이 달렸어요.",
+  "content": "누군가 댓글을 남겼습니다.",
+  "link": "/posts/15"
+}
+
+### 3) 400 Bad Request (receiverId 누락)
+POST http://localhost:8080/api/notifications
+Content-Type: application/json
+Authorization: Bearer {{access_token}}
+
+{
+  "type": "POINT",
+  "title": "포인트 적립",
+  "content": "100P",
+  "link": "/mypage/points"
+}
+
+
