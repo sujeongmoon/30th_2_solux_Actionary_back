@@ -1,8 +1,10 @@
 package com.req2res.actionarybe.domain.member.service;
 
+import com.req2res.actionarybe.domain.member.dto.BadgeResponseDTO;
 import com.req2res.actionarybe.domain.member.dto.LoginMemberResponseDTO;
 import com.req2res.actionarybe.domain.member.dto.UpdateNicknameResponseDTO;
 import com.req2res.actionarybe.domain.member.dto.UpdateProfileRequestDTO;
+import com.req2res.actionarybe.domain.member.entity.Badge;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
@@ -12,6 +14,8 @@ import com.req2res.actionarybe.global.exception.CustomException;
 import com.req2res.actionarybe.global.exception.ErrorCode;
 
 import lombok.RequiredArgsConstructor;
+
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -59,6 +63,21 @@ public class MemberService {
         return new UpdateNicknameResponseDTO(
                 member.getId(),
                 member.getNickname()
+        );
+    }
+
+    @Transactional
+    public BadgeResponseDTO badge(Long id){
+        Member member = memberRepository.findById(id)
+                .orElseThrow(()->new CustomException(ErrorCode.MEMBER_NOT_FOUND));
+        Badge badge = Optional.ofNullable(member.getBadge())
+                .orElseThrow(()->new CustomException(ErrorCode.BADGE_NOT_ASSIGNED));
+
+        return new BadgeResponseDTO(
+                badge.getId(),
+                badge.getName(),
+                badge.getRequiredPoint(),
+                badge.getImageUrl()
         );
     }
 }

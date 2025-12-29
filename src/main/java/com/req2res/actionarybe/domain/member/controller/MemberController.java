@@ -1,9 +1,6 @@
 package com.req2res.actionarybe.domain.member.controller;
 
-import com.req2res.actionarybe.domain.member.dto.LoginMemberResponseDTO;
-import com.req2res.actionarybe.domain.member.dto.UpdateNicknameRequestDTO;
-import com.req2res.actionarybe.domain.member.dto.UpdateNicknameResponseDTO;
-import com.req2res.actionarybe.domain.member.dto.UpdateProfileRequestDTO;
+import com.req2res.actionarybe.domain.member.dto.*;
 import com.req2res.actionarybe.domain.member.service.MemberService;
 import com.req2res.actionarybe.global.Response;
 import com.req2res.actionarybe.global.security.CustomUserDetails;
@@ -51,5 +48,14 @@ public class MemberController {
         String nickname=updateNickNameRequestDTO.getNickname();
         UpdateNicknameResponseDTO result=memberService.updateNickname(id,nickname);
         return ResponseEntity.ok(Response.success("닉네임 변경에 성공했습니다.",result));
+    }
+
+    @GetMapping("/badge")
+    public ResponseEntity<Response<BadgeResponseDTO>> badge(
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    ){
+        Long id=userDetails.getId();
+        BadgeResponseDTO result = memberService.badge(id);
+        return ResponseEntity.ok(Response.success("뱃지 정보 조회에 성공했습니다.",result));
     }
 }

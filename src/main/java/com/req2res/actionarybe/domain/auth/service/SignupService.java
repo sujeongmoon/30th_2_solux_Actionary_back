@@ -2,7 +2,9 @@ package com.req2res.actionarybe.domain.auth.service;
 
 import com.req2res.actionarybe.domain.auth.dto.SignupRequestDTO;
 import com.req2res.actionarybe.domain.auth.dto.SignupResponseDTO;
+import com.req2res.actionarybe.domain.member.entity.Badge;
 import com.req2res.actionarybe.domain.member.entity.Member;
+import com.req2res.actionarybe.domain.member.repository.BadgeRepository;
 import com.req2res.actionarybe.domain.member.repository.MemberRepository;
 import com.req2res.actionarybe.global.exception.CustomException;
 import com.req2res.actionarybe.global.exception.ErrorCode;
@@ -19,9 +21,14 @@ import java.util.UUID;
 public class SignupService {
 
     private final MemberRepository memberRepository;
+    private final BadgeRepository badgeRepository;
     private final PasswordEncoder passwordEncoder;
 
     public SignupResponseDTO signup(SignupRequestDTO req) {
+        // id = 1 → 0P 기본 뱃지
+        Badge defaultBadge = badgeRepository.findById(1L)
+                .orElseThrow(() -> new IllegalStateException("기본 뱃지(0P) 없음"));
+
 
         // 1. 중복 검사
         if (memberRepository.existsByLoginId(req.getLoginId())) {
@@ -40,6 +47,7 @@ public class SignupService {
                 .name(req.getName())
                 .nickname("action_" + UUID.randomUUID().toString().substring(0, 8))
                 .birthday(LocalDate.parse(req.getBirthday())) // 문자열 날짜 파싱
+                .badge(defaultBadge)
                 .build();
 
         // 4. DB 저장
