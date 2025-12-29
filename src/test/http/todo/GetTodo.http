@@ -1,10 +1,10 @@
 ### 특정 날짜 투두 목록 조회 (카테고리 없음)
 GET http://localhost:8080/api/todos?date=2025-11-19
-Authorization: {{accessToken}}
+Authorization: Bearer {{accessToken}}
 
 ### 특정 날짜 투두 목록 조회 (카테고리 포함)
 GET http://localhost:8080/api/todos?date=2025-10-31&categoryId=3
-Authorization: {{accessToken}}
+Authorization: Bearer {{accessToken}}
 
 
 
