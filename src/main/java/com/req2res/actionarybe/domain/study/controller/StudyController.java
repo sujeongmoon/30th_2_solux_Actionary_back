@@ -5,6 +5,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -120,6 +121,52 @@ public class StudyController {
 		Member member = memberService.findMemberByLoginId(userDetails.getUsername());
 		studyService.deleteStudy(member, studyId);
 		return Response.success("스터디가 삭제되었습니다.", null);
+	}
+
+	@Operation(summary = "스터디 수정 API", description = "스터디를 수정하는 기능입니다.")
+	@ApiResponses(value = {
+		@ApiResponse(
+			responseCode = "200",
+			description = "스터디 수정 완료",
+			content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
+				{
+					"code": 200,
+					"message": "스터디를 수정했습니다."
+				}
+				"""))
+		),
+		@ApiResponse(
+			responseCode = "403",
+			description = "생성자와 요청자의 불일치로 접근권한 없는 경우",
+			content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
+				{
+					"code": 403,
+					"message": "사용자가 방장인 스터디가 아닙니다."
+				}
+				"""))
+		),
+		@ApiResponse(
+			responseCode = "404",
+			description = "삭제하고자 하는 스터디가 없는 경우",
+			content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
+				{
+					"code": 404,
+					"message": "존재하지 않는 스터디입니다."
+				}
+				"""))
+		)
+	})
+	@PutMapping("/{studyId}")
+	public Response<StudyResponseDto> updateStudy(
+		// TODO: 추후 pull 후 getMemberIdFromToken으로 memberId 불러온 뒤 전달할 수 있도록 수정
+		@AuthenticationPrincipal UserDetails userDetails,
+		@RequestBody @Valid StudyRequestDto request,
+		@Parameter(name = "studyId", description = "수정할 스터디의 ID", example = "1")
+		@PathVariable Long studyId
+	) {
+		Member member = memberService.findMemberByLoginId(userDetails.getUsername());
+		StudyResponseDto response = studyService.updateStudy(member, request, studyId);
+		return Response.success("스터디가 수정되었습니다.", response);
 	}
 
 }

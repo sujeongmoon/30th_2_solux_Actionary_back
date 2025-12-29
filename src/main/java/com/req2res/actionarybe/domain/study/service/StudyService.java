@@ -64,4 +64,16 @@ public class StudyService {
 
 		studyRepository.delete(study);
 	}
+
+	public StudyResponseDto updateStudy(Member member, @Valid StudyRequestDto request, Long studyId) {
+		Study study = studyRepository.findById(studyId).
+			orElseThrow(() -> new CustomException(ErrorCode.STUDY_NOT_FIND));
+
+		if (!study.getCreator().equals(member)) {
+			throw new CustomException(ErrorCode.STUDY_NOT_MATCH_MEMBER);
+		}
+
+		study.updateStudy(request, member);
+		return StudyResponseDto.from(study);
+	}
 }
