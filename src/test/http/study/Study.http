@@ -47,18 +47,18 @@ Authorization: {{accessToken}}
 Content-Type: application/json
 
 {
-  "studyName": "06-12 임용송이 오전 공부반",
+  "studyName": "정처기",
   "coverImage": "image_url.jpg",
-  "category": "TEACHER_EXAM",
-  "description": "눈송이 인증 받아요",
-  "memberLimit": 15,
+  "category": "LICENSE",
+  "description": "정처기따요",
+  "memberLimit": 20,
   "isPublic": true,
   "password": null
 }
 
 
 ### 스터디 수정
-PUT http://localhost:8080/api/studies/2
+PUT http://localhost:8080/api/studies/4
 Authorization: {{accessToken}}
 Content-Type: application/json
 
@@ -68,8 +68,8 @@ Content-Type: application/json
   "category": "LANGUAGE",
   "description": "토익만ㄱㄱ",
   "memberLimit": 7,
-  "isPublic": true,
-  "password": null
+  "isPublic": false,
+  "password": 392039
 }
 
 ### 스터디 수정(존재하지 않는 스터디 - 404 실패)
@@ -101,12 +101,36 @@ Content-Type: application/json
 
 
 ### 스터디 상세조회
-GET http://localhost:8080/api/studies/2
+GET http://localhost:8080/api/studies/4
 Authorization: {{accessToken}}
 Content-Type: application/json
 
 
 ### 스터디 상세조회(존재하지 않는 스터디 - 404 실패)
 GET http://localhost:8080/api/studies/999999999999
+Authorization: {{accessToken}}
+Content-Type: application/json
+
+
+### 공개 스터디 목록조회 (카테고리x)
+GET http://localhost:8080/api/studies?visibility=public&page=0
+Authorization: {{accessToken}}
+Content-Type: application/json
+
+
+### 공개 스터디 목록조회 (카테고리 - TEACHER_EXAM)
+GET http://localhost:8080/api/studies?visibility=public&category=TEACHER_EXAM&page=0
+Authorization: {{accessToken}}
+Content-Type: application/json
+
+
+### 비공개 스터디 목록조회 (카테고리x)
+GET http://localhost:8080/api/studies?visibility=private&page=0
+Authorization: {{accessToken}}
+Content-Type: application/json
+
+
+### 비공개 스터디 목록조회 (카테고리 - TEACHER_EXAM)
+GET http://localhost:8080/api/studies?visibility=private&category=TEACHER_EXAM&page=0
 Authorization: {{accessToken}}
 Content-Type: application/json

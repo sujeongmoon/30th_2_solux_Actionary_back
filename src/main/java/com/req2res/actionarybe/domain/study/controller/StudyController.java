@@ -9,13 +9,16 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.req2res.actionarybe.domain.member.entity.Member;
 import com.req2res.actionarybe.domain.member.service.MemberService;
 import com.req2res.actionarybe.domain.study.dto.StudyDetailResponseDto;
+import com.req2res.actionarybe.domain.study.dto.StudyListResponseDto;
 import com.req2res.actionarybe.domain.study.dto.StudyRequestDto;
 import com.req2res.actionarybe.domain.study.dto.StudyResponseDto;
+import com.req2res.actionarybe.domain.study.entity.Category;
 import com.req2res.actionarybe.domain.study.service.StudyService;
 import com.req2res.actionarybe.global.Response;
 
@@ -204,6 +207,34 @@ public class StudyController {
 		Member member = memberService.findMemberByLoginId(userDetails.getUsername());
 		StudyDetailResponseDto response = studyService.getStudyDetail(member, studyId);
 		return Response.success("스터디가 상세 조회되었습니다.", response);
+	}
+
+	@Operation(summary = "스터디 목록 조회 API", description = "개설돼있는 전체 스터디를 분류에 따라 조회하는 기능입니다.")
+	@ApiResponses(value = {
+		@ApiResponse(
+			responseCode = "200",
+			description = "스터디 목록 조회 완료",
+			content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
+				{
+					"code": 200,
+					"message": "스터디 리스트를 조회했습니다."
+				}
+				"""))
+		)
+	})
+	@GetMapping
+	public Response<StudyListResponseDto> getStudyList(
+		@Parameter(description = "스터디 공개 여부", example = "public")
+		@RequestParam(defaultValue = "public") String visibility,
+
+		@Parameter(description = "스터디 카테고리", example = "TEACHER_EXAM")
+		@RequestParam(required = false) Category category,
+
+		@Parameter(description = "페이지", example = "0")
+		@RequestParam(defaultValue = "0") int pageNumber
+	) {
+		StudyListResponseDto response = studyService.getStudyList(visibility, category, pageNumber);
+		return Response.success("스터디 리스트를 조회했습니다.", response);
 	}
 
 }

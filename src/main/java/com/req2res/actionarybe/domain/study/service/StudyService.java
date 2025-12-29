@@ -1,13 +1,20 @@
 package com.req2res.actionarybe.domain.study.service;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.req2res.actionarybe.domain.member.entity.Member;
 import com.req2res.actionarybe.domain.study.dto.StudyDetailResponseDto;
+import com.req2res.actionarybe.domain.study.dto.StudyListResponseDto;
 import com.req2res.actionarybe.domain.study.dto.StudyRequestDto;
 import com.req2res.actionarybe.domain.study.dto.StudyResponseDto;
+import com.req2res.actionarybe.domain.study.dto.StudySummaryDto;
+import com.req2res.actionarybe.domain.study.entity.Category;
 import com.req2res.actionarybe.domain.study.entity.Study;
 import com.req2res.actionarybe.domain.study.repository.StudyLikeRepository;
 import com.req2res.actionarybe.domain.study.repository.StudyParticipantRepository;
@@ -96,6 +103,40 @@ public class StudyService {
 			.isPublic(study.getIsPublic())
 			.isStudyLike(studyLikeRepository.existsByStudyAndMember(study, member))
 			.isStudyOwner(study.getCreator().equals(member))
+			.build();
+	}
+
+	public StudyListResponseDto getStudyList(String visibility, Category category, int pageNumber) {
+
+		Pageable pageable = PageRequest.of(pageNumber, 8, Sort.by("updatedAt").descending());
+
+		Boolean isPublic = null;
+
+		if (visibility.equals("public")) {
+			isPublic = true;
+		} else if (visibility.equals("private")) {
+			isPublic = false;
+		}
+
+		Page<Study> studyPage;
+
+		if (category != null) {
+			studyPage = studyRepository.findByIsPublicAndCategory(isPublic, category, pageable);
+		} else {
+			studyPage = studyRepository.findByIsPublic(isPublic, pageable);
+		}
+
+		return StudyListResponseDto.builder()
+			.isPublic(isPublic)
+			.category(category == null ? null : category)
+			.categoryLabel(category == null ? null : category.getLabel())
+			.content(studyPage.getContent().stream()
+				.map(StudySummaryDto::from)
+				.toList())
+			.page(studyPage.getNumber())
+			.size(studyPage.getSize())
+			.totalElements(studyPage.getTotalElements())
+			.totalPages(studyPage.getTotalPages())
 			.build();
 	}
 }
