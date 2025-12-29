@@ -1,10 +1,12 @@
+@access_token = 여기에 토큰
+
 ### 1) 알림 생성 성공 (POINT)
 POST http://localhost:8080/api/notifications
 Content-Type: application/json
 Authorization: Bearer {{access_token}}
 
 {
-  "receiverId": 7,
+  "receiverId": 1,
   "type": "POINT",
   "title": "포인트가 적립되었습니다.",
   "content": "공부시간 기록으로 100P가 적립되었어요.",

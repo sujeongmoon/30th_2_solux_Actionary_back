@@ -1,3 +1,5 @@
+@access_token = 여기에 토큰
+
 ### 북마크 생성 1
 POST http://localhost:8080/api/bookmarks
 Authorization: Bearer {{accessToken}}
