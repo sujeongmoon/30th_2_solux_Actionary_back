@@ -5,9 +5,11 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.req2res.actionarybe.domain.member.entity.Member;
+import com.req2res.actionarybe.domain.study.dto.StudyDetailResponseDto;
 import com.req2res.actionarybe.domain.study.dto.StudyRequestDto;
 import com.req2res.actionarybe.domain.study.dto.StudyResponseDto;
 import com.req2res.actionarybe.domain.study.entity.Study;
+import com.req2res.actionarybe.domain.study.repository.StudyLikeRepository;
 import com.req2res.actionarybe.domain.study.repository.StudyParticipantRepository;
 import com.req2res.actionarybe.domain.study.repository.StudyRepository;
 import com.req2res.actionarybe.global.exception.CustomException;
@@ -22,6 +24,7 @@ public class StudyService {
 
 	private final StudyRepository studyRepository;
 	private final StudyParticipantRepository studyParticipantRepository;
+	private final StudyLikeRepository studyLikeRepository;
 
 	public StudyResponseDto createStudy(Member member, @Valid StudyRequestDto request) {
 
@@ -75,5 +78,24 @@ public class StudyService {
 
 		study.updateStudy(request, member);
 		return StudyResponseDto.from(study);
+	}
+
+	public StudyDetailResponseDto getStudyDetail(Member member, Long studyId) {
+		Study study = studyRepository.findById(studyId).
+			orElseThrow(() -> new CustomException(ErrorCode.STUDY_NOT_FIND));
+
+		return StudyDetailResponseDto.builder()
+			.studyId(studyId)
+			.studyName(study.getName())
+			.coverImage(study.getCoverImage())
+			.category(study.getCategory())
+			.categoryLabel(study.getCategory().getLabel())
+			.description(study.getDescription())
+			.memberNow(studyParticipantRepository.countByStudyAndUpdatedAtIsNull(study))
+			.memberLimit(study.getMemberLimit())
+			.isPublic(study.getIsPublic())
+			.isStudyLike(studyLikeRepository.existsByStudyAndMember(study, member))
+			.isStudyOwner(study.getCreator().equals(member))
+			.build();
 	}
 }

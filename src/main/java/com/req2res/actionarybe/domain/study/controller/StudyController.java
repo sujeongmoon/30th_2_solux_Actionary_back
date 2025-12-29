@@ -3,6 +3,7 @@ package com.req2res.actionarybe.domain.study.controller;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.req2res.actionarybe.domain.member.entity.Member;
 import com.req2res.actionarybe.domain.member.service.MemberService;
+import com.req2res.actionarybe.domain.study.dto.StudyDetailResponseDto;
 import com.req2res.actionarybe.domain.study.dto.StudyRequestDto;
 import com.req2res.actionarybe.domain.study.dto.StudyResponseDto;
 import com.req2res.actionarybe.domain.study.service.StudyService;
@@ -167,6 +169,41 @@ public class StudyController {
 		Member member = memberService.findMemberByLoginId(userDetails.getUsername());
 		StudyResponseDto response = studyService.updateStudy(member, request, studyId);
 		return Response.success("스터디가 수정되었습니다.", response);
+	}
+
+	@Operation(summary = "스터디 상세 조회 API", description = "스터디의 썸네일 및 제목을 클릭했을 시 보여지는 스터디 상세 조회 기능입니다.")
+	@ApiResponses(value = {
+		@ApiResponse(
+			responseCode = "200",
+			description = "스터디 상세 조회 완료",
+			content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
+				{
+					"code": 200,
+					"message": "스터디가 상세 조회되었습니다."
+				}
+				"""))
+		),
+		@ApiResponse(
+			responseCode = "404",
+			description = "상세 조회 하고자 하는 스터디가 없는 경우",
+			content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
+				{
+					"code": 404,
+					"message": "존재하지 않는 스터디입니다."
+				}
+				"""))
+		)
+	})
+	@GetMapping("/{studyId}")
+	public Response<StudyDetailResponseDto> getStudyDetail(
+		// TODO: 추후 pull 후 getMemberIdFromToken으로 memberId 불러온 뒤 전달할 수 있도록 수정
+		@AuthenticationPrincipal UserDetails userDetails,
+		@Parameter(name = "studyId", description = "상세 조회할 스터디의 ID", example = "1")
+		@PathVariable Long studyId
+	) {
+		Member member = memberService.findMemberByLoginId(userDetails.getUsername());
+		StudyDetailResponseDto response = studyService.getStudyDetail(member, studyId);
+		return Response.success("스터디가 상세 조회되었습니다.", response);
 	}
 
 }

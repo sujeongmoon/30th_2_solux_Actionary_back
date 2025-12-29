@@ -61,9 +61,6 @@ public class Study {
 	@JoinColumn(name = "creator_user_id")
 	private Member creator;
 
-	public void updateStudy(@Valid StudyRequestDto request, Long studyId) {
-	}
-
 	public void updateStudy(@Valid StudyRequestDto request, Member member) {
 
 		String encodedPassword = null;
