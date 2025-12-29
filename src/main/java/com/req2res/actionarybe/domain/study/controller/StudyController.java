@@ -204,7 +204,10 @@ public class StudyController {
 		@Parameter(name = "studyId", description = "상세 조회할 스터디의 ID", example = "1")
 		@PathVariable Long studyId
 	) {
-		Member member = memberService.findMemberByLoginId(userDetails.getUsername());
+		Member member = null;
+		if (userDetails != null) {
+			member = memberService.findMemberByLoginId(userDetails.getUsername());
+		}
 		StudyDetailResponseDto response = studyService.getStudyDetail(member, studyId);
 		return Response.success("스터디가 상세 조회되었습니다.", response);
 	}
