@@ -9,6 +9,12 @@ import com.req2res.actionarybe.domain.notification.service.NotificationService;
 import com.req2res.actionarybe.global.Response;
 import com.req2res.actionarybe.global.exception.CustomException;
 import com.req2res.actionarybe.global.exception.ErrorCode;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -26,6 +32,76 @@ public class NotificationController {
     private final NotificationService notificationService;
     private final MemberRepository memberRepository;
 
+
+    @Operation(
+            summary = "알림 생성 API",
+            description = """
+                    서비스에서 저장해야 하는 알림(댓글/포인트/투두 올클리어/자정 공부량)을 생성합니다.
+                    생성 시 isRead는 기본 false로 저장됩니다.
+                    """
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "알림 생성 완료",
+                    content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
+                            {
+                              "success": true,
+                              "message": "알림이 생성되었습니다.",
+                              "data": {
+                                "notificationId": 101,
+                                "receiverId": 7,
+                                "type": "POINT",
+                                "title": "포인트가 적립되었습니다.",
+                                "content": "공부시간 기록으로 100P가 적립되었어요.",
+                                "link": "/mypage/points",
+                                "isRead": false,
+                                "createdAt": "2025-10-31T12:30:00"
+                              }
+                            }
+                            """))
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "잘못된 요청 (receiverId/type/title 누락 등)",
+                    content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
+                            {
+                              "success": false,
+                              "message": "잘못된 요청입니다."
+                            }
+                            """))
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "인증 실패(토큰 없음/만료)",
+                    content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
+                            {
+                              "success": false,
+                              "message": "인증이 필요합니다."
+                            }
+                            """))
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "receiverId에 해당하는 사용자가 없음",
+                    content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
+                            {
+                              "success": false,
+                              "message": "리소스를 찾을 수 없습니다."
+                            }
+                            """))
+            ),
+            @ApiResponse(
+                    responseCode = "500",
+                    description = "서버 오류(알림 저장 중 예외 발생)",
+                    content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
+                            {
+                              "success": false,
+                              "message": "서버 오류가 발생했습니다."
+                            }
+                            """))
+            )
+    })
     // 1. 알림 생성 API
     @PostMapping
     public ResponseEntity<Response<NotificationCreateResponseDTO>> createNotification(
@@ -35,10 +111,76 @@ public class NotificationController {
         return ResponseEntity.ok(Response.success("알림이 생성되었습니다.", data));
     }
 
+
+    @Operation(
+            summary = "알림 목록 조회 API",
+            description = """
+                    내 알림 목록을 최신순(createdAt DESC)으로 조회합니다.
+                    limit 파라미터가 있으면 최근 N개만 조회합니다.
+                    """
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "알림 목록 조회 성공",
+                    content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
+                            {
+                              "success": true,
+                              "message": "",
+                              "data": [
+                                {
+                                  "notificationId": 131,
+                                  "type": "COMMENT",
+                                  "title": "내 게시글에 댓글이 달렸습니다.",
+                                  "content": "다현님이 작성한 글에 새로운 댓글이 있어요.",
+                                  "link": "/posts/77",
+                                  "isRead": false,
+                                  "createdAt": "2025-10-31T12:55:00"
+                                },
+                                {
+                                  "notificationId": 130,
+                                  "type": "POINT",
+                                  "title": "포인트가 적립되었습니다.",
+                                  "content": "스터디 참여로 10P 적립!",
+                                  "link": "/mypage/points",
+                                  "isRead": true,
+                                  "createdAt": "2025-10-31T12:40:00"
+                                }
+                              ]
+                            }
+                            """))
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "인증 실패(토큰 없음/만료)",
+                    content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
+                            {
+                              "success": false,
+                              "message": "인증이 필요합니다."
+                            }
+                            """))
+            ),
+            @ApiResponse(
+                    responseCode = "500",
+                    description = "서버 오류(알림 목록 조회 중 예외 발생)",
+                    content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
+                            {
+                              "success": false,
+                              "message": "서버 오류가 발생했습니다."
+                            }
+                            """))
+            )
+    })
     // 2. 알림 조회 API
     @GetMapping
     public ResponseEntity<Response<List<NotificationGetResponseDTO>>> getMyNotifications(
             @AuthenticationPrincipal UserDetails userDetails,
+
+            @Parameter(
+                    name = "limit",
+                    description = "가져올 최대 개수(선택, 미지정 시 전체). 예: 20",
+                    example = "20"
+            )
             @RequestParam(required = false) Integer limit
     ) {
         String loginId = userDetails.getUsername();
