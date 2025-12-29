@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.req2res.actionarybe.domain.study.entity.Category;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -45,4 +46,11 @@ public class StudyRequestDto {
 	@Schema(description = "스터디 비밀번호", example = "060522")
 	private String password;
 
+	@AssertTrue(message = "공개 스터디는 비밀번호가 없어야 하고, 비공개 스터디는 비밀번호가 필요합니다.")
+	public boolean passwordCheck() {
+		if (Boolean.TRUE.equals(isPublic)) {
+			return password == null || password.isBlank();
+		}
+		return password != null;
+	}
 }
