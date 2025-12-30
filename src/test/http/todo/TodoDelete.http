@@ -1,6 +1,6 @@
 ###투두 삭제 API
 DELETE http://localhost:8080/api/todos/1
-Authorization: {{accessToken}}
+Authorization: Bearer {{accessToken}}
 Content-Type: application/json
 
 {}
