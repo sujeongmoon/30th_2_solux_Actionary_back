@@ -1,24 +1,36 @@
 package com.req2res.actionarybe.domain.post.controller;
 
+import com.req2res.actionarybe.domain.post.dto.CreatePostRequestDTO;
+import com.req2res.actionarybe.domain.post.dto.CreatePostResponseDTO;
 import com.req2res.actionarybe.domain.post.dto.SortedResponseDTO;
 import com.req2res.actionarybe.domain.post.entity.Post;
 import com.req2res.actionarybe.domain.post.service.PostService;
 import com.req2res.actionarybe.global.Response;
+import com.req2res.actionarybe.global.security.CustomUserDetails;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("api/posts")
 public class PostController {
     private final PostService postService;
+
+    @PostMapping("/{postId}")
+    public ResponseEntity<Response<CreatePostResponseDTO>> createPost(
+            @Valid @RequestBody CreatePostRequestDTO createPostRequestDTO,
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    ){
+        Long member_id = userDetails.getId();
+        CreatePostResponseDTO result = postService.createPost(createPostRequestDTO, member_id);
+        return ResponseEntity.ok(Response.success("게시글 생성 성공",result));
+    }
 
     @GetMapping("/latest")
     public ResponseEntity<Response<SortedResponseDTO>> getLatestPosts(
