@@ -3,10 +3,9 @@ package com.req2res.actionarybe.domain.point.service;
 import com.req2res.actionarybe.domain.member.entity.Member;
 import com.req2res.actionarybe.domain.member.repository.MemberRepository;
 import com.req2res.actionarybe.domain.notification.service.NotificationService;
-import com.req2res.actionarybe.domain.point.dto.StudyParticipationPointRequestDTO;
-import com.req2res.actionarybe.domain.point.dto.StudyParticipationPointResponseDTO;
-import com.req2res.actionarybe.domain.point.dto.StudyTimePointRequestDTO;
-import com.req2res.actionarybe.domain.point.dto.StudyTimePointResponseDTO;
+import com.req2res.actionarybe.domain.point.dto.*;
+import com.req2res.actionarybe.domain.todo.entity.Todo;
+import com.req2res.actionarybe.domain.todo.repository.TodoRepository;
 import com.req2res.actionarybe.domain.point.entity.PointHistory;
 import com.req2res.actionarybe.domain.point.entity.PointSource;
 import com.req2res.actionarybe.domain.point.entity.UserPoint;
@@ -29,6 +28,7 @@ public class PointService {
     private final UserPointRepository userPointRepository;
     private final PointHistoryRepository pointHistoryRepository;
     private final NotificationService notificationService;
+    private final TodoRepository todoRepository;
 
     // 1. 공부시간 포인트 적립 API
     @Transactional
@@ -158,5 +158,99 @@ public class PointService {
                 userPoint.getTotalPoint()
         );
     }
+
+    @Transactional
+    public TodoCompletionPointResponseDTO earnTodoCompletionPoint(
+            Long loginMemberId,
+            TodoCompletionPointRequestDTO request
+    ) {
+        Member member = memberRepository.findById(loginMemberId)
+                .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
+
+        // 1) to-do 존재 확인 (404)
+        Todo todo = todoRepository.findById(request.getTodoId())
+                .orElseThrow(() -> new CustomException(ErrorCode.TODO_NOT_FOUND));
+
+        // 2) to-do 소유자 확인 (403/400 중 선택) - 보통 403
+        if (!todo.getUserId().equals(member.getId())) {
+            throw new CustomException(ErrorCode.POINT_USER_MISMATCH);
+        }
+
+        // 3) 이미 이 to-do로 포인트 지급했는지 (409)
+        boolean alreadyRewardedForTodo = pointHistoryRepository.existsByMember_IdAndSourceAndTodoId(
+                member.getId(),
+                PointSource.TODO_COMPLETION,
+                request.getTodoId()
+        );
+
+        if (alreadyRewardedForTodo) {
+            throw new CustomException(ErrorCode.TODO_POINT_ALREADY_EARNED);
+
+        }
+
+        // 4) 오늘 투두 포인트 지급 개수 확인 (일 최대 5P)
+        LocalDate today = LocalDate.now();
+        LocalDateTime start = today.atStartOfDay();
+        LocalDateTime end = today.plusDays(1).atStartOfDay();
+
+        int limit = 5;
+        int todayCount = (int) pointHistoryRepository.countByMember_IdAndSourceAndCreatedAtBetween(
+                member.getId(),
+                PointSource.TODO_COMPLETION,
+                start,
+                end
+        );
+
+        // 5) 한도 초과면 0P로 정상 응답 (history 저장 X, 알림 X)
+        UserPoint userPoint = userPointRepository.findByMember_Id(member.getId())
+                .orElseGet(() -> userPointRepository.save(
+                        UserPoint.builder()
+                                .member(member)
+                                .totalPoint(0)
+                                .lastEarnedAt(null)
+                                .build()
+                ));
+
+        if (todayCount >= limit) {
+            return new TodoCompletionPointResponseDTO(
+                    member.getId(),
+                    request.getTodoId(),
+                    0,
+                    PointSource.TODO_COMPLETION,
+                    limit,
+                    limit,
+                    userPoint.getTotalPoint()
+            );
+        }
+
+        // 6) 적립 (1P)
+        int earnedPoint = 1;
+        LocalDateTime now = LocalDateTime.now();
+        userPoint.addPoint(earnedPoint, now);
+
+        // 7) point_history 저장 (todoId 포함)
+        PointHistory history = PointHistory.builder()
+                .member(member)
+                .todoId(request.getTodoId())
+                .earnedPoint(earnedPoint)
+                .source(PointSource.TODO_COMPLETION)
+                .totalPoint(userPoint.getTotalPoint())
+                .build();
+        pointHistoryRepository.save(history);
+
+        // 8) 알림 생성
+        notificationService.notifyPoint(member.getId(), earnedPoint, PointSource.TODO_COMPLETION);
+
+        return new TodoCompletionPointResponseDTO(
+                member.getId(),
+                request.getTodoId(),
+                earnedPoint,
+                PointSource.TODO_COMPLETION,
+                todayCount + 1,
+                limit,
+                userPoint.getTotalPoint()
+        );
+    }
+
 
 }

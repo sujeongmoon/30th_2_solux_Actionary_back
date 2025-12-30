@@ -30,6 +30,9 @@ public class PointHistory extends Timestamped {
     @Column(name = "study_room_id")
     private Long studyRoomId;
 
+    @Column(name = "todo_id")
+    private Long todoId;
+
     @Column(name = "earned_point", nullable = false)
     private int earnedPoint; // 이번에 적립된 포인트
 

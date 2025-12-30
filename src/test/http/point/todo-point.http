@@ -1,0 +1,28 @@
+@host = http://localhost:8080
+
+### 1) 성공 (1P 적립)
+POST {{host}}/api/points/todos
+Content-Type: application/json
+Authorization: Bearer {{access_token}}
+
+{
+  "todoId": 1
+}
+
+### 2) 409 - 같은 todoId로 중복 지급
+POST {{host}}/api/points/todos
+Content-Type: application/json
+Authorization: Bearer {{access_token}}
+
+{
+  "todoId": 1
+}
+
+### 3) 404 - 존재하지 않는 todoId
+POST {{host}}/api/points/todos
+Content-Type: application/json
+Authorization: Bearer {{access_token}}
+
+{
+  "todoId": 999999
+}
