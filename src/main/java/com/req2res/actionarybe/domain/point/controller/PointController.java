@@ -94,9 +94,50 @@ public class PointController {
     }
 
     // 2. 스터디 참여 포인트 적립 API
+    @Operation(
+            summary = "스터디 참여 포인트 적립",
+            description = """
+                사용자가 **스터디에 30분 이상 참여했을 때** 호출하는 API입니다.
+
+                - 참여 시간이 **30분 이상**인 경우에만 포인트가 적립됩니다.
+                - 스터디 1개당 **1회만 포인트 지급**됩니다.
+                - 포인트 적립 시 **알림이 생성**됩니다.
+                """
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "스터디 참여 포인트 적립 성공",
+                    content = @Content(
+                            schema = @Schema(implementation = StudyParticipationPointResponseDTO.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "잘못된 요청 (참여 시간 30분 미만, 필수 값 누락)",
+                    content = @Content
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "인증 실패 (토큰 없음 또는 만료)",
+                    content = @Content
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "존재하지 않는 사용자 또는 스터디",
+                    content = @Content
+            ),
+            @ApiResponse(
+                    responseCode = "409",
+                    description = "이미 해당 스터디 참여 포인트를 적립한 경우",
+                    content = @Content
+            )
+    })
     @PostMapping("/study-participation")
     public ResponseEntity<Response<StudyParticipationPointResponseDTO>> earnStudyParticipationPoint(
-            @Parameter(hidden = true) @AuthenticationPrincipal UserDetails userDetails,
+            @Parameter(hidden = true)
+            @AuthenticationPrincipal UserDetails userDetails,
+
             @RequestBody @Valid StudyParticipationPointRequestDTO request
     ) {
         String loginId = userDetails.getUsername();
@@ -107,7 +148,10 @@ public class PointController {
         StudyParticipationPointResponseDTO data =
                 pointService.earnStudyParticipationPoint(member.getId(), request);
 
-        return ResponseEntity.ok(Response.success("스터디 참여로 10P가 적립되었습니다!", data));
+        return ResponseEntity.ok(
+                Response.success("스터디 참여로 10P가 적립되었습니다!", data)
+        );
     }
+
 
 }
