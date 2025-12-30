@@ -7,7 +7,7 @@ import java.util.List;
 
 @Getter
 @AllArgsConstructor
-public class LatestResponseDTO {
+public class SortedResponseDTO {
     private List<PostSummaryDTO> posts;
     private PageInfoDTO pageInfo;
 }
