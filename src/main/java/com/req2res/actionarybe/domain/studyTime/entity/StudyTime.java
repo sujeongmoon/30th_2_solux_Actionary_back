@@ -1,6 +1,7 @@
 package com.req2res.actionarybe.domain.studyTime.entity;
 
 import com.req2res.actionarybe.domain.study.entity.StudyParticipant;
+import com.req2res.actionarybe.global.Timestamped;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -23,7 +24,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class StudyTime {
+public class StudyTime extends Timestamped {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
