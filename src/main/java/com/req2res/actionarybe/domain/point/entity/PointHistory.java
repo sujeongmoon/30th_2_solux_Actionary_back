@@ -27,6 +27,9 @@ public class PointHistory extends Timestamped {
     @JoinColumn(name = "member_id", nullable = false)
     private Member member; // 유저 id (FK)
 
+    @Column(name = "study_room_id")
+    private Long studyRoomId;
+
     @Column(name = "earned_point", nullable = false)
     private int earnedPoint; // 이번에 적립된 포인트
 
