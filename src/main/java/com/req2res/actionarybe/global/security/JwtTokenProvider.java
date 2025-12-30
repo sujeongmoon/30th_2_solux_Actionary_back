@@ -6,8 +6,6 @@ import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.*;
-import org.springframework.security.core.authority.AuthorityUtils;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
@@ -22,11 +20,11 @@ public class JwtTokenProvider {
     private final CustomMemberDetailsService userDetailsService;
 
     public JwtTokenProvider(
-            CustomMemberDetailsService userDetailsService, // ✅ 추가
+            CustomMemberDetailsService userDetailsService,
             @Value("${jwt.secret:local-demo-secret-change-me-12345678901234567890}") String secret,
             @Value("${jwt.access-token-expiration-ms:3600000}") long accessMs
     ) {
-        this.userDetailsService = userDetailsService; // ✅ 추가
+        this.userDetailsService = userDetailsService;
         this.secretKey = Keys.hmacShaKeyFor(secret.getBytes());
         this.accessTokenValidityMs = accessMs;
     }
