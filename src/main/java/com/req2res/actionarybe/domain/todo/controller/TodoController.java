@@ -9,8 +9,10 @@ import com.req2res.actionarybe.global.exception.CustomException;
 import com.req2res.actionarybe.global.exception.ErrorCode;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +28,7 @@ import java.time.LocalDate;
 @RestController
 @RequestMapping("/api/todos")
 @RequiredArgsConstructor
+@SecurityRequirement(name = "bearerAuth")
 public class TodoController {
 
     private final TodoService todoService;
@@ -44,7 +47,10 @@ public class TodoController {
     })
     @PostMapping
     public Response<TodoCreateResponseDTO> createTodo(
+            @Parameter(hidden = true)
             @AuthenticationPrincipal UserDetails userDetails,
+
+            @Parameter(description = "투두 생성 요청 정보", required = true)
             @RequestBody @Valid TodoCreateRequestDTO request
     ) {
         String loginId = userDetails.getUsername();
@@ -60,10 +66,6 @@ public class TodoController {
     }
 
     // 2. 특정 날짜 투두 목록 조회 API
-    /**
-     * - 카테고리 설정: GET /api/todos?date=2025-10-31&categoryId=3
-     * - 카테고리 미설정: GET /api/todos?date=2025-10-31
-     */
     @Operation(
             summary = "특정 날짜 투두 목록 조회",
             description = "date(필수)와 categoryId(선택)를 이용해 특정 날짜의 투두 목록을 조회합니다."
@@ -75,12 +77,15 @@ public class TodoController {
     })
     @GetMapping
     public ResponseEntity<Response<DailyTodosResponseDTO>> getTodosByDate(
+            @Parameter(hidden = true)
             @AuthenticationPrincipal UserDetails userDetails,
 
+            @Parameter(description = "조회 날짜 (yyyy-MM-dd)", example = "2025-10-31", required = true)
             @RequestParam
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
             LocalDate date,
 
+            @Parameter(description = "카테고리 ID (선택)", example = "3")
             @RequestParam(required = false)
             Long categoryId
     ) {
@@ -112,8 +117,13 @@ public class TodoController {
     })
     @PatchMapping("/{todoId}")
     public ResponseEntity<Response<TodoResponseDTO>> updateTodo(
+            @Parameter(description = "수정할 투두 ID", example = "10")
             @PathVariable Long todoId,
+
+            @Parameter(description = "투두 수정 요청 정보 (title, categoryId 중 변경할 값만 전달)")
             @RequestBody TodoUpdateRequestDTO request,
+
+            @Parameter(hidden = true)
             @AuthenticationPrincipal UserDetails userDetails
     ) {
         String loginId = userDetails.getUsername();
@@ -143,8 +153,13 @@ public class TodoController {
     })
     @PatchMapping("/{todoId}/status")
     public ResponseEntity<Response<TodoStatusResponseDTO>> updateTodoStatus(
+            @Parameter(hidden = true)
             @AuthenticationPrincipal UserDetails userDetails,
+
+            @Parameter(description = "상태를 변경할 투두 ID", example = "10")
             @PathVariable Long todoId,
+
+            @Parameter(description = "상태 변경 요청 정보 (DONE 또는 FAILED)", required = true)
             @RequestBody TodoStatusUpdateRequestDTO request
     ) {
         String loginId = userDetails.getUsername();
@@ -177,7 +192,10 @@ public class TodoController {
     })
     @DeleteMapping("/{todoId}")
     public ResponseEntity<Response<Void>> deleteTodo(
+            @Parameter(hidden = true)
             @AuthenticationPrincipal UserDetails userDetails,
+
+            @Parameter(description = "삭제할 투두 ID", example = "10")
             @PathVariable Long todoId
     ) {
         String loginId = userDetails.getUsername();
