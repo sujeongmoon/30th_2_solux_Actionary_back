@@ -42,8 +42,11 @@ public enum ErrorCode {
 	TODO_CATEGORY_IN_USE(HttpStatus.CONFLICT, "해당 카테고리에 미완료 투두가 있어 삭제할 수 없습니다."),
 
 	// point
-	POINT_ALREADY_EARNED_TODAY(HttpStatus.CONFLICT, "오늘은 이미 공부시간 포인트를 적립했습니다."),
+	STUDY_TIME_POINT_ALREADY_EARNED_TODAY(HttpStatus.CONFLICT, "오늘은 이미 공부시간 포인트를 적립했습니다."),
 	POINT_USER_MISMATCH(HttpStatus.FORBIDDEN, "요청 userId와 로그인 사용자가 일치하지 않습니다."),
+	STUDY_PARTICIPATION_POINT_ALREADY_EARNED_TODAY(HttpStatus.CONFLICT, "해당 스터디 참여 포인트는 이미 적립되었습니다."),
+	STUDY_PARTICIPATION_TIME_NOT_ENOUGH(HttpStatus.BAD_REQUEST, "참여 시간은 30분 이상이어야 포인트가 적립됩니다."),
+
 
 	//user
 	EMAIL_DUPLICATED(HttpStatus.CONFLICT, "중복된 이메일입니다"),

@@ -2,6 +2,8 @@ package com.req2res.actionarybe.domain.point.controller;
 
 import com.req2res.actionarybe.domain.member.entity.Member;
 import com.req2res.actionarybe.domain.member.repository.MemberRepository;
+import com.req2res.actionarybe.domain.point.dto.StudyParticipationPointRequestDTO;
+import com.req2res.actionarybe.domain.point.dto.StudyParticipationPointResponseDTO;
 import com.req2res.actionarybe.domain.point.dto.StudyTimePointRequestDTO;
 import com.req2res.actionarybe.domain.point.dto.StudyTimePointResponseDTO;
 import com.req2res.actionarybe.domain.point.service.PointService;
@@ -67,6 +69,8 @@ public class PointController {
                     content = @Content
             )
     })
+
+
     @PostMapping("/study-time")
     public ResponseEntity<Response<StudyTimePointResponseDTO>> earnStudyTimePoint(
             @Parameter(hidden = true)
@@ -88,4 +92,22 @@ public class PointController {
 
         return ResponseEntity.ok(Response.success(msg, data));
     }
+
+    // 2. 스터디 참여 포인트 적립 API
+    @PostMapping("/study-participation")
+    public ResponseEntity<Response<StudyParticipationPointResponseDTO>> earnStudyParticipationPoint(
+            @Parameter(hidden = true) @AuthenticationPrincipal UserDetails userDetails,
+            @RequestBody @Valid StudyParticipationPointRequestDTO request
+    ) {
+        String loginId = userDetails.getUsername();
+
+        Member member = memberRepository.findByLoginId(loginId)
+                .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
+
+        StudyParticipationPointResponseDTO data =
+                pointService.earnStudyParticipationPoint(member.getId(), request);
+
+        return ResponseEntity.ok(Response.success("스터디 참여로 10P가 적립되었습니다!", data));
+    }
+
 }

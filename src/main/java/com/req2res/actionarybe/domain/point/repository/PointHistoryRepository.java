@@ -8,11 +8,18 @@ import java.time.LocalDateTime;
 
 public interface PointHistoryRepository extends JpaRepository<PointHistory, Long> {
 
-    // "오늘 STUDY_TIME 적립" 중복 여부 체크 (409 Conflict)
+    // "오늘 STUDY_TIME 적립" 중복 여부 체크
     boolean existsByMember_IdAndSourceAndCreatedAtBetween(
             Long memberId,
             PointSource source,
             LocalDateTime start,
             LocalDateTime end
+    );
+
+    // "스터디 참여 포인트 적립" 중복 여부 체크
+    boolean existsByMember_IdAndSourceAndStudyRoomId(
+            Long memberId,
+            PointSource source,
+            Long studyRoomId
     );
 }

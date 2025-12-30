@@ -3,6 +3,8 @@ package com.req2res.actionarybe.domain.point.service;
 import com.req2res.actionarybe.domain.member.entity.Member;
 import com.req2res.actionarybe.domain.member.repository.MemberRepository;
 import com.req2res.actionarybe.domain.notification.service.NotificationService;
+import com.req2res.actionarybe.domain.point.dto.StudyParticipationPointRequestDTO;
+import com.req2res.actionarybe.domain.point.dto.StudyParticipationPointResponseDTO;
 import com.req2res.actionarybe.domain.point.dto.StudyTimePointRequestDTO;
 import com.req2res.actionarybe.domain.point.dto.StudyTimePointResponseDTO;
 import com.req2res.actionarybe.domain.point.entity.PointHistory;
@@ -50,7 +52,7 @@ public class PointService {
         );
 
         if (alreadyEarned) {
-            throw new CustomException(ErrorCode.POINT_ALREADY_EARNED_TODAY);
+            throw new CustomException(ErrorCode.STUDY_TIME_POINT_ALREADY_EARNED_TODAY);
         }
 
         // 3) 적립 포인트 계산 (studyHours * 10, 반올림)
@@ -91,4 +93,70 @@ public class PointService {
                 userPoint.getTotalPoint()
         );
     }
+
+    // 2. 스터디 참여 포인트 적립 API
+    @Transactional
+    public StudyParticipationPointResponseDTO earnStudyParticipationPoint(
+            Long loginMemberId,
+            StudyParticipationPointRequestDTO request
+    ) {
+        Member member = memberRepository.findById(loginMemberId)
+                .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
+
+        // 30분 이상만 인정 (400)
+        if (request.getParticipatedMinutes() == null || request.getParticipatedMinutes() < 30) {
+            throw new CustomException(ErrorCode.STUDY_PARTICIPATION_TIME_NOT_ENOUGH);
+        }
+
+        // 중복 지급 방지 (409) : 같은 studyRoomId에 대해 이미 지급했는지
+        boolean alreadyRewarded = pointHistoryRepository.existsByMember_IdAndSourceAndStudyRoomId(
+                member.getId(),
+                PointSource.STUDY_PARTICIPATION,
+                request.getStudyRoomId()
+        );
+
+        if (alreadyRewarded) {
+            throw new CustomException(ErrorCode.STUDY_PARTICIPATION_POINT_ALREADY_EARNED_TODAY);
+        }
+
+        // 고정 10P
+        int earnedPoint = 10;
+        LocalDateTime now = LocalDateTime.now();
+
+        // user_point 조회/생성 (member 기준)
+        UserPoint userPoint = userPointRepository.findByMember_Id(member.getId())
+                .orElseGet(() -> userPointRepository.save(
+                        UserPoint.builder()
+                                .member(member)
+                                .totalPoint(0)
+                                .lastEarnedAt(null)
+                                .build()
+                ));
+
+        // 포인트 반영
+        userPoint.addPoint(earnedPoint, now);
+
+        // point_history 저장 (studyRoomId 포함!)
+        PointHistory history = PointHistory.builder()
+                .member(member)
+                .studyRoomId(request.getStudyRoomId())
+                .earnedPoint(earnedPoint)
+                .source(PointSource.STUDY_PARTICIPATION)
+                .totalPoint(userPoint.getTotalPoint())
+                .build();
+
+        pointHistoryRepository.save(history);
+
+        // 알림 생성
+        notificationService.notifyPoint(member.getId(), earnedPoint, PointSource.STUDY_PARTICIPATION);
+
+        return new StudyParticipationPointResponseDTO(
+                member.getId(),
+                request.getStudyRoomId(),
+                earnedPoint,
+                PointSource.STUDY_PARTICIPATION,
+                userPoint.getTotalPoint()
+        );
+    }
+
 }
