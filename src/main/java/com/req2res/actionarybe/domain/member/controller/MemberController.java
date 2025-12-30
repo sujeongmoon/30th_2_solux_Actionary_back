@@ -7,7 +7,6 @@ import com.req2res.actionarybe.global.security.CustomUserDetails;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -19,6 +18,7 @@ public class MemberController {
 
     private final MemberService memberService;
 
+    // 로그인 유저 정보 조회
     @GetMapping("/info")
     @SecurityRequirement(name = "Bearer Token")
     public ResponseEntity<Response<LoginMemberResponseDTO>> info(
@@ -29,6 +29,7 @@ public class MemberController {
         return ResponseEntity.ok(Response.success("로그인 유저 정보 조회 성공", result));
     }
 
+    // 프로필 사진 수정
     @PatchMapping("/profile")
     public ResponseEntity<Response<UpdateProfileRequestDTO>> profile(
             @AuthenticationPrincipal CustomUserDetails userDetails,
@@ -39,6 +40,7 @@ public class MemberController {
         return ResponseEntity.ok(Response.success("프로필 사진 변경에 성공했습니다.",null));
     }
 
+    // 닉네임 수정
     @PatchMapping("/nickname")
     public ResponseEntity<Response<UpdateNicknameResponseDTO>> nickname(
             @AuthenticationPrincipal CustomUserDetails userDetails,
@@ -50,6 +52,7 @@ public class MemberController {
         return ResponseEntity.ok(Response.success("닉네임 변경에 성공했습니다.",result));
     }
 
+    // 뱃지 조회
     @GetMapping("/badge")
     public ResponseEntity<Response<BadgeResponseDTO>> badge(
             @AuthenticationPrincipal CustomUserDetails userDetails

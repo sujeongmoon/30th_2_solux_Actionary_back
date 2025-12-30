@@ -28,6 +28,7 @@ public class MemberService {
 			.orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
 	}
 
+    // 로그인 유저 정보 조회
     public LoginMemberResponseDTO getLoginMemberInfo(Long id) {
         Member member = memberRepository.findById(id)
                 .orElseThrow(()->new IllegalArgumentException("해당 회원이 없습니다."));
@@ -66,6 +67,7 @@ public class MemberService {
         );
     }
 
+    // 회원 뱃지 정보 조회
     @Transactional
     public BadgeResponseDTO badge(Long id){
         Member member = memberRepository.findById(id)

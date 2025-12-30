@@ -19,18 +19,21 @@ public class AuthController {
     private final JwtTokenProvider tokenProvider;
     private final AuthService authService;
 
+    // 회원가입
     @PostMapping("/signup")
     public ResponseEntity<Response<SignupResponseDTO>> signup(@Valid @RequestBody SignupRequestDTO req){
         SignupResponseDTO result = authService.signup(req);
         return ResponseEntity.ok(Response.success("회원가입에 성공하였습니다.", result));
     }
 
+    // 로그인
     @PostMapping("/login")
     public ResponseEntity<Response<LoginResponseDTO>> login(@Valid @RequestBody LoginRequestDTO req) {
         LoginResponseDTO result = authService.login(req);
         return ResponseEntity.ok(Response.success("로그인에 성공하였습니다.", result));
     }
 
+    // 회원 탈퇴
     @DeleteMapping("/withdraw")
     public ResponseEntity<Response<Void>> withdraw(@AuthenticationPrincipal CustomUserDetails userDetails){
         Long id = userDetails.getId();
@@ -38,6 +41,7 @@ public class AuthController {
         return ResponseEntity.ok(Response.success("회원 탈퇴에 성공하였습니다.",null));
     }
 
+    // 로그인 유지 (refreshToken 활용)
     @PostMapping("/refresh")
     public ResponseEntity<Response<RefreshTokenResponseDTO>> refreshAccessToken(
             @RequestBody @Valid RefreshTokenRequestDTO request

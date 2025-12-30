@@ -29,6 +29,7 @@ public class AuthService {
     private final BadgeRepository badgeRepository;
     private final PasswordEncoder passwordEncoder;
 
+    // 회원 탈퇴
     public void withdrawMember(Long id){
         if(!memberRepository.existsById(id)){
             throw new CustomException(ErrorCode.MEMBER_NOT_FOUND);
@@ -36,6 +37,7 @@ public class AuthService {
         memberRepository.deleteById(id);
     }
 
+    // 로그인
     public LoginResponseDTO login(LoginRequestDTO req) {
 
         authManager.authenticate(
@@ -60,6 +62,7 @@ public class AuthService {
         );
     }
 
+    // 회원가입
     public SignupResponseDTO signup(SignupRequestDTO req) {
         // id = 1 → 0P 기본 뱃지
         Badge defaultBadge = badgeRepository.findById(1L)
