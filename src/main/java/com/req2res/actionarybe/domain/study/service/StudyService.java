@@ -1,5 +1,13 @@
 package com.req2res.actionarybe.domain.study.service;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -10,8 +18,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.req2res.actionarybe.domain.member.entity.Member;
+import com.req2res.actionarybe.domain.study.dto.RankingBoardDto;
+import com.req2res.actionarybe.domain.study.dto.RankingDurationDto;
 import com.req2res.actionarybe.domain.study.dto.StudyDetailResponseDto;
 import com.req2res.actionarybe.domain.study.dto.StudyListResponseDto;
+import com.req2res.actionarybe.domain.study.dto.StudyRankingBoardListResponseDto;
 import com.req2res.actionarybe.domain.study.dto.StudyRequestDto;
 import com.req2res.actionarybe.domain.study.dto.StudyResponseDto;
 import com.req2res.actionarybe.domain.study.dto.StudySummaryDto;
@@ -139,6 +150,69 @@ public class StudyService {
 			.size(studyPage.getSize())
 			.totalElements(studyPage.getTotalElements())
 			.totalPages(studyPage.getTotalPages())
+			.build();
+	}
+
+	public StudyRankingBoardListResponseDto getRankingBoardStudyList(Long studyId, String type) {
+		boolean isToday = true;
+
+		if (type.equals("today")) {
+			isToday = true;
+		} else if (type.equals("total")) {
+			isToday = false;
+		}
+
+		LocalDateTime startOfDay = LocalDate.now().atStartOfDay();
+
+		List<RankingDurationDto> todayList =
+			studyParticipantRepository.findTodayDurations(studyId, startOfDay);
+
+		List<RankingDurationDto> totalList =
+			studyParticipantRepository.findTotalDurations(studyId);
+
+		Map<Long, RankingDurationDto> todayMap =
+			todayList.stream()
+				.collect(Collectors.toMap(
+					RankingDurationDto::getUserId,
+					Function.identity()
+				));
+
+		Map<Long, RankingDurationDto> totalMap =
+			totalList.stream()
+				.collect(Collectors.toMap(
+					RankingDurationDto::getUserId,
+					Function.identity()
+				));
+
+		List<RankingDurationDto> baseList =
+			isToday ? todayList : totalList;
+
+		List<RankingBoardDto> rankingBoards = baseList.stream()
+			.sorted(Comparator.comparingLong(RankingDurationDto::getDurationSeconds).reversed())
+			.map(base -> {
+				Long today = todayMap.getOrDefault(
+					base.getUserId(),
+					new RankingDurationDto(base.getUserId(), base.getUserNickname(), 0L)
+				).getDurationSeconds();
+
+				Long total = totalMap.getOrDefault(
+					base.getUserId(),
+					new RankingDurationDto(base.getUserId(), base.getUserNickname(), 0L)
+				).getDurationSeconds();
+
+				return RankingBoardDto.builder()
+					.userId(base.getUserId())
+					.userNickname(base.getUserNickname())
+					.todayDurationSeconds(today)
+					.totalDurationSeconds(total)
+					.build();
+			})
+			.toList();
+
+		return StudyRankingBoardListResponseDto.builder()
+			.studyId(studyId)
+			.isToday(isToday)
+			.rankingBoards(rankingBoards)
 			.build();
 	}
 }

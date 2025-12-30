@@ -16,6 +16,7 @@ import com.req2res.actionarybe.domain.member.entity.Member;
 import com.req2res.actionarybe.domain.member.service.MemberService;
 import com.req2res.actionarybe.domain.study.dto.StudyDetailResponseDto;
 import com.req2res.actionarybe.domain.study.dto.StudyListResponseDto;
+import com.req2res.actionarybe.domain.study.dto.StudyRankingBoardListResponseDto;
 import com.req2res.actionarybe.domain.study.dto.StudyRequestDto;
 import com.req2res.actionarybe.domain.study.dto.StudyResponseDto;
 import com.req2res.actionarybe.domain.study.entity.Category;
@@ -238,6 +239,41 @@ public class StudyController {
 	) {
 		StudyListResponseDto response = studyService.getStudyList(visibility, category, pageNumber);
 		return Response.success("스터디 리스트를 조회했습니다.", response);
+	}
+
+	@Operation(summary = "스터디 랭킹 보드 조회 API", description = "스터디 상세 조회에서의 랭킹 보드 조회 기능입니다.")
+	@ApiResponses(value = {
+		@ApiResponse(
+			responseCode = "200",
+			description = "스터디의 랭킹보드 조회 완료",
+			content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
+				{
+					"code": 200,
+					"message": "스터디의 랭킹보드가 조회되었습니다."
+				}
+				"""))
+		),
+		@ApiResponse(
+			responseCode = "404",
+			description = "랭킹보드 조회 하고자 하는 스터디가 없는 경우",
+			content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
+				{
+					"code": 404,
+					"message": "존재하지 않는 스터디입니다."
+				}
+				"""))
+		)
+	})
+	@GetMapping("/{studyId}/rankings")
+	public Response<StudyRankingBoardListResponseDto> getStudyRankingBoardList(
+		@Parameter(name = "studyId", description = "랭킹보드 조회할 스터디의 ID", example = "1")
+		@PathVariable Long studyId,
+
+		@Parameter(description = "일간/누적 참가시간", example = "today")
+		@RequestParam(defaultValue = "today") String type
+	) {
+		StudyRankingBoardListResponseDto response = studyService.getRankingBoardStudyList(studyId, type);
+		return Response.success("스터디의 랭킹보드가 조회되었습니다", response);
 	}
 
 }
