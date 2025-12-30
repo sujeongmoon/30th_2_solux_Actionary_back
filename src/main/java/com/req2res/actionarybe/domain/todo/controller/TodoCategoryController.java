@@ -9,8 +9,10 @@ import com.req2res.actionarybe.global.exception.CustomException;
 import com.req2res.actionarybe.global.exception.ErrorCode;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +29,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @RequestMapping("/api/todo-categories")
 @Validated
+@SecurityRequirement(name = "bearerAuth")
 public class TodoCategoryController {
 
     private final MemberRepository memberRepository;
@@ -45,7 +48,10 @@ public class TodoCategoryController {
     })
     @PostMapping
     public ResponseEntity<Response<TodoCategoryCreateResponseDTO>> create(
+            @Parameter(hidden = true)
             @AuthenticationPrincipal UserDetails userDetails,
+
+            @Parameter(description = "카테고리 생성 요청 정보", required = true)
             @RequestBody @Valid TodoCategoryCreateRequestDTO request
     ) {
         String loginId = userDetails.getUsername();
@@ -72,8 +78,13 @@ public class TodoCategoryController {
     })
     @PatchMapping("/{categoryId}")
     public ResponseEntity<Response<TodoCategoryUpdateResponseDTO>> update(
+            @Parameter(hidden = true)
             @AuthenticationPrincipal UserDetails userDetails,
+
+            @Parameter(description = "수정할 카테고리 ID", example = "1")
             @PathVariable Long categoryId,
+
+            @Parameter(description = "카테고리 수정 요청 정보")
             @RequestBody TodoCategoryUpdateRequestDTO request
     ) {
         String loginId = userDetails.getUsername();
@@ -102,7 +113,10 @@ public class TodoCategoryController {
     })
     @DeleteMapping("/{categoryId}")
     public ResponseEntity<Response<Void>> delete(
+            @Parameter(hidden = true)
             @AuthenticationPrincipal UserDetails userDetails,
+
+            @Parameter(description = "삭제할 카테고리 ID", example = "1")
             @PathVariable Long categoryId
     ) {
         String loginId = userDetails.getUsername();
@@ -128,6 +142,7 @@ public class TodoCategoryController {
     })
     @GetMapping
     public ResponseEntity<Response<List<TodoCategoryListItemDTO>>> getMyCategories(
+            @Parameter(hidden = true)
             @AuthenticationPrincipal UserDetails userDetails
     ) {
         String loginId = userDetails.getUsername();
@@ -139,6 +154,6 @@ public class TodoCategoryController {
 
         List<TodoCategoryListItemDTO> data = todoCategoryService.getCategory(userId);
 
-        return ResponseEntity.ok(Response.success("", data));
+        return ResponseEntity.ok(Response.success("카테고리 목록 조회 성공", data));
     }
 }

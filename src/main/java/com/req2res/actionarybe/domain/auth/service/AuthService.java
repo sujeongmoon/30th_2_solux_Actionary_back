@@ -1,5 +1,7 @@
 package com.req2res.actionarybe.domain.auth.service;
 
+import com.req2res.actionarybe.domain.auth.dto.LoginRequestDTO;
+import com.req2res.actionarybe.domain.auth.dto.LoginResponseDTO;
 import com.req2res.actionarybe.domain.auth.dto.SignupRequestDTO;
 import com.req2res.actionarybe.domain.auth.dto.SignupResponseDTO;
 import com.req2res.actionarybe.domain.member.entity.Badge;
@@ -8,26 +10,63 @@ import com.req2res.actionarybe.domain.member.repository.BadgeRepository;
 import com.req2res.actionarybe.domain.member.repository.MemberRepository;
 import com.req2res.actionarybe.global.exception.CustomException;
 import com.req2res.actionarybe.global.exception.ErrorCode;
+import com.req2res.actionarybe.global.security.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.UUID;
 
-
 @Service
 @RequiredArgsConstructor
-public class SignupService {
-
+public class AuthService {
     private final MemberRepository memberRepository;
+    private final AuthenticationManager authManager;
+    private final JwtTokenProvider tokenProvider;
     private final BadgeRepository badgeRepository;
     private final PasswordEncoder passwordEncoder;
 
+    // 회원 탈퇴
+    public void withdrawMember(Long id){
+        if(!memberRepository.existsById(id)){
+            throw new CustomException(ErrorCode.MEMBER_NOT_FOUND);
+        }
+        memberRepository.deleteById(id);
+    }
+
+    // 로그인
+    public LoginResponseDTO login(LoginRequestDTO req) {
+
+        authManager.authenticate(
+                new UsernamePasswordAuthenticationToken(req.getLoginId(), req.getPassword())
+        );
+
+        // 1. 로그인 인증 후, DB에서 member 정보 조회
+        Member member = memberRepository.findByLoginId(req.getLoginId())
+                .orElseThrow(() -> new CustomException(ErrorCode.BAD_CREDENTIALS));
+
+        // 2. JWT 생성 시 memberId와 loginId 모두 포함
+        String accessToken = tokenProvider.createToken(member.getId(), member.getLoginId());
+        String refreshToken = tokenProvider.createRefreshToken(member.getLoginId());
+
+
+        return new LoginResponseDTO(
+                member.getId(),
+                member.getNickname(),
+                member.getImageUrl(),
+                accessToken,
+                refreshToken
+        );
+    }
+
+    // 회원가입
     public SignupResponseDTO signup(SignupRequestDTO req) {
         // id = 1 → 0P 기본 뱃지
         Badge defaultBadge = badgeRepository.findById(1L)
-                .orElseThrow(() -> new IllegalStateException("기본 뱃지(0P) 없음"));
+                .orElseThrow(() -> new CustomException(ErrorCode.BADGE_NOT_FOUND));
 
 
         // 1. 중복 검사

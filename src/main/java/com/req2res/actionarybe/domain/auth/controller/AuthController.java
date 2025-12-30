@@ -1,8 +1,6 @@
 package com.req2res.actionarybe.domain.auth.controller;
 
-import com.req2res.actionarybe.domain.auth.service.DeleteService;
-import com.req2res.actionarybe.domain.auth.service.LoginService;
-import com.req2res.actionarybe.domain.auth.service.SignupService;
+import com.req2res.actionarybe.domain.auth.service.AuthService;
 import com.req2res.actionarybe.global.Response;
 import com.req2res.actionarybe.domain.auth.dto.*;
 import com.req2res.actionarybe.global.security.CustomUserDetails;
@@ -10,7 +8,6 @@ import com.req2res.actionarybe.global.security.JwtTokenProvider;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.*;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,29 +17,31 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
 
     private final JwtTokenProvider tokenProvider;
-    private final SignupService signupService;
-    private final LoginService loginService;
-    private final DeleteService deleteService;
+    private final AuthService authService;
 
+    // 회원가입
     @PostMapping("/signup")
     public ResponseEntity<Response<SignupResponseDTO>> signup(@Valid @RequestBody SignupRequestDTO req){
-        SignupResponseDTO result = signupService.signup(req);
+        SignupResponseDTO result = authService.signup(req);
         return ResponseEntity.ok(Response.success("회원가입에 성공하였습니다.", result));
     }
 
+    // 로그인
     @PostMapping("/login")
     public ResponseEntity<Response<LoginResponseDTO>> login(@Valid @RequestBody LoginRequestDTO req) {
-        LoginResponseDTO result = loginService.login(req);
+        LoginResponseDTO result = authService.login(req);
         return ResponseEntity.ok(Response.success("로그인에 성공하였습니다.", result));
     }
 
+    // 회원 탈퇴
     @DeleteMapping("/withdraw")
     public ResponseEntity<Response<Void>> withdraw(@AuthenticationPrincipal CustomUserDetails userDetails){
         Long id = userDetails.getId();
-        deleteService.withdrawMember(id);
+        authService.withdrawMember(id);
         return ResponseEntity.ok(Response.success("회원 탈퇴에 성공하였습니다.",null));
     }
 
+    // 로그인 유지 (refreshToken 활용)
     @PostMapping("/refresh")
     public ResponseEntity<Response<RefreshTokenResponseDTO>> refreshAccessToken(
             @RequestBody @Valid RefreshTokenRequestDTO request
