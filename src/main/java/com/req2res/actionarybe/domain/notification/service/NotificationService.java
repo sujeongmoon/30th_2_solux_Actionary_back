@@ -8,6 +8,7 @@ import com.req2res.actionarybe.domain.notification.dto.NotificationGetResponseDT
 import com.req2res.actionarybe.domain.notification.entity.Notification;
 import com.req2res.actionarybe.domain.notification.entity.NotificationType;
 import com.req2res.actionarybe.domain.notification.repository.NotificationRepository;
+import com.req2res.actionarybe.domain.point.entity.PointSource;
 import com.req2res.actionarybe.global.exception.CustomException;
 import com.req2res.actionarybe.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -63,7 +64,14 @@ public class NotificationService {
 
     // 1-3. 포인트 적립 시
     @Transactional
-    public void notifyPoint(Long userId, int point, String reason) {
+    public void notifyPoint(Long userId, int point, PointSource source) {
+
+        String reason = switch (source) {
+            case STUDY_TIME -> "공부시간";
+            case STUDY_PARTICIPATION -> "스터디 참여";
+            case TODO_COMPLETION -> "투두 완료";
+        };
+
         NotificationCreateRequestDTO req = NotificationCreateRequestDTO.of(
                 userId,
                 NotificationType.POINT,

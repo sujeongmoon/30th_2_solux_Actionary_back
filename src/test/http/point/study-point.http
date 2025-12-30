@@ -1,0 +1,36 @@
+@host = http://localhost:8080
+
+### 1) 공부시간 포인트 적립 성공
+POST {{host}}/api/points/study-time
+Content-Type: application/json
+Authorization: Bearer
+
+{
+  "studyHours": 10
+}
+
+### 2) 400 Bad Request - studyHours 누락
+POST {{host}}/api/points/study-time
+Content-Type: application/json
+Authorization: Bearer {{access_token}}
+
+{
+}
+
+### 3) 400 Bad Request - studyHours가 0 이하
+POST {{host}}/api/points/study-time
+Content-Type: application/json
+Authorization: Bearer {{access_token}}
+
+{
+  "studyHours": 0
+}
+
+### 4) 409 Conflict - 오늘 이미 적립한 경우 (같은 토큰으로 1번 성공 후 다시 호출)
+POST {{host}}/api/points/study-time
+Content-Type: application/json
+Authorization: Bearer {{access_token}}
+
+{
+  "studyHours": 2
+}
