@@ -34,7 +34,7 @@ public class MemberService {
                 .orElseThrow(()->new IllegalArgumentException("해당 회원이 없습니다."));
         return new LoginMemberResponseDTO(
                 member.getId(),
-                member.getImageUrl(),
+                member.getProfileImageUrl(),
                 member.getNickname(),
                 member.getPhoneNumber(),
                 member.getBirthday()
@@ -47,10 +47,10 @@ public class MemberService {
         Member member=memberRepository.findById(id)
                 .orElseThrow(()->new CustomException(ErrorCode.MEMBER_NOT_FOUND));
 
-        member.setImageUrl(imageUrl);
+        member.setProfileImageUrl(imageUrl);
 
         return new UpdateProfileRequestDTO(
-                member.getImageUrl() // @Transactional: '메서드' 단위 -> 위에서 set한 현재값 바로 반영됨 (이전값 반영 걱정X)
+                member.getProfileImageUrl() // @Transactional: '메서드' 단위 -> 위에서 set한 현재값 바로 반영됨 (이전값 반영 걱정X)
         );
     }
 

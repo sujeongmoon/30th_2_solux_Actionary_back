@@ -56,7 +56,7 @@ public class AuthService {
         return new LoginResponseDTO(
                 member.getId(),
                 member.getNickname(),
-                member.getImageUrl(),
+                member.getProfileImageUrl(),
                 accessToken,
                 refreshToken
         );

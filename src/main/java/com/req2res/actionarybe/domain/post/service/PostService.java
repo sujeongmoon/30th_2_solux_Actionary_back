@@ -59,6 +59,36 @@ public class PostService {
         );
     }
 
+    public GetPostResponseDTO getPost(Long post_id) {
+        Post post=postRepository.findById(post_id)
+                .orElseThrow(()->new CustomException(ErrorCode.POST_NOT_FOUND));
+
+        PostInfoDTO postInfo = new PostInfoDTO(
+                post.getId(),
+                post.getType().toString(),
+                post.getTitle(),
+                post.getText(),
+                post.getCommentsCount(),
+                post.getCreatedAt()
+        );
+
+        PostAuthorDTO postAuthor = new PostAuthorDTO(
+                post.getMember().getId(),
+                post.getMember().getNickname(),
+                post.getMember().getProfileImageUrl(),
+                post.getMember().getBadge().getId()
+        );
+
+        List<String> images=post.getImages().stream()
+                .map(postImage->postImage.getImageUrl()).toList();
+
+        return new GetPostResponseDTO(
+                postInfo,
+                images,
+                postAuthor
+        );
+    }
+
     // 최신 / 인기 게시글 공용
     public SortedResponseDTO getSortedPosts(Post.Type type, Pageable pageable) {
 

@@ -39,7 +39,7 @@ public class Member extends Timestamped {
     @Column(nullable=false, length=20)
     private String phoneNumber;
 
-    private String imageUrl;
+    private String profileImageUrl;
 
 //    @CreatedDate @Column(updatable = false)
 //    private LocalDateTime createdAt;
@@ -53,15 +53,15 @@ public class Member extends Timestamped {
 
     @Builder
     public Member(String loginId, String password, String name, String email,
-                String phoneNumber, LocalDate birthday, String imageUrl, String nickname, Badge badge) {
+                  String phoneNumber, LocalDate birthday, String profileImageUrl, String nickname, Badge badge) {
         this.loginId = loginId;
         this.password = password;
         this.name = name;
         this.email = email;
         this.phoneNumber = phoneNumber;
         this.birthday = birthday;
-        this.imageUrl = (imageUrl == null || imageUrl.isBlank())
-                ? "http://.../default_profile.png" : imageUrl;
+        this.profileImageUrl = (profileImageUrl == null || profileImageUrl.isBlank())
+                ? "http://.../default_profile.png" : profileImageUrl;
         this.nickname = (nickname == null || nickname.isBlank())
                 ? generateDefaultNickname() : nickname;
         this.badge = badge;
@@ -72,8 +72,8 @@ public class Member extends Timestamped {
         return "user" + System.currentTimeMillis();
     }
 
-    public void setImageUrl(String imageUrl) {
-        this.imageUrl = imageUrl;
+    public void setProfileImageUrl(String imageUrl) {
+        this.profileImageUrl = imageUrl;
     }
 
     public void setNickname(String nickname) {
