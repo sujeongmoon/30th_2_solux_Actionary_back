@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class CreatePostRequestDTO {
 
-    @Schema(example = "108")
+    @Schema(example = "1")
     private Long userId;
 
     @Schema(example = "인증")

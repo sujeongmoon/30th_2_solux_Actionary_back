@@ -1,9 +1,6 @@
 package com.req2res.actionarybe.domain.post.controller;
 
-import com.req2res.actionarybe.domain.post.dto.CreatePostRequestDTO;
-import com.req2res.actionarybe.domain.post.dto.CreatePostResponseDTO;
-import com.req2res.actionarybe.domain.post.dto.GetPostResponseDTO;
-import com.req2res.actionarybe.domain.post.dto.SortedResponseDTO;
+import com.req2res.actionarybe.domain.post.dto.*;
 import com.req2res.actionarybe.domain.post.entity.Post;
 import com.req2res.actionarybe.domain.post.service.PostService;
 import com.req2res.actionarybe.global.Response;
@@ -34,13 +31,32 @@ public class PostController {
         return ResponseEntity.ok(Response.success("게시글 생성 성공",result));
     }
 
-    // post_id에 따른 게시글 조회
+    // 게시글 조회 (post_id에 따른)
     @GetMapping("/{post_id}")
     public ResponseEntity<Response<GetPostResponseDTO>> getPostById(
             @RequestParam Long post_id
     ){
         GetPostResponseDTO result = postService.getPost(post_id);
-        return ResponseEntity.ok(Response.success("post_id에 따른 게시글 조회 성공",result));
+        return ResponseEntity.ok(Response.success("post_id에 따른 게시글 조회 성공", result));
+    }
+
+    // 게시글 수정
+    @PatchMapping("/{post_id}")
+    public ResponseEntity<Response<UpdatePostResponseDTO>> updatePost(
+            @RequestParam Long postId,
+            @Valid@RequestBody UpdatePostRequestDTO request
+    ){
+        UpdatePostResponseDTO result = postService.updatePost(postId, request);
+        return ResponseEntity.ok(Response.success("게시글 수정 성공", result));
+    }
+
+    // 게시글 삭제
+    @DeleteMapping("/{post_id}")
+    public ResponseEntity<Response<DeletePostResponseDTO>> deletePost(
+        @RequestParam Long post_id
+    ){
+        DeletePostResponseDTO result = postService.deletePost(post_id);
+        return ResponseEntity.ok(Response.success("게시글 삭제 성공", result));
     }
 
     // 최신순 정렬된 게시글 조회

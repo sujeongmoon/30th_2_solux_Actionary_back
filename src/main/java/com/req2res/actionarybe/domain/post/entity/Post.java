@@ -63,4 +63,19 @@ public class Post extends Timestamped {
         구인,
         정보
     }
+
+    public void setType(Type type) {
+        this.type = type;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public void setText(String text) {
+        this.text = text;
+    }
+
+
+
 }

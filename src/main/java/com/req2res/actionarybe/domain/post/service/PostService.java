@@ -59,6 +59,7 @@ public class PostService {
         );
     }
 
+    // 게시글 조회 (post_id에 따른)
     public GetPostResponseDTO getPost(Long post_id) {
         Post post=postRepository.findById(post_id)
                 .orElseThrow(()->new CustomException(ErrorCode.POST_NOT_FOUND));
@@ -87,6 +88,36 @@ public class PostService {
                 images,
                 postAuthor
         );
+    }
+
+    // 게시글 수정
+    @Transactional
+    public UpdatePostResponseDTO updatePost(Long post_id, UpdatePostRequestDTO request) {
+        Post post=postRepository.findById(post_id)
+                .orElseThrow(()->new CustomException(ErrorCode.POST_NOT_FOUND));
+
+        if(request.getType()!=null)
+            post.setType(Post.Type.valueOf(request.getType())); // request의 type는 String이라, Post의 Type 자료형인 Post.Type(Enum) 타입 변환 필요
+        if(request.getTitle()!=null)
+            post.setTitle(request.getTitle());
+        if(request.getText()!=null)
+            post.setText(request.getText());
+        if(request.getImageUrls()!=null);
+            // 마저 짜기
+
+
+
+        return new UpdatePostResponseDTO(
+                post.getId(),
+                post.getTitle()
+        );
+    }
+
+    // 게시글 삭제
+    @Transactional
+    public DeletePostResponseDTO deletePost(Long post_id) {
+        postRepository.deleteById(post_id);
+        return new DeletePostResponseDTO(post_id);
     }
 
     // 최신 / 인기 게시글 공용
