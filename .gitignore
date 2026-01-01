@@ -41,3 +41,6 @@ out/
 
 ###.DS_Store###
 .DS_Store
+
+# 업로드 파일 제외
+/uploads/

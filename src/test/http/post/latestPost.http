@@ -1,0 +1,6 @@
+@access_token=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJqYWVoeXVuOTkiLCJpYXQiOjE3NjcwNzQ3NjAsImV4cCI6MTc2NzA3ODM2MH0.C51IbMm7nVhGz2Xv_0GYp-Lj-NOnGxObC6RectgVdk8
+
+### 최신 게시글 가져오기
+GET http://localhost:8080/api/posts.latest?page=0
+Authorization: Bearer {{access_token}}
+

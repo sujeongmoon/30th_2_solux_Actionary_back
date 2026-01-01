@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
 import jakarta.validation.ConstraintViolationException;
+import org.hibernate.boot.model.naming.IllegalIdentifierException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -88,13 +89,6 @@ public class GlobalExceptionHandler {
     protected ResponseEntity<Response<?>> handleExpiredToken(ExpiredJwtException ex) {
         ex.printStackTrace();
         ErrorCode errorCode = ErrorCode.EXPIRED_TOKEN;
-        return new ResponseEntity<>(Response.fail(errorCode.getMessage()), errorCode.getStatus());
-    }
-
-    @ExceptionHandler(JwtException.class)
-    protected ResponseEntity<Response<?>> handleInvalidToken(JwtException ex) {
-        ex.printStackTrace();
-        ErrorCode errorCode = ErrorCode.INVALID_TOKEN;
         return new ResponseEntity<>(Response.fail(errorCode.getMessage()), errorCode.getStatus());
     }
 

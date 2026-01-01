@@ -3,6 +3,7 @@ package com.req2res.actionarybe.domain.member.entity;
 import com.req2res.actionarybe.global.Timestamped;
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDate;
 
@@ -11,7 +12,7 @@ import java.time.LocalDate;
 @Table(name = "member",
         indexes = { @Index(name="idx_member_login_id", columnList="loginId", unique = true),
                 @Index(name="idx_member_email", columnList="email", unique = true) })
-//@EntityListeners(AuditingEntityListener.class)
+@EntityListeners(AuditingEntityListener.class)
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Member extends Timestamped {
@@ -48,12 +49,13 @@ public class Member extends Timestamped {
 //    @LastModifiedDate
 //    private LocalDateTime updatedAt;
 
-    // 나중에 BadgeId FK 연결하기
-    private Long badgeId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "badge_id", nullable = false) // FK 컬럼명 (DB에는 badge_id로 연결됨)
+    private Badge badge; // member.getBadge().getId() (O) / member.getBadgeId() (X)
 
     @Builder
     public Member(String loginId, String password, String name, String email,
-                String phoneNumber, LocalDate birthday, String imageUrl, String nickname, Long badgeId) {
+                String phoneNumber, LocalDate birthday, String imageUrl, String nickname, Badge badge) {
         this.loginId = loginId;
         this.password = password;
         this.name = name;
@@ -64,11 +66,22 @@ public class Member extends Timestamped {
                 ? "http://.../default_profile.png" : imageUrl;
         this.nickname = (nickname == null || nickname.isBlank())
                 ? generateDefaultNickname() : nickname;
-        this.badgeId=badgeId==null?0:badgeId;
+        this.badge = badge;
         // createdAt, updatedAt은 Timestamped에서 자동으로 위에 필드 변수에 넣어줄거라, 외부에서 주입받을 필요X
     }
 
     private String generateDefaultNickname() {
         return "user" + System.currentTimeMillis();
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
+    }
+    public void setNickname(String nickname) {
+        this.nickname=nickname;
+    }
+
+    public void setBadge(Badge badge) {
+        this.badge = badge;
     }
 }
