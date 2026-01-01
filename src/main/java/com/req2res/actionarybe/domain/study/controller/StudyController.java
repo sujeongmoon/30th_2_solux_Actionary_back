@@ -236,9 +236,9 @@ public class StudyController {
 		@RequestParam(required = false) Category category,
 
 		@Parameter(description = "페이지", example = "0")
-		@RequestParam(defaultValue = "0") int pageNumber
+		@RequestParam(defaultValue = "0") int page
 	) {
-		StudyListResponseDto response = studyService.getStudyList(visibility, category, pageNumber);
+		StudyListResponseDto response = studyService.getStudyList(visibility, category, page);
 		return Response.success("스터디 리스트를 조회했습니다.", response);
 	}
 

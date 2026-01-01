@@ -131,6 +131,6 @@ Content-Type: application/json
 
 
 ### 비공개 스터디 목록조회 (카테고리 - TEACHER_EXAM)
-GET http://localhost:8080/api/studies?visibility=private&category=TEACHER_EXAM&page=0
+GET http://localhost:8080/api/studies?visibility=private&category=TEACHER_EXAM&page=1
 Authorization: {{accessToken}}
 Content-Type: application/json
