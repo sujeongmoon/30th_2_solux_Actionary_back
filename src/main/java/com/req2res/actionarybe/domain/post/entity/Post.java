@@ -49,17 +49,6 @@ public class Post extends Timestamped {
         images.add(image);
     }
 
-
-    // Comment 정보도 객체로 다룰 수 있게 해줌 (Comment만 Post 존재 아는건 비효율적이니)
-    @OneToMany(
-            mappedBy = "post",
-            cascade = CascadeType.PERSIST,
-            orphanRemoval = true
-    )
-    private List<Comment> comments = new ArrayList<>();
-    public void addComment(Comment comment) {comments.add(comment);}
-
-
     public Post(Member member, Type type, String title, String text) {
         this.member = member;
         this.type = type;
@@ -86,10 +75,6 @@ public class Post extends Timestamped {
 
     public void setText(String text) {
         this.text = text;
-    }
-
-    public void increaseCommentsCount() {
-        this.commentsCount++;
     }
 
 }
