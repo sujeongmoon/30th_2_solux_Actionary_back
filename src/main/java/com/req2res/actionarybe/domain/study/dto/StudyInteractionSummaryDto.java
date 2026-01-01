@@ -6,7 +6,7 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public class HitStudySummaryDto {
+public class StudyInteractionSummaryDto {
 	@Schema(description = "스터디 id", example = "1")
 	private Long studyId;
 

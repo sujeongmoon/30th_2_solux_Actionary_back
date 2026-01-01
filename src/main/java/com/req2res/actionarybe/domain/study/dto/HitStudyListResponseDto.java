@@ -29,7 +29,7 @@ public class HitStudyListResponseDto {
 		+ "\t\t\t  \"memberNow\" : \"5\"\n"
 		+ "\t\t\t}\t  \n"
 		+ "\t  ]")
-	private List<HitStudySummaryDto> content;
+	private List<StudyInteractionSummaryDto> content;
 
 	@Schema(description = "현재 페이지", example = "0")
 	private int page;

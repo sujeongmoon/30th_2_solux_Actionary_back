@@ -15,9 +15,9 @@ import org.springframework.stereotype.Service;
 
 import com.req2res.actionarybe.domain.member.entity.Member;
 import com.req2res.actionarybe.domain.study.dto.HitStudyListResponseDto;
-import com.req2res.actionarybe.domain.study.dto.HitStudySummaryDto;
 import com.req2res.actionarybe.domain.study.dto.RankingBoardDto;
 import com.req2res.actionarybe.domain.study.dto.RankingDurationDto;
+import com.req2res.actionarybe.domain.study.dto.StudyInteractionSummaryDto;
 import com.req2res.actionarybe.domain.study.dto.StudyLikeResponseDto;
 import com.req2res.actionarybe.domain.study.dto.StudyRankingBoardListResponseDto;
 import com.req2res.actionarybe.domain.study.entity.Study;
@@ -105,7 +105,7 @@ public class StudyInteractionService {
 
 		Pageable pageable = PageRequest.of(pageNumber, 3);
 
-		Page<HitStudySummaryDto> page = studyRepository.findHitStudies(pageable);
+		Page<StudyInteractionSummaryDto> page = studyRepository.findHitStudies(pageable);
 
 		return HitStudyListResponseDto.builder()
 			.content(page.getContent())
