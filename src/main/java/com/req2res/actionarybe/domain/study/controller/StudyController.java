@@ -16,6 +16,7 @@ import com.req2res.actionarybe.domain.member.entity.Member;
 import com.req2res.actionarybe.domain.member.service.MemberService;
 import com.req2res.actionarybe.domain.study.dto.HitStudyListResponseDto;
 import com.req2res.actionarybe.domain.study.dto.StudyDetailResponseDto;
+import com.req2res.actionarybe.domain.study.dto.StudyLikeResponseDto;
 import com.req2res.actionarybe.domain.study.dto.StudyListResponseDto;
 import com.req2res.actionarybe.domain.study.dto.StudyRankingBoardListResponseDto;
 import com.req2res.actionarybe.domain.study.dto.StudyRequestDto;
@@ -50,16 +51,6 @@ public class StudyController {
 				{
 					"code": 200,
 					"message": "스터디가 생성되었습니다."
-				}
-				"""))
-		),
-		@ApiResponse(
-			responseCode = "404",
-			description = "북마크 링크가 비어있는 경우",
-			content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
-				{
-					"code": 404,
-					"message": "북마크 링크는 비어있을 수 없습니다."
 				}
 				"""))
 		)
@@ -297,6 +288,41 @@ public class StudyController {
 	) {
 		HitStudyListResponseDto response = studyService.getHitStudyList(page);
 		return Response.success("인기 스터디 목록을 조회했습니다.", response);
+	}
+
+	@Operation(summary = "스터디 즐겨찾기 성공/취소 API", description = "스터디 상세 조회에서의 즐겨찾기/취소 기능입니다.")
+	@ApiResponses(value = {
+		@ApiResponse(
+			responseCode = "200",
+			description = "스터디가 즐겨찾기 성공/취소 완료",
+			content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
+				{
+					"code": 200,
+					"message": "해당 스터디가 즐겨찾기 성공/취소 되었습니다."
+				}
+				"""))
+		),
+		@ApiResponse(
+			responseCode = "404",
+			description = "즐겨찾기 성공/취소 하고자 하는 스터디가 없는 경우",
+			content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
+				{
+					"code": 404,
+					"message": "존재하지 않는 스터디입니다."
+				}
+				"""))
+		)
+	})
+	@PostMapping("/{studyId}/likes")
+	public Response<StudyLikeResponseDto> createStudyLike(
+		// TODO: 추후 pull 후 getMemberIdFromToken으로 memberId 불러온 뒤 전달할 수 있도록 수정
+		@AuthenticationPrincipal UserDetails userDetails,
+		@Parameter(name = "studyId", description = "즐겨찾기 성공/취소할 스터디의 ID", example = "1")
+		@PathVariable Long studyId
+	) {
+		Member member = memberService.findMemberByLoginId(userDetails.getUsername());
+		StudyLikeResponseDto response = studyService.createStudyLike(member, studyId);
+		return Response.success("해당 스터디가 즐겨찾기 성공/취소 되었습니다.", response);
 	}
 
 }

@@ -102,35 +102,29 @@ Content-Type: application/json
 
 ### 스터디 상세조회
 GET http://localhost:8080/api/studies/4
-Authorization: {{accessToken}}
 Content-Type: application/json
 
 
 ### 스터디 상세조회(존재하지 않는 스터디 - 404 실패)
 GET http://localhost:8080/api/studies/999999999999
-Authorization: {{accessToken}}
 Content-Type: application/json
 
 
 ### 공개 스터디 목록조회 (카테고리x)
 GET http://localhost:8080/api/studies?visibility=public&page=0
-Authorization: {{accessToken}}
 Content-Type: application/json
 
 
 ### 공개 스터디 목록조회 (카테고리 - TEACHER_EXAM)
 GET http://localhost:8080/api/studies?visibility=public&category=TEACHER_EXAM&page=0
-Authorization: {{accessToken}}
 Content-Type: application/json
 
 
 ### 비공개 스터디 목록조회 (카테고리x)
 GET http://localhost:8080/api/studies?visibility=private&page=0
-Authorization: {{accessToken}}
 Content-Type: application/json
 
 
 ### 비공개 스터디 목록조회 (카테고리 - TEACHER_EXAM)
 GET http://localhost:8080/api/studies?visibility=private&category=TEACHER_EXAM&page=1
-Authorization: {{accessToken}}
 Content-Type: application/json

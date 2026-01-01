@@ -23,6 +23,7 @@ import com.req2res.actionarybe.domain.study.dto.HitStudySummaryDto;
 import com.req2res.actionarybe.domain.study.dto.RankingBoardDto;
 import com.req2res.actionarybe.domain.study.dto.RankingDurationDto;
 import com.req2res.actionarybe.domain.study.dto.StudyDetailResponseDto;
+import com.req2res.actionarybe.domain.study.dto.StudyLikeResponseDto;
 import com.req2res.actionarybe.domain.study.dto.StudyListResponseDto;
 import com.req2res.actionarybe.domain.study.dto.StudyRankingBoardListResponseDto;
 import com.req2res.actionarybe.domain.study.dto.StudyRequestDto;
@@ -30,6 +31,7 @@ import com.req2res.actionarybe.domain.study.dto.StudyResponseDto;
 import com.req2res.actionarybe.domain.study.dto.StudySummaryDto;
 import com.req2res.actionarybe.domain.study.entity.Category;
 import com.req2res.actionarybe.domain.study.entity.Study;
+import com.req2res.actionarybe.domain.study.entity.StudyLike;
 import com.req2res.actionarybe.domain.study.repository.StudyLikeRepository;
 import com.req2res.actionarybe.domain.study.repository.StudyParticipantRepository;
 import com.req2res.actionarybe.domain.study.repository.StudyRepository;
@@ -230,6 +232,30 @@ public class StudyService {
 			.size(page.getSize())
 			.totalElements(page.getTotalElements())
 			.totalPages(page.getTotalPages())
+			.build();
+	}
+
+	public StudyLikeResponseDto createStudyLike(Member member, Long studyId) {
+
+		Study study = studyRepository.findById(studyId).
+			orElseThrow(() -> new CustomException(ErrorCode.STUDY_NOT_FIND));
+
+		boolean isLiked = !studyLikeRepository.existsByStudyAndMember(study, member);
+
+		if (isLiked) {
+			StudyLike studyLike = StudyLike.builder()
+				.study(study)
+				.member(member)
+				.build();
+			studyLikeRepository.save(studyLike);
+		} else {
+			StudyLike studyLike = studyLikeRepository.findByStudyAndMember(study, member);
+			studyLikeRepository.delete(studyLike);
+		}
+
+		return StudyLikeResponseDto.builder()
+			.studyId(studyId)
+			.isLiked(isLiked)
 			.build();
 	}
 }
