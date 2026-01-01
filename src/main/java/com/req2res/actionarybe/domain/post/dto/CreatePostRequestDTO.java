@@ -1,5 +1,6 @@
 package com.req2res.actionarybe.domain.post.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -11,7 +12,8 @@ import lombok.NoArgsConstructor;
 public class CreatePostRequestDTO {
 
     @Schema(example = "1")
-    private Long userId;
+    @JsonProperty(value = "member_id")
+    private Long membreId;
 
     @Schema(example = "인증")
     @NotBlank
