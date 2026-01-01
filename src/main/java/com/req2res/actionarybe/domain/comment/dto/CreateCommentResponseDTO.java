@@ -8,9 +8,9 @@ import java.time.LocalDateTime;
 @Getter
 @AllArgsConstructor
 public class CreateCommentResponseDTO {
-    private Long content_id;
+    private Long contentId;
     private String content;
-    private Boolean is_secret;
+    private Boolean isSecret;
     private LocalDateTime created_at;
     private AuthorCommentDTO author;
 }

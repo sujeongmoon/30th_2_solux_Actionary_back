@@ -37,6 +37,7 @@ public class Post extends Timestamped {
     @Column(nullable = false)
     private int commentsCount;
 
+
     // PostImage 정보도 객체로 다룰 수 있게 해줌 (PostImage만 Post 존재 아는건 비효율적이니)
     @OneToMany(
             mappedBy = "post",
@@ -44,10 +45,10 @@ public class Post extends Timestamped {
             orphanRemoval = true
     )
     private List<PostImage> images = new ArrayList<>();
-
     public void addImage(PostImage image) {
         images.add(image);
     }
+
 
     // Comment 정보도 객체로 다룰 수 있게 해줌 (Comment만 Post 존재 아는건 비효율적이니)
     @OneToMany(
@@ -58,6 +59,7 @@ public class Post extends Timestamped {
     private List<Comment> comments = new ArrayList<>();
     public void addComment(Comment comment) {comments.add(comment);}
 
+
     public Post(Member member, Type type, String title, String text) {
         this.member = member;
         this.type = type;
@@ -65,7 +67,6 @@ public class Post extends Timestamped {
         this.text = text;
         this.commentsCount = 0;
     }
-
 
     public enum Type {
         인증,

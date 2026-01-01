@@ -80,6 +80,7 @@ public class PostService {
                 post.getMember().getBadge().getId()
         );
 
+        // 서버 꺼졌다가 켜져도, .getImages()하면 SQL 쿼리 날림 (@OneToMany(fetch = FetchType.LAZY이기에)
         List<String> images=post.getImages().stream()
                 .map(postImage->postImage.getImageUrl()).toList();
 
