@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.req2res.actionarybe.domain.member.entity.Member;
 import com.req2res.actionarybe.domain.member.service.MemberService;
+import com.req2res.actionarybe.domain.study.dto.HitStudyListResponseDto;
 import com.req2res.actionarybe.domain.study.dto.StudyDetailResponseDto;
 import com.req2res.actionarybe.domain.study.dto.StudyListResponseDto;
 import com.req2res.actionarybe.domain.study.dto.StudyRankingBoardListResponseDto;
@@ -274,6 +275,28 @@ public class StudyController {
 	) {
 		StudyRankingBoardListResponseDto response = studyService.getRankingBoardStudyList(studyId, type);
 		return Response.success("스터디의 랭킹보드가 조회되었습니다", response);
+	}
+
+	@Operation(summary = "인기 스터디 목록 조회 API", description = "개설돼있는 스터디 중 인기 스터디를 조회하는 기능입니다.")
+	@ApiResponses(value = {
+		@ApiResponse(
+			responseCode = "200",
+			description = "인기 스터디 목록 조회 완료",
+			content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
+				{
+					"code": 200,
+					"message": "인기 스터디 목록을 조회했습니다."
+				}
+				"""))
+		)
+	})
+	@GetMapping("/hit")
+	public Response<HitStudyListResponseDto> getHitStudyList(
+		@Parameter(description = "페이지", example = "0")
+		@RequestParam(defaultValue = "0") int page
+	) {
+		HitStudyListResponseDto response = studyService.getHitStudyList(page);
+		return Response.success("인기 스터디 목록을 조회했습니다.", response);
 	}
 
 }

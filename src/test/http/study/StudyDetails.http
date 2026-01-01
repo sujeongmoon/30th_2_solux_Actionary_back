@@ -45,3 +45,6 @@ GET http://localhost:8080/api/studies/3/rankings?type=today
 
 ### 스터디 랭킹 보드 조회 (전체 순위)
 GET http://localhost:8080/api/studies/3/rankings?type=total
+
+### 인기 스터디 목록 조회
+GET http://localhost:8080/api/studies/hit?page=1

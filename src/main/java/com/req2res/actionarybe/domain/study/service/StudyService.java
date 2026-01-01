@@ -18,6 +18,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.req2res.actionarybe.domain.member.entity.Member;
+import com.req2res.actionarybe.domain.study.dto.HitStudyListResponseDto;
+import com.req2res.actionarybe.domain.study.dto.HitStudySummaryDto;
 import com.req2res.actionarybe.domain.study.dto.RankingBoardDto;
 import com.req2res.actionarybe.domain.study.dto.RankingDurationDto;
 import com.req2res.actionarybe.domain.study.dto.StudyDetailResponseDto;
@@ -213,6 +215,21 @@ public class StudyService {
 			.studyId(studyId)
 			.isToday(isToday)
 			.rankingBoards(rankingBoards)
+			.build();
+	}
+
+	public HitStudyListResponseDto getHitStudyList(int pageNumber) {
+
+		Pageable pageable = PageRequest.of(pageNumber, 3);
+
+		Page<HitStudySummaryDto> page = studyRepository.findHitStudies(pageable);
+
+		return HitStudyListResponseDto.builder()
+			.content(page.getContent())
+			.page(page.getNumber())
+			.size(page.getSize())
+			.totalElements(page.getTotalElements())
+			.totalPages(page.getTotalPages())
 			.build();
 	}
 }
