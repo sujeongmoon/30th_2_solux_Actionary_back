@@ -9,6 +9,9 @@ spring:
   jackson:
     deserialization:
       fail-on-unknown-properties: true
+  sql:
+    init:
+      mode: always
 
   jpa:
     hibernate:
