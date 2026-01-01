@@ -48,17 +48,43 @@ Content-Type: application/json
 GET http://localhost:8080/api/studies/3/rankings?type=total
 Content-Type: application/json
 
+
 ### 인기 스터디 목록 조회
 GET http://localhost:8080/api/studies/hit?page=0
 Content-Type: application/json
+
 
 ### 스터디 즐겨찾기 / 취소
 POST http://localhost:8080/api/studies/1/likes
 Authorization: {{accessToken}}
 Content-Type: application/json
 
+
 ### 스터디 즐겨찾기 / 취소(존재하지 않는 스터디 - 404 실패)
 POST http://localhost:8080/api/studies/9999999/likes
 Authorization: {{accessToken}}
 Content-Type: application/json
 
+
+### 나만의 스터디 목록 조회 (전체) - 최근에 스터디 접속한 순 정렬
+GET http://localhost:8080/api/studies/my?page=0
+Authorization: {{accessToken}}
+Content-Type: application/json
+
+
+### 나만의 스터디 목록 조회 (개설한 스터디) - 최근에 스터디 개설한 순 정렬
+GET http://localhost:8080/api/studies/my?scope=OWNED&page=0
+Authorization: {{accessToken}}
+Content-Type: application/json
+
+
+### 나만의 스터디 목록 조회 (접속한 스터디) - 최근에 스터디 접속한 순 정렬
+GET http://localhost:8080/api/studies/my?scope=JOINED&page=0
+Authorization: {{accessToken}}
+Content-Type: application/json
+
+
+### 나만의 스터디 목록 조회 (즐겨찾기한 스터디) - 최근에 스터디 즐겨찾기한 순 정렬
+GET http://localhost:8080/api/studies/my?scope=LIKED&page=0
+Authorization: {{accessToken}}
+Content-Type: application/json

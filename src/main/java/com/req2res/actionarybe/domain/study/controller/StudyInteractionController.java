@@ -12,8 +12,10 @@ import org.springframework.web.bind.annotation.RestController;
 import com.req2res.actionarybe.domain.member.entity.Member;
 import com.req2res.actionarybe.domain.member.service.MemberService;
 import com.req2res.actionarybe.domain.study.dto.HitStudyListResponseDto;
+import com.req2res.actionarybe.domain.study.dto.MyStudyListResponseDto;
 import com.req2res.actionarybe.domain.study.dto.StudyLikeResponseDto;
 import com.req2res.actionarybe.domain.study.dto.StudyRankingBoardListResponseDto;
+import com.req2res.actionarybe.domain.study.entity.Scope;
 import com.req2res.actionarybe.domain.study.service.StudyInteractionService;
 import com.req2res.actionarybe.global.Response;
 
@@ -122,5 +124,33 @@ public class StudyInteractionController {
 		Member member = memberService.findMemberByLoginId(userDetails.getUsername());
 		StudyLikeResponseDto response = studyInteractionService.createStudyLike(member, studyId);
 		return Response.success("해당 스터디가 즐겨찾기 성공/취소 되었습니다.", response);
+	}
+
+	@Operation(summary = "나만의 스터디 목록 조회 API", description = "개설돼있는 스터디 중 나만의 스터디를 분류에 따라 조회하는 기능입니다.")
+	@ApiResponses(value = {
+		@ApiResponse(
+			responseCode = "200",
+			description = "나만의 스터디 목록 조회 조회 완료",
+			content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
+				{
+					"code": 200,
+					"message": "나만의 스터디 목록 조회을 조회했습니다."
+				}
+				"""))
+		)
+	})
+	@GetMapping("/my")
+	public Response<MyStudyListResponseDto> getMyStudyList(
+		@AuthenticationPrincipal UserDetails userDetails,
+
+		@Parameter(description = "나만의 스터디 범위", example = "ALL")
+		@RequestParam(defaultValue = "ALL") Scope scope,
+
+		@Parameter(description = "페이지", example = "0")
+		@RequestParam(defaultValue = "0") int page
+	) {
+		Member member = memberService.findMemberByLoginId(userDetails.getUsername());
+		MyStudyListResponseDto response = studyInteractionService.getMyStudyList(member, scope, page);
+		return Response.success("나만의 스터디 목록 조회을 조회했습니다.", response);
 	}
 }

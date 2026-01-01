@@ -15,11 +15,13 @@ import org.springframework.stereotype.Service;
 
 import com.req2res.actionarybe.domain.member.entity.Member;
 import com.req2res.actionarybe.domain.study.dto.HitStudyListResponseDto;
+import com.req2res.actionarybe.domain.study.dto.MyStudyListResponseDto;
 import com.req2res.actionarybe.domain.study.dto.RankingBoardDto;
 import com.req2res.actionarybe.domain.study.dto.RankingDurationDto;
 import com.req2res.actionarybe.domain.study.dto.StudyInteractionSummaryDto;
 import com.req2res.actionarybe.domain.study.dto.StudyLikeResponseDto;
 import com.req2res.actionarybe.domain.study.dto.StudyRankingBoardListResponseDto;
+import com.req2res.actionarybe.domain.study.entity.Scope;
 import com.req2res.actionarybe.domain.study.entity.Study;
 import com.req2res.actionarybe.domain.study.entity.StudyLike;
 import com.req2res.actionarybe.domain.study.repository.StudyLikeRepository;
@@ -137,6 +139,32 @@ public class StudyInteractionService {
 		return StudyLikeResponseDto.builder()
 			.studyId(studyId)
 			.isLiked(isLiked)
+			.build();
+	}
+
+	public MyStudyListResponseDto getMyStudyList(Member member, Scope scope, int pageNumber) {
+
+		Pageable pageable = PageRequest.of(pageNumber, 3);
+		Page<StudyInteractionSummaryDto> page = null;
+
+		if (scope.equals(Scope.ALL)) {
+			page = studyRepository.findMyAllStudies(member, pageable);
+		} else if (scope.equals(Scope.OWNED)) {
+			page = studyRepository.findMyOwnedStudies(member, pageable);
+		} else if (scope.equals(Scope.JOINED)) {
+			page = studyRepository.findMyJoinedStudies(member, pageable);
+		} else if (scope.equals(Scope.LIKED)) {
+			page = studyRepository.findMyLikedStudies(member, pageable);
+		}
+
+		return MyStudyListResponseDto.builder()
+			.scope(scope)
+			.scopeLabel(scope.getLabel())
+			.content(page.getContent())
+			.page(page.getNumber())
+			.size(page.getSize())
+			.totalElements(page.getTotalElements())
+			.totalPages(page.getTotalPages())
 			.build();
 	}
 }
