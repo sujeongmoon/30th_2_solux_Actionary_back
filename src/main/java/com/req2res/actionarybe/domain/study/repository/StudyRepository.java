@@ -26,7 +26,7 @@ public interface StudyRepository extends JpaRepository<Study, Long> {
 		from Study s
 		left join StudyParticipant sp
 		  on sp.study = s
-		 and sp.updatedAt is null
+		 and sp.isActive = true
 		group by s.id, s.name, s.coverImage, s.description
 		order by count(sp) desc
 		""")

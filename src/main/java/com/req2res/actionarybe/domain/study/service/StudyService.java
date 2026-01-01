@@ -82,7 +82,7 @@ public class StudyService {
 			throw new CustomException(ErrorCode.STUDY_NOT_MATCH_MEMBER);
 		}
 
-		if (studyParticipantRepository.countByStudyAndUpdatedAtIsNull(study) != 0) {
+		if (studyParticipantRepository.countByStudyAndIsActiveTrue(study) != 0) {
 			throw new CustomException(ErrorCode.STUDY_NOT_MATCH_MEMBER);
 		}
 
@@ -113,7 +113,7 @@ public class StudyService {
 			.category(study.getCategory())
 			.categoryLabel(study.getCategory().getLabel())
 			.description(study.getDescription())
-			.memberNow(studyParticipantRepository.countByStudyAndUpdatedAtIsNull(study))
+			.memberNow(studyParticipantRepository.countByStudyAndIsActiveTrue(study))
 			.memberLimit(study.getMemberLimit())
 			.isPublic(study.getIsPublic())
 			.isStudyLike(studyLikeRepository.existsByStudyAndMember(study, member))

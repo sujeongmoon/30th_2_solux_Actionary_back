@@ -12,7 +12,7 @@ import com.req2res.actionarybe.domain.study.entity.StudyParticipant;
 
 public interface StudyParticipantRepository extends JpaRepository<StudyParticipant, Long> {
 
-	int countByStudyAndUpdatedAtIsNull(Study study);
+	int countByStudyAndIsActiveTrue(Study study);
 
 	@Query("""
 		    select new com.req2res.actionarybe.domain.study.dto.RankingDurationDto(
