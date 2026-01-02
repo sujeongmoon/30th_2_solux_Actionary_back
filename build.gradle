@@ -43,9 +43,12 @@ dependencies {
 //    openapi(Swagger)
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.14'
 
+//    webclinet
+    implementation 'org.springframework.boot:spring-boot-starter-webflux'
 
-    runtimeOnly   'io.jsonwebtoken:jjwt-impl:0.11.5'
-    runtimeOnly   'io.jsonwebtoken:jjwt-jackson:0.11.5'
+
+    runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5'
+    runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5'
 
 }
 

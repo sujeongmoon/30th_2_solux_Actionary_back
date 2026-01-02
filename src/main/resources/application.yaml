@@ -28,3 +28,6 @@ spring:
     secret: "my-super-long-secret-key"
     access-token-expiration-ms: 3600000  # 1시간
 
+janus:
+  base-url: http://localhost:8088/janus
+

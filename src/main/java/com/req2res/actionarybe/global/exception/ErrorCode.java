@@ -27,6 +27,7 @@ public enum ErrorCode {
 	STUDY_NOT_FIND(HttpStatus.NOT_FOUND, "존재하지 않는 스터디입니다."),
 	STUDY_NOT_MATCH_MEMBER(HttpStatus.FORBIDDEN, "사용자가 방장인 스터디가 아닙니다."),
 	STUDY_HAVE_USER(HttpStatus.CONFLICT, "스터디에 참여 중인 사용자가 있습니다."),
+	STUDY_CREATE_ERROR(HttpStatus.BAD_GATEWAY, "Janus 서버와 통신에 실패했습니다."),
 
 	//to-do
 	TODO_INVALID_TITLE(HttpStatus.BAD_REQUEST, "할 일 제목은 비어 있을 수 없습니다."),
@@ -59,11 +60,10 @@ public enum ErrorCode {
 	EXPIRED_TOKEN(HttpStatus.UNAUTHORIZED, "토큰이 만료되었습니다."),
 	MISSING_TOKEN(HttpStatus.UNAUTHORIZED, "토큰이 존재하지 않습니다."),
 
-    // badge
-    BADGE_NOT_FOUND(HttpStatus.INTERNAL_SERVER_ERROR, "뱃지가 존재하지 않습니다.");
+	// badge
+	BADGE_NOT_FOUND(HttpStatus.INTERNAL_SERVER_ERROR, "뱃지가 존재하지 않습니다.");
 
-
-    private final HttpStatus status;
+	private final HttpStatus status;
 	private final String message;
 
 }
