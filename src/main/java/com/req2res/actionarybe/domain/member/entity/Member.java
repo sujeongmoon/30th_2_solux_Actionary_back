@@ -41,7 +41,7 @@ public class Member extends Timestamped {
     @Column(nullable=false, length=20)
     private String phoneNumber;
 
-    private String imageUrl;
+    private String profileImageUrl;
 
 //    @CreatedDate @Column(updatable = false)
 //    private LocalDateTime createdAt;
@@ -62,7 +62,7 @@ public class Member extends Timestamped {
         this.email = email;
         this.phoneNumber = phoneNumber;
         this.birthday = birthday;
-        this.imageUrl = (imageUrl == null || imageUrl.isBlank())
+        this.profileImageUrl = (imageUrl == null || imageUrl.isBlank())
                 ? "http://.../default_profile.png" : imageUrl;
         this.nickname = (nickname == null || nickname.isBlank())
                 ? generateDefaultNickname() : nickname;
@@ -74,8 +74,8 @@ public class Member extends Timestamped {
         return "user" + System.currentTimeMillis();
     }
 
-    public void setImageUrl(String imageUrl) {
-        this.imageUrl = imageUrl;
+    public void setProfileImageUrl(String profileImageUrl) {
+        this.profileImageUrl = profileImageUrl;
     }
     public void setNickname(String nickname) {
         this.nickname=nickname;
