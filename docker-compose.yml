@@ -11,3 +11,21 @@ services:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
       TZ: "Asia/Seoul"
+
+  janus-gateway:
+    image: "canyan/janus-gateway:latest"
+    container_name: actionary_janus_gateway
+    command: [ "/usr/local/bin/janus", "-F", "/usr/local/etc/janus" ]
+    ports:
+      - "8088:8088"
+      - "8089:8089"
+      - "8889:8889"
+      - "8000:8000"
+      - "7088:7088"
+      - "7089:7089"
+    volumes:
+      - "./janus/janus.jcfg:/usr/local/etc/janus/janus.jcfg"
+      - "./janus/janus.transport.http.jcfg:/usr/local/etc/janus/janus.transport.http.jcfg"
+    environment:
+      JANUS_ADMIN_SECRET: ${JANUS_ADMIN_SECRET}
+    restart: always
