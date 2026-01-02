@@ -50,21 +50,10 @@ public class StudyController {
 					"message": "스터디가 생성되었습니다."
 				}
 				"""))
-		),
-		@ApiResponse(
-			responseCode = "404",
-			description = "북마크 링크가 비어있는 경우",
-			content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
-				{
-					"code": 404,
-					"message": "북마크 링크는 비어있을 수 없습니다."
-				}
-				"""))
 		)
 	})
 	@PostMapping
 	public Response<StudyResponseDto> createStudy(
-		// TODO: 추후 pull 후 getMemberIdFromToken으로 memberId 불러온 뒤 전달할 수 있도록 수정
 		@AuthenticationPrincipal UserDetails userDetails,
 		@RequestBody @Valid StudyRequestDto request
 	) {
@@ -118,7 +107,6 @@ public class StudyController {
 	})
 	@DeleteMapping("/{studyId}")
 	public Response<StudyResponseDto> deleteStudy(
-		// TODO: 추후 pull 후 getMemberIdFromToken으로 memberId 불러온 뒤 전달할 수 있도록 수정
 		@AuthenticationPrincipal UserDetails userDetails,
 		@Parameter(name = "studyId", description = "조회할 스터디의 ID", example = "1")
 		@PathVariable Long studyId
@@ -163,7 +151,6 @@ public class StudyController {
 	})
 	@PutMapping("/{studyId}")
 	public Response<StudyResponseDto> updateStudy(
-		// TODO: 추후 pull 후 getMemberIdFromToken으로 memberId 불러온 뒤 전달할 수 있도록 수정
 		@AuthenticationPrincipal UserDetails userDetails,
 		@RequestBody @Valid StudyRequestDto request,
 		@Parameter(name = "studyId", description = "수정할 스터디의 ID", example = "1")
@@ -199,7 +186,6 @@ public class StudyController {
 	})
 	@GetMapping("/{studyId}")
 	public Response<StudyDetailResponseDto> getStudyDetail(
-		// TODO: 추후 pull 후 getMemberIdFromToken으로 memberId 불러온 뒤 전달할 수 있도록 수정
 		@AuthenticationPrincipal UserDetails userDetails,
 		@Parameter(name = "studyId", description = "상세 조회할 스터디의 ID", example = "1")
 		@PathVariable Long studyId
@@ -234,10 +220,9 @@ public class StudyController {
 		@RequestParam(required = false) Category category,
 
 		@Parameter(description = "페이지", example = "0")
-		@RequestParam(defaultValue = "0") int pageNumber
+		@RequestParam(defaultValue = "0") int page
 	) {
-		StudyListResponseDto response = studyService.getStudyList(visibility, category, pageNumber);
+		StudyListResponseDto response = studyService.getStudyList(visibility, category, page);
 		return Response.success("스터디 리스트를 조회했습니다.", response);
 	}
-
 }
