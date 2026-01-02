@@ -29,6 +29,9 @@ public class StudyParticipant extends Timestamped {
 	@Column
 	private Long id;
 
+	@Column(nullable = false)
+	private boolean isActive;
+
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "study_id", nullable = false)
 	private Study study;
