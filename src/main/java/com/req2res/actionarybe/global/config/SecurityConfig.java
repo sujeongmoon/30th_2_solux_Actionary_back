@@ -37,9 +37,9 @@ public class SecurityConfig {
 				.permitAll()
 				.requestMatchers(HttpMethod.GET, "/api/studies/my", "/api/studies/*/participating/**")
 				.authenticated()
-				.requestMatchers(HttpMethod.GET, "/api/studies/**")
+				.requestMatchers(HttpMethod.GET, "/api/studies/**","/api/users/*/points")
 				.permitAll()
-				.anyRequest().authenticated()
+					.anyRequest().authenticated()
 			)
 			.addFilterBefore(new JwtAuthenticationFilter(tokenProvider),
 				UsernamePasswordAuthenticationFilter.class);
