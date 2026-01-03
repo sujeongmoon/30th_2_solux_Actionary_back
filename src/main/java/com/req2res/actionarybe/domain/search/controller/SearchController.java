@@ -53,7 +53,7 @@ public class SearchController {
     public ResponseEntity<Response<StudySearchPageResponseDTO>> searchStudies(
             @AuthenticationPrincipal UserDetails userDetails,
 
-            @Parameter(description = "검색어(필수)", example = "spring")
+            @Parameter(description = "검색어(필수)", example = "임용")
             @RequestParam(name = "q") String q,
 
             @Parameter(description = "정렬 기준 (RECENT | POPULAR), 기본 RECENT", example = "RECENT")
