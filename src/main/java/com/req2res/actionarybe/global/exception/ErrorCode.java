@@ -30,6 +30,8 @@ public enum ErrorCode {
 	STUDY_CREATE_ERROR(HttpStatus.BAD_GATEWAY, "Janus 서버와 통신에 실패했습니다."),
 	STUDY_CAPACITY_EXCEEDED(HttpStatus.CONFLICT, "스터디 참여 인원이 이미 정원에 도달했습니다"),
 	STUDY_PARTICIPANT_PASSWORD_REQUIRED(HttpStatus.FORBIDDEN, "비공개 스터디 입장 시 비밀번호가 필요합니다."),
+	STUDY_PARTICIPANT_PASSWORD_UNREQUIRED(HttpStatus.BAD_REQUEST, "공개 스터디 입장 시 비밀번호가 필요하지 않습니다."),
+	STUDY_PARTICIPANT_PASSWORD_BAD_CREDENTIALS(HttpStatus.UNAUTHORIZED, "비공개 스터디 입장 비밀번호가 일치하지 않습니다."),
 
 	//to-do
 	TODO_INVALID_TITLE(HttpStatus.BAD_REQUEST, "할 일 제목은 비어 있을 수 없습니다."),

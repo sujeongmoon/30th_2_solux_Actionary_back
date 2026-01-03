@@ -64,3 +64,22 @@ Authorization: {{accessToken}}
 Content-Type: application/json
 
 
+### 스터디 접속(비공개방)
+POST http://localhost:8080/api/studies/2/participating/private
+Authorization: {{accessToken}}
+Content-Type: application/json
+
+{
+  "password": "060522"
+}
+
+
+### 스터디 접속(비공개방) (잘못된 비밀번호 - 401 실패)
+POST http://localhost:8080/api/studies/2/participating/private
+Authorization: {{accessToken}}
+Content-Type: application/json
+
+{
+  "password": "888888"
+}
+
