@@ -66,28 +66,33 @@ public class PointController {
                     content = @Content
             )
     })
-
-
     @PostMapping("/study-time")
     public ResponseEntity<Response<StudyTimePointResponseDTO>> earnStudyTimePoint(
             @Parameter(hidden = true)
             @AuthenticationPrincipal UserDetails userDetails,
-
             @RequestBody @Valid StudyTimePointRequestDTO request
     ) {
-        String loginId = userDetails.getUsername();
-
-        Member member = memberRepository.findByLoginId(loginId)
-                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND));
-
-        Long userId = member.getId();
+        Long userId = memberRepository.findByLoginId(userDetails.getUsername())
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND))
+                .getId();
 
         StudyTimePointResponseDTO data = pointService.earnStudyTimePoint(userId, request);
 
-        String msg = "공부시간 " + request.getStudyHours() + "시간 기록으로 "
-                + data.getEarnedPoint() + "P가 적립되었습니다.";
+        String formatted = formatToHhMmSs(request.getStudySeconds());
+        String msg = String.format("공부시간 %s 기록으로 %dP가 적립되었습니다.", formatted, data.getEarnedPoint());
 
         return ResponseEntity.ok(Response.success(msg, data));
+    }
+
+    /**
+     * 초(seconds)를 HH:MM:SS 문자열로 변환
+     * 예) 4500 -> 01:15:00
+     */
+    private String formatToHhMmSs(Long seconds) {
+        long h = seconds / 3600;
+        long m = (seconds % 3600) / 60;
+        long s = seconds % 60;
+        return String.format("%02d:%02d:%02d", h, m, s);
     }
 
     // 2. 스터디 참여 포인트 적립 API

@@ -7,6 +7,4 @@ public interface UserPointRepository extends JpaRepository<UserPoint, Long> {
 
     // member_id로 user_point 한 건 조회
     java.util.Optional<UserPoint> findByMember_Id(Long memberId);
-
-
 }
