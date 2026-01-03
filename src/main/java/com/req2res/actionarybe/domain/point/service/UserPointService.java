@@ -6,7 +6,9 @@ import com.req2res.actionarybe.domain.member.entity.Member;
 import com.req2res.actionarybe.domain.member.repository.MemberRepository;
 import com.req2res.actionarybe.domain.point.dto.*;
 import com.req2res.actionarybe.domain.point.entity.PointSource;
+import com.req2res.actionarybe.domain.point.entity.UserPoint;
 import com.req2res.actionarybe.domain.point.repository.PointHistoryRepository;
+import com.req2res.actionarybe.domain.point.repository.UserPointRepository;
 import com.req2res.actionarybe.global.exception.CustomException;
 import com.req2res.actionarybe.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +25,7 @@ public class UserPointService {
 
     private final MemberRepository memberRepository;
     private final PointHistoryRepository pointHistoryRepository;
+    private final UserPointRepository userPointRepository;
 
     // 1. 공개용 포인트 조회 API
     public PublicUserPointResponseDTO getPublicUserPoints(Long userId) {
@@ -54,5 +57,21 @@ public class UserPointService {
                 points,
                 badges
         );
+    }
+
+    // 2. 사이드바용 포인트 조회 API
+    @Transactional(readOnly = true)
+    public MyPointSummaryResponseDTO getMyPointSummary(Long loginMemberId) {
+
+        // 1) 사용자 존재 확인 (401/403은 security에서, 여기서는 서버 로직상 404/500 방지용)
+        Member member = memberRepository.findById(loginMemberId)
+                .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
+
+        // 2) user_point 없으면 0으로 처리 (신규 유저)
+        int totalPoint = userPointRepository.findByMember_Id(member.getId())
+                .map(UserPoint::getTotalPoint)
+                .orElse(0);
+
+        return new MyPointSummaryResponseDTO(member.getId(), totalPoint);
     }
 }

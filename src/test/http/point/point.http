@@ -1,5 +1,5 @@
 @host = http://localhost:8080
-@access_token = eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJqYWVoeXVuOTkiLCJpYXQiOjE3Njc0MjE2NDgsImV4cCI6MTc2NzQyNTI0OH0.2twvrIkjeOMJrW_9WM6jUNkmiGSCsHKiA5EgC4vU4R02
+@access_token = eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJqYWVoeXVuOTkiLCJpYXQiOjE3Njc0MjMyMDMsImV4cCI6MTc2NzQyNjgwM30.d1xx8X7LEgBMRnHlRVP0PpHaJMhArzb9VftTiU2TbdU
 
 ###=======스터디 참여 포인트 적립 API=========
 ### 1) 성공
@@ -98,8 +98,16 @@ Authorization: Bearer {{access_token}}
   "todoId": 999999
 }
 
-### 공개용 포인트 조회 성공
+### ======공개용 포인트 조회 ======
 GET {{host}}/api/users/1/points
 
 ### 404 - 없는 userId
 GET {{host}}/api/users/999999/points
+
+### =======사이드바용 포인트 조회=======
+### 1) 사이드바용 포인트 조회 성공
+GET {{host}}/api/users/me/points
+Authorization: Bearer {{access_token}}
+
+### 2) 401 - 토큰 없음
+GET {{host}}/api/users/me/points
