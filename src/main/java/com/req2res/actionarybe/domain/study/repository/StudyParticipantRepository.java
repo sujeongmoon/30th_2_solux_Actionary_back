@@ -47,4 +47,7 @@ public interface StudyParticipantRepository extends JpaRepository<StudyParticipa
 		    group by m.id, m.nickname
 		""")
 	List<RankingDurationDto> findTotalDurations(Long studyId);
+
+	// 로그인 유저가 해당 스터디 참여 중인지 (is_active=1)
+	boolean existsByStudy_IdAndMember_IdAndIsActiveTrue(Long studyId, Long memberId);
 }
