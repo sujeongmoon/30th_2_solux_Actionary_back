@@ -1,6 +1,7 @@
 package com.req2res.actionarybe.domain.studyTime.repository;
 
-import com.req2res.actionarybe.domain.point.entity.StudyTimeManual;
+
+import com.req2res.actionarybe.domain.studyTime.entity.StudyTimeManual;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
