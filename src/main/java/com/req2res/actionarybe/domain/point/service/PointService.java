@@ -1,4 +1,5 @@
 package com.req2res.actionarybe.domain.point.service;
+//포인트 적립 Service
 
 import com.req2res.actionarybe.domain.member.entity.Member;
 import com.req2res.actionarybe.domain.member.repository.MemberRepository;
