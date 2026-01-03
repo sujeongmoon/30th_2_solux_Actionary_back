@@ -26,7 +26,7 @@ public class StudyTimeManual extends Timestamped {
 
     @Column(name = "duration_second", nullable = false)
     private Integer durationSecond;
-    
+
     public void updateDurationSecond(Integer durationSecond) {
         this.durationSecond = durationSecond;
     }

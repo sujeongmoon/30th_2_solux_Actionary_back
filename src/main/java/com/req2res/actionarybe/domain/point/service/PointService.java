@@ -5,6 +5,8 @@ import com.req2res.actionarybe.domain.member.entity.Member;
 import com.req2res.actionarybe.domain.member.repository.MemberRepository;
 import com.req2res.actionarybe.domain.notification.service.NotificationService;
 import com.req2res.actionarybe.domain.point.dto.*;
+import com.req2res.actionarybe.domain.studyTime.repository.StudyTimeManualRepository;
+import com.req2res.actionarybe.domain.studyTime.repository.StudyTimeRepository;
 import com.req2res.actionarybe.domain.todo.entity.Todo;
 import com.req2res.actionarybe.domain.todo.repository.TodoRepository;
 import com.req2res.actionarybe.domain.point.entity.PointHistory;
@@ -30,11 +32,12 @@ public class PointService {
     private final PointHistoryRepository pointHistoryRepository;
     private final NotificationService notificationService;
     private final TodoRepository todoRepository;
+    private final StudyTimeRepository studyTimeRepository;
+    private final StudyTimeManualRepository studyTimeManualRepository;
 
     // 1. 공부시간 포인트 적립 API
     @Transactional
-    public StudyTimePointResponseDTO earnStudyTimePoint(Long loginMemberId,
-                                                        StudyTimePointRequestDTO request) {
+    public StudyTimePointResponseDTO earnStudyTimePoint(Long loginMemberId) {
 
         // 1) 사용자 존재 확인 (404)
         Member member = memberRepository.findById(loginMemberId)
@@ -56,11 +59,24 @@ public class PointService {
             throw new CustomException(ErrorCode.STUDY_TIME_POINT_ALREADY_EARNED_TODAY);
         }
 
-        // 3) 적립 포인트 계산 (studyHours * 10, 반올림)
-        int earnedPoint = (int) Math.round(request.getStudyHours() * 10);
+        // 3) 오늘 누적 공부시간(초) 계산: study_time + study_time_manual
+        long studySecondsFromStudy = studyTimeRepository.sumTodaySeconds(member.getId(), start, end);
+        long studySecondsFromManual = studyTimeManualRepository
+                .sumDurationSecondByUserIdAndManualDate(member.getId(), today);
+
+        long todayStudySeconds = studySecondsFromStudy + studySecondsFromManual;
+
+        // 4) 오늘 누적이 0이면 적립 의미가 없으니 막기 (400)
+        if (todayStudySeconds <= 0) {
+            throw new CustomException(ErrorCode.BAD_REQUEST, "오늘 기록된 공부시간이 없습니다.");
+        }
+
+        // 5) 적립 포인트 계산: (오늘 누적 초 -> 시간 환산) * 10, 반올림
+        int earnedPoint = (int) Math.round((todayStudySeconds / 3600.0) * 10);
+
         LocalDateTime now = LocalDateTime.now();
 
-        // 4) user_point 조회/생성 (member_id 기준)
+        // 6) user_point 조회/생성 (member_id 기준)
         UserPoint userPoint = userPointRepository.findByMember_Id(member.getId())
                 .orElseGet(() -> userPointRepository.save(
                         UserPoint.builder()
@@ -70,10 +86,10 @@ public class PointService {
                                 .build()
                 ));
 
-        // 5) 여기부터는 영속 상태 → save 호출 필요 없음 (dirty checking)
+        // 7) 여기부터는 영속 상태 → save 호출 필요 없음 (dirty checking)
         userPoint.addPoint(earnedPoint, now);
 
-        // 6) point_history 기록 저장 (createdAt은 Timestamped가 자동 처리)
+        // 8) point_history 기록 저장
         PointHistory history = PointHistory.builder()
                 .member(member)
                 .earnedPoint(earnedPoint)
@@ -83,17 +99,18 @@ public class PointService {
 
         pointHistoryRepository.save(history);
 
-        // 7) 알림 생성
+        // 9) 알림 생성
         notificationService.notifyPoint(member.getId(), earnedPoint, PointSource.STUDY_TIME);
 
         return new StudyTimePointResponseDTO(
                 member.getId(),
                 earnedPoint,
                 PointSource.STUDY_TIME,
-                request.getStudyHours(),
+                todayStudySeconds,
                 userPoint.getTotalPoint()
         );
     }
+
 
     // 2. 스터디 참여 포인트 적립 API
     @Transactional

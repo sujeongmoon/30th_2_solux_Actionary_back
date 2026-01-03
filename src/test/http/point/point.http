@@ -1,5 +1,5 @@
 @host = http://localhost:8080
-@access_token = eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJqYWVoeXVuOTkiLCJpYXQiOjE3Njc0MjMyMDMsImV4cCI6MTc2NzQyNjgwM30.d1xx8X7LEgBMRnHlRVP0PpHaJMhArzb9VftTiU2TbdU
+@access_token =
 
 ###=======스터디 참여 포인트 적립 API=========
 ### 1) 성공
@@ -39,35 +39,11 @@ POST {{host}}/api/points/study-time
 Content-Type: application/json
 Authorization: Bearer {{access_token}}
 
-{
-  "studyHours": 10
-}
-
-### 2) 400 Bad Request - studyHours 누락
+### 2) 409 Conflict - 오늘 이미 적립한 경우 (같은 토큰으로 1번 성공 후 다시 호출)
 POST {{host}}/api/points/study-time
 Content-Type: application/json
 Authorization: Bearer {{access_token}}
 
-{
-}
-
-### 3) 400 Bad Request - studyHours가 0 이하
-POST {{host}}/api/points/study-time
-Content-Type: application/json
-Authorization: Bearer {{access_token}}
-
-{
-  "studyHours": 0
-}
-
-### 4) 409 Conflict - 오늘 이미 적립한 경우 (같은 토큰으로 1번 성공 후 다시 호출)
-POST {{host}}/api/points/study-time
-Content-Type: application/json
-Authorization: Bearer {{access_token}}
-
-{
-  "studyHours": 2
-}
 
 ###=======투두 완료 포인트 적립 API=========
 

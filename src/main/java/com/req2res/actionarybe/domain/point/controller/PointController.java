@@ -32,12 +32,19 @@ public class PointController {
     @Operation(
             summary = "공부시간 포인트 적립",
             description = """
-                    사용자가 **당일 공부한 시간(studyHours)** 을 전송하면  
-                    `공부시간 × 10` 만큼 포인트를 적립합니다.
+                사용자가 포인트 적립을 요청하면  
+                서버가 **오늘 기록된 공부시간**을 기준으로 포인트를 적립합니다.
 
-                    - 하루 1회만 적립 가능
-                    - 포인트 적립 시 알림이 생성됩니다.
-                    """
+                - 오늘 누적 공부시간(초)은 다음과 같이 계산됩니다.
+                  - study_time 테이블의 오늘 기록 합
+                  - study_time_manual 테이블의 오늘 기록 합
+
+                - 적립 포인트 계산 방식:
+                  - earnedPoint = round((todayStudySeconds / 3600.0) × 10)
+
+                - 하루 1회만 적립 가능
+                - 포인트 적립 시 알림이 생성됩니다.
+                """
     )
     @ApiResponses({
             @ApiResponse(
@@ -47,7 +54,7 @@ public class PointController {
             ),
             @ApiResponse(
                     responseCode = "400",
-                    description = "잘못된 요청 (필수값 누락, studyHours ≤ 0 등)",
+                    description = "오늘 기록된 공부시간이 없는 경우",
                     content = @Content
             ),
             @ApiResponse(
@@ -69,31 +76,18 @@ public class PointController {
     @PostMapping("/study-time")
     public ResponseEntity<Response<StudyTimePointResponseDTO>> earnStudyTimePoint(
             @Parameter(hidden = true)
-            @AuthenticationPrincipal UserDetails userDetails,
-            @RequestBody @Valid StudyTimePointRequestDTO request
+            @AuthenticationPrincipal UserDetails userDetails
     ) {
         Long userId = memberRepository.findByLoginId(userDetails.getUsername())
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND))
                 .getId();
 
-        StudyTimePointResponseDTO data = pointService.earnStudyTimePoint(userId, request);
+        StudyTimePointResponseDTO data = pointService.earnStudyTimePoint(userId);
 
-        String formatted = formatToHhMmSs(request.getStudySeconds());
-        String msg = String.format("공부시간 %s 기록으로 %dP가 적립되었습니다.", formatted, data.getEarnedPoint());
-
+        String msg = String.format("오늘 누적 공부시간 기준으로 %dP가 적립되었습니다.", data.getEarnedPoint());
         return ResponseEntity.ok(Response.success(msg, data));
     }
 
-    /**
-     * 초(seconds)를 HH:MM:SS 문자열로 변환
-     * 예) 4500 -> 01:15:00
-     */
-    private String formatToHhMmSs(Long seconds) {
-        long h = seconds / 3600;
-        long m = (seconds % 3600) / 60;
-        long s = seconds % 60;
-        return String.format("%02d:%02d:%02d", h, m, s);
-    }
 
     // 2. 스터디 참여 포인트 적립 API
     @Operation(

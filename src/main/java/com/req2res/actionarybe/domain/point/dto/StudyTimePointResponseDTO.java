@@ -44,13 +44,6 @@ public class StudyTimePointResponseDTO {
     private Long todayStudySeconds;
 
     @Schema(
-            description = "표시용 금일 누적 공부 시간 (HH:MM:SS)",
-            example = "01:15:00",
-            requiredMode = Schema.RequiredMode.REQUIRED
-    )
-    private String todayStudyTime;
-
-    @Schema(
             description = "포인트 적립 후 총 포인트",
             example = "120",
             requiredMode = Schema.RequiredMode.REQUIRED
