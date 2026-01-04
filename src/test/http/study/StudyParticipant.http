@@ -83,3 +83,9 @@ Content-Type: application/json
   "password": "888888"
 }
 
+
+### 스터디 접속 유저 기본정보 표시
+GET http://localhost:8080/api/studies/1/participating/users
+Authorization: {{accessToken}}
+Content-Type: application/json
+

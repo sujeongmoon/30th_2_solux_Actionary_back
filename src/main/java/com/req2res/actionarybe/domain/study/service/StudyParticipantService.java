@@ -7,6 +7,8 @@ import org.springframework.stereotype.Service;
 import com.req2res.actionarybe.domain.member.entity.Member;
 import com.req2res.actionarybe.domain.study.dto.StudyParticipantPrivateRequestDto;
 import com.req2res.actionarybe.domain.study.dto.StudyParticipantResponseDto;
+import com.req2res.actionarybe.domain.study.dto.StudyParticipantUserDto;
+import com.req2res.actionarybe.domain.study.dto.StudyParticipantUsersResponseDto;
 import com.req2res.actionarybe.domain.study.entity.Study;
 import com.req2res.actionarybe.domain.study.entity.StudyParticipant;
 import com.req2res.actionarybe.domain.study.repository.StudyParticipantRepository;
@@ -78,5 +80,23 @@ public class StudyParticipantService {
 		studyParticipantRepository.save(studyParticipant);
 
 		return StudyParticipantResponseDto.from(studyParticipant);
+	}
+
+	public StudyParticipantUsersResponseDto getStudyParticipantUsers(Member member, Long studyId) {
+
+		Study study = studyRepository.findById(studyId).
+			orElseThrow(() -> new CustomException(ErrorCode.STUDY_NOT_FIND));
+
+		StudyParticipantUserDto me = studyParticipantRepository.findParticipantUserByStudyAndMemberAndIsActiveTrue(
+				studyId, member.getId())
+			.orElseThrow(() ->
+				new CustomException(ErrorCode.STUDY_PARTICIPANT_NOT_JOINED)
+			);
+
+		return StudyParticipantUsersResponseDto.builder()
+			.studyId(studyId)
+			.me(me)
+			.participatingUsers(studyParticipantRepository.findParticipantUserByStudyAndIsActiveTrue(studyId))
+			.build();
 	}
 }
