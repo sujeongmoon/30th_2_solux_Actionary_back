@@ -29,3 +29,10 @@ services:
     environment:
       JANUS_ADMIN_SECRET: ${JANUS_ADMIN_SECRET}
     restart: always
+
+  redis:
+    image: redis:7.2-alpine
+    container_name: actionary_redis
+    ports:
+      - "6379:6379"
+    restart: always
