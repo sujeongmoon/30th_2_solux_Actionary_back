@@ -1,5 +1,9 @@
 package com.req2res.actionarybe.domain.study.service;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -98,10 +102,22 @@ public class StudyParticipantService {
 				new CustomException(ErrorCode.STUDY_PARTICIPANT_NOT_JOINED)
 			);
 
+		List<StudyParticipantUserDto> participatingUsers = studyParticipantRepository.findParticipantUserByStudyAndIsActiveTrue(
+			studyId);
+
+		Map<Object, Object> nowStateMap = redisTemplate.opsForHash().entries("study:" + studyId + ":nowState");
+		Map<Long, String> participantNowStates = new HashMap<>();
+		for (Map.Entry<Object, Object> entry : nowStateMap.entrySet()) {
+			Long key = Long.valueOf((String)entry.getKey());
+			String value = (String)entry.getValue();
+			participantNowStates.put(key, value);
+		}
+
 		return StudyParticipantUsersResponseDto.builder()
 			.studyId(studyId)
 			.me(me)
-			.participatingUsers(studyParticipantRepository.findParticipantUserByStudyAndIsActiveTrue(studyId))
+			.participatingUsers(participatingUsers)
+			.participantNowStates(participantNowStates)
 			.build();
 	}
 

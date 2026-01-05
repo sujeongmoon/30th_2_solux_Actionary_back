@@ -1,6 +1,7 @@
 package com.req2res.actionarybe.domain.study.dto;
 
 import java.util.List;
+import java.util.Map;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
@@ -44,4 +45,10 @@ public class StudyParticipantUsersResponseDto {
 		+ "\t\t\t}\n"
 		+ "\t  ]")
 	private List<StudyParticipantUserDto> participatingUsers;
+
+	@Schema(description = "해당 스터디에 접속해있는 유저들의 <스터디 참여 id : 말풍선>을 나타내는 Map", example = "{\n"
+		+ "\t\t  \"1\": \"조금만 쉬고 올게요\",\n"
+		+ "\t    \"2\": \"짧게만하고갈듯?\"\n"
+		+ "\t  }")
+	private Map<Long, String> participantNowStates;
 }
