@@ -7,6 +7,7 @@ import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
+import com.req2res.actionarybe.domain.member.entity.Member;
 import com.req2res.actionarybe.domain.study.dto.RankingDurationDto;
 import com.req2res.actionarybe.domain.study.dto.StudyParticipantUserDto;
 import com.req2res.actionarybe.domain.study.entity.Study;
@@ -83,4 +84,6 @@ public interface StudyParticipantRepository extends JpaRepository<StudyParticipa
 		
 		""")
 	List<StudyParticipantUserDto> findParticipantUserByStudyAndIsActiveTrue(Long studyId);
+
+	Optional<StudyParticipant> findByStudyAndMemberAndIsActiveTrue(Study study, Member member);
 }

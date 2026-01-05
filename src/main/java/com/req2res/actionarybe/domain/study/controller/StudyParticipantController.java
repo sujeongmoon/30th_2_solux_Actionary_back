@@ -3,6 +3,7 @@ package com.req2res.actionarybe.domain.study.controller;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -11,6 +12,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.req2res.actionarybe.domain.member.entity.Member;
 import com.req2res.actionarybe.domain.member.service.MemberService;
+import com.req2res.actionarybe.domain.study.dto.StudyParticipantNowStateRequestDto;
+import com.req2res.actionarybe.domain.study.dto.StudyParticipantNowStateResponseDto;
 import com.req2res.actionarybe.domain.study.dto.StudyParticipantPrivateRequestDto;
 import com.req2res.actionarybe.domain.study.dto.StudyParticipantResponseDto;
 import com.req2res.actionarybe.domain.study.dto.StudyParticipantUsersResponseDto;
@@ -196,6 +199,53 @@ public class StudyParticipantController {
 		Member member = memberService.findMemberByLoginId(userDetails.getUsername());
 		StudyParticipantUsersResponseDto response = studyParticipantService.getStudyParticipantUsers(member, studyId);
 		return Response.success("스터디에 접속한 유저들의 정보가 조회되었습니다.", response);
+	}
+
+	@Operation(summary = "스터디 접속 시 본인의 말풍선 변경 API", description = "스터디 접속 시 본인의 말풍선을 변경하는 기능입니다.")
+	@ApiResponses(value = {
+		@ApiResponse(
+			responseCode = "200",
+			description = "스터디 접속 시 본인의 말풍선 변경 완료",
+			content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
+				{
+					"code": 200,
+					"message": "해당 유저의 말풍선 변경이 완료되었습니다."
+				}
+				"""))
+		),
+		@ApiResponse(
+			responseCode = "404",
+			description = "참여하고자 하는 스터디가 없는 경우",
+			content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
+				{
+					"code": 404,
+					"message": "존재하지 않는 스터디입니다."
+				}
+				"""))
+		),
+		@ApiResponse(
+			responseCode = "403",
+			description = "유저가 해당 스터디에 참여하고 있지 않은 경우",
+			content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
+				{
+					"code": 403,
+					"message": "유저가 해당 스터디에 참여하고 있지 않습니다."
+				}
+				"""))
+		)
+	})
+	@PatchMapping("/nowState")
+	public Response<StudyParticipantNowStateResponseDto> updateStudyParticipantNowState(
+		@AuthenticationPrincipal UserDetails userDetails,
+		@RequestBody @Valid StudyParticipantNowStateRequestDto request,
+		@Parameter(name = "studyId", description = "참여한 스터디의 ID", example = "1")
+		@PathVariable Long studyId
+	) {
+		Member member = memberService.findMemberByLoginId(userDetails.getUsername());
+		StudyParticipantNowStateResponseDto response = studyParticipantService.updateStudyParticipantNowState(request,
+			member,
+			studyId);
+		return Response.success("해당 유저의 말풍선 변경이 완료되었습니다.", response);
 	}
 
 }

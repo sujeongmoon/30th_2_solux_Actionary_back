@@ -89,3 +89,12 @@ GET http://localhost:8080/api/studies/1/participating/users
 Authorization: {{accessToken}}
 Content-Type: application/json
 
+
+### 스터디 접속 시 본인의 말풍선 변경
+PATCH http://localhost:8080/api/studies/1/participating/nowState
+Authorization: {{accessToken}}
+Content-Type: application/json
+
+{
+  "nowState": "조금만 쉬고 올게요"
+}

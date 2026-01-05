@@ -1,10 +1,13 @@
 package com.req2res.actionarybe.domain.study.service;
 
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.req2res.actionarybe.domain.member.entity.Member;
+import com.req2res.actionarybe.domain.study.dto.StudyParticipantNowStateRequestDto;
+import com.req2res.actionarybe.domain.study.dto.StudyParticipantNowStateResponseDto;
 import com.req2res.actionarybe.domain.study.dto.StudyParticipantPrivateRequestDto;
 import com.req2res.actionarybe.domain.study.dto.StudyParticipantResponseDto;
 import com.req2res.actionarybe.domain.study.dto.StudyParticipantUserDto;
@@ -25,6 +28,8 @@ public class StudyParticipantService {
 
 	private final StudyRepository studyRepository;
 	private final StudyParticipantRepository studyParticipantRepository;
+
+	private final RedisTemplate<String, String> redisTemplate;
 
 	public StudyParticipantResponseDto createStudyParticipantPublic(Member member, Long studyId) {
 
@@ -99,4 +104,32 @@ public class StudyParticipantService {
 			.participatingUsers(studyParticipantRepository.findParticipantUserByStudyAndIsActiveTrue(studyId))
 			.build();
 	}
+
+	public StudyParticipantNowStateResponseDto updateStudyParticipantNowState(
+		@Valid StudyParticipantNowStateRequestDto request, Member member, Long studyId) {
+
+		Study study = studyRepository.findById(studyId).
+			orElseThrow(() -> new CustomException(ErrorCode.STUDY_NOT_FIND));
+
+		StudyParticipant studyParticipant = studyParticipantRepository.findByStudyAndMemberAndIsActiveTrue(
+				study, member)
+			.orElseThrow(() -> new CustomException(ErrorCode.STUDY_PARTICIPANT_NOT_JOINED));
+
+		String redisKey = "study:" + studyId + ":nowState";
+
+		redisTemplate.opsForHash()
+			.put(
+				redisKey,
+				studyParticipant.getId().toString(),
+				request.getNowState()
+			);
+
+		return StudyParticipantNowStateResponseDto.builder()
+			.studyId(studyId)
+			.studyParticipantId(studyParticipant.getId())
+			.userId(member.getId())
+			.nowState(request.getNowState())
+			.build();
+	}
+
 }
