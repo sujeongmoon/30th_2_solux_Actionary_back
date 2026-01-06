@@ -19,11 +19,85 @@ import java.util.List;
 @RequiredArgsConstructor
 public class SearchService {
 
-    private final StudyRepository studyRepository;
     private final StudyParticipantRepository studyParticipantRepository;
     private final SearchRepository searchRepository;
 
-    // 1. 스터디 검색 API
+    // 1. 통합 검색 API (전체 검색)
+    public IntegratedSearchResponseDTO searchAll(String q, Long loginUserId) {
+
+        // q 필수 체크
+        if (q == null || q.isBlank()) {
+            throw new CustomException(ErrorCode.BAD_REQUEST, "검색어(q)는 필수입니다.");
+        }
+
+        // 여러 단어 OR 검색
+        List<String> keywords = List.of(q.trim().split("\\s+"));
+
+        // 통합검색은 최신순 고정 (RECENT)
+        SearchSort sort = SearchSort.RECENT;
+
+        // 통합 검색은 미리보기 개수 제한
+        Pageable studyPageable = PageRequest.of(0, 8); // 스터디 8개
+        Pageable postPageable  = PageRequest.of(0, 5); // 게시글 5개
+
+        // 1) 스터디 검색 (custom)
+        Page<Study> studyPage = searchRepository.searchStudiesByKeywords(keywords, sort, studyPageable);
+
+        List<StudySearchResponseDTO> studies = studyPage.getContent().stream()
+                .map(study -> {
+                    boolean isJoined = false;
+                    if (loginUserId != null) {
+                        isJoined = studyParticipantRepository
+                                .existsByStudy_IdAndMember_IdAndIsActiveTrue(study.getId(), loginUserId);
+                    }
+
+                    return StudySearchResponseDTO.builder()
+                            .studyId(study.getId())
+                            .title(study.getName())
+                            .description(study.getDescription())
+                            .category(String.valueOf(study.getCategory()))
+                            .thumbnailUrl(study.getCoverImage())
+                            .isJoined(isJoined)
+                            .createdAt(study.getCreatedAt())
+                            .build();
+                })
+                .toList();
+
+        // 2) 게시글 검색 (custom)
+        Page<Post> postPage = searchRepository.searchPostsByKeywords(keywords, sort, postPageable);
+
+        List<PostSearchResponseDTO> posts = postPage.getContent().stream()
+                .map(post -> {
+                    boolean isMine = false;
+                    if (loginUserId != null) {
+                        isMine = post.getMember().getId().equals(loginUserId);
+                    }
+
+                    return PostSearchResponseDTO.builder()
+                            .postId(post.getId())
+                            .type(post.getType().name())
+                            .title(post.getTitle())
+                            .authorNickname(post.getMember().getNickname())
+                            .createdAt(post.getCreatedAt())
+                            .commentCount(post.getCommentsCount())
+                            .isMine(isMine)
+                            .build();
+                })
+                .toList();
+
+        // 둘 다 비어있으면 404
+        if (studies.isEmpty() && posts.isEmpty()) {
+            throw new CustomException(ErrorCode.SEARCH_NOT_FOUND);
+        }
+
+        return IntegratedSearchResponseDTO.builder()
+                .studies(studies)
+                .posts(posts)
+                .build();
+    }
+
+
+    // 2. 스터디 검색 API
     public StudySearchPageResponseDTO searchStudies(String q, String sortRaw, Integer pageRaw, Integer sizeRaw, Long loginUserId) {
         // q 필수 체크
         if (q == null || q.isBlank()) {
@@ -83,7 +157,7 @@ public class SearchService {
                 .build();
     }
 
-    //2. 게시글 검색 API
+    //3. 게시글 검색 API
     public PostSearchPageResponseDTO searchPosts(String q, String sortRaw, Integer pageRaw, Integer sizeRaw, Long loginUserId) {
 
         // q 필수 체크

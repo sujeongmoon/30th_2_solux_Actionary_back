@@ -2,6 +2,7 @@ package com.req2res.actionarybe.domain.search.controller;
 
 import com.req2res.actionarybe.domain.member.entity.Member;
 import com.req2res.actionarybe.domain.member.repository.MemberRepository;
+import com.req2res.actionarybe.domain.search.dto.IntegratedSearchResponseDTO;
 import com.req2res.actionarybe.domain.search.dto.StudySearchPageResponseDTO;
 import com.req2res.actionarybe.domain.search.service.SearchService;
 import com.req2res.actionarybe.domain.search.dto.PostSearchPageResponseDTO;
@@ -26,8 +27,55 @@ public class SearchController {
     private final SearchService searchService;
     private final MemberRepository memberRepository;
 
+    // 1. 통합 검색 API
+    @Operation(
+            summary = "통합 검색 결과 조회",
+            description = """
+                검색어(q)를 기반으로 스터디 + 게시글을 함께 검색합니다.
+                
+                - 정렬은 최신순(RECENT) 고정
+                - 띄어쓰기 포함 여러 단어 검색 가능 (OR 검색)
+                - 인증: permitAll (Authorization 헤더는 선택)
+                - 로그인 상태라면 스터디는 isJoined, 게시글은 isMine을 계산하여 내려줍니다.
+                - 스터디는 8개, 게시글은 5개로 제한합니다.
+                """
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "통합 검색 성공",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = Response.class))
+            ),
+            @ApiResponse(responseCode = "400", description = "잘못된 요청 (q 누락 등)"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized (토큰 만료/위조인데 인증이 필요한 요청일 때)"),
+            @ApiResponse(responseCode = "404", description = "검색 결과 없음"),
+            @ApiResponse(responseCode = "500", description = "서버 오류")
+    })
+    @GetMapping
+    public ResponseEntity<Response<IntegratedSearchResponseDTO>> searchAll(
+            @AuthenticationPrincipal UserDetails userDetails,
 
-    // 1. 스터디 검색 API
+            @Parameter(description = "검색어(필수)", example = "알고리즘 인증")
+            @RequestParam(name = "q") String q
+    ) {
+        Long userId = null;
+
+        if (userDetails != null) {
+            String loginId = userDetails.getUsername();
+
+            Member member = memberRepository.findByLoginId(loginId)
+                    .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND));
+
+            userId = member.getId();
+        }
+
+        IntegratedSearchResponseDTO data = searchService.searchAll(q, userId);
+
+        return ResponseEntity.ok(Response.success("통합 검색 결과입니다.", data));
+    }
+
+    // 2. 스터디 검색 API
     @Operation(
             summary = "스터디 검색 결과 조회",
             description = """
@@ -85,7 +133,7 @@ public class SearchController {
         return ResponseEntity.ok(Response.success("스터디 검색 결과입니다.", data));
     }
 
-    // 2. 게시글 검색 API
+    // 3. 게시글 검색 API
     @Operation(
             summary = "게시글 검색 결과 조회",
             description = """
