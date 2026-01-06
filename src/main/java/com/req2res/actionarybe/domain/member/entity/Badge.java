@@ -1,6 +1,7 @@
 package com.req2res.actionarybe.domain.member.entity;
 
 import jakarta.persistence.*;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
