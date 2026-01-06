@@ -18,7 +18,9 @@ import com.req2res.actionarybe.domain.study.dto.StudyParticipantPrivateRequestDt
 import com.req2res.actionarybe.domain.study.dto.StudyParticipantResponseDto;
 import com.req2res.actionarybe.domain.study.dto.StudyParticipantUsersResponseDto;
 import com.req2res.actionarybe.domain.study.service.StudyParticipantService;
+import com.req2res.actionarybe.domain.studyTime.dto.StudyTimeResponseDto;
 import com.req2res.actionarybe.domain.studyTime.dto.StudyTimeTypeRequestDto;
+import com.req2res.actionarybe.domain.studyTime.service.StudyTimeService;
 import com.req2res.actionarybe.global.Response;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -36,6 +38,7 @@ import lombok.RequiredArgsConstructor;
 public class StudyParticipantController {
 
 	private final StudyParticipantService studyParticipantService;
+	private final StudyTimeService studyTimeService;
 	private final MemberService memberService;
 
 	@Operation(summary = "공개 스터디 접속 API", description = "공개 스터디를 접속 하는 기능입니다.")
@@ -292,6 +295,51 @@ public class StudyParticipantController {
 		Member member = memberService.findMemberByLoginId(userDetails.getUsername());
 		studyParticipantService.updateStudyParticipant(member, studyId, request);
 		return Response.success("스터디에서 퇴장했습니다.", null);
+	}
+
+	@Operation(summary = "스터디 접속 시 공부/휴식 누적시간 기록 API", description = "스터디 접속 화면에서 재생/정지버튼을 눌렀을 시 공부/휴식 누적시간이 기록되는 기능입니다.")
+	@ApiResponses(value = {
+		@ApiResponse(
+			responseCode = "200",
+			description = "이전 누적 시간이 저장되고 타이머가 전환",
+			content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
+				{
+					"code": 200,
+					"message": "이전 누적 시간이 저장되고 타이머가 전환되었습니다."
+				}
+				"""))
+		),
+		@ApiResponse(
+			responseCode = "404",
+			description = "참여하고자 하는 스터디가 없는 경우",
+			content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
+				{
+					"code": 404,
+					"message": "존재하지 않는 스터디입니다."
+				}
+				"""))
+		),
+		@ApiResponse(
+			responseCode = "403",
+			description = "유저가 해당 스터디에 참여하고 있지 않은 경우",
+			content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
+				{
+					"code": 403,
+					"message": "유저가 해당 스터디에 참여하고 있지 않습니다."
+				}
+				"""))
+		)
+	})
+	@PostMapping("/durationtime")
+	public Response<StudyTimeResponseDto> createStudyTime(
+		@AuthenticationPrincipal UserDetails userDetails,
+		@RequestBody @Valid StudyTimeTypeRequestDto request,
+		@Parameter(name = "studyId", description = "참여한 스터디의 ID", example = "1")
+		@PathVariable Long studyId
+	) {
+		Member member = memberService.findMemberByLoginId(userDetails.getUsername());
+		StudyTimeResponseDto response = studyTimeService.createStudyTimeToDto(member, studyId, request);
+		return Response.success("이전 누적 시간이 저장되고 타이머가 전환되었습니다.", response);
 	}
 
 }

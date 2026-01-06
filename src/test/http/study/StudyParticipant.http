@@ -108,3 +108,23 @@ Content-Type: application/json
 {
   "type": "STUDY"
 }
+
+
+### 스터디 접속 시 공부/휴식 누적시간 기록 (공부시간 기록)
+POST http://localhost:8080/api/studies/1/participating/durationtime
+Authorization: {{accessToken}}
+Content-Type: application/json
+
+{
+  "type": "STUDY"
+}
+
+### 스터디 접속 시 공부/휴식 누적시간 기록 (휴식시간 기록)
+POST http://localhost:8080/api/studies/1/participating/durationtime
+Authorization: {{accessToken}}
+Content-Type: application/json
+
+{
+  "type": "BREAK"
+}
+

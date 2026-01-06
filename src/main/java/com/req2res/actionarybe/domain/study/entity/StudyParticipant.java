@@ -49,8 +49,8 @@ public class StudyParticipant extends Timestamped {
 		this.isActive = false;
 	}
 
-	public void updateLastStateChangedAt(StudyParticipant studyParticipant) {
-		this.lastStateChangedAt = LocalDateTime.now();
+	public void updateLastStateChangedAt(LocalDateTime lastStateChangedAt) {
+		this.lastStateChangedAt = lastStateChangedAt;
 	}
 
 }
