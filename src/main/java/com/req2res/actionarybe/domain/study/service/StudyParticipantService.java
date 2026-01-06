@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -18,12 +19,16 @@ import com.req2res.actionarybe.domain.study.dto.StudyParticipantPrivateRequestDt
 import com.req2res.actionarybe.domain.study.dto.StudyParticipantResponseDto;
 import com.req2res.actionarybe.domain.study.dto.StudyParticipantUserDto;
 import com.req2res.actionarybe.domain.study.dto.StudyParticipantUsersResponseDto;
+import com.req2res.actionarybe.domain.study.dto.event.NowStateChangedEvent;
+import com.req2res.actionarybe.domain.study.dto.event.ParticipantJoinedEvent;
+import com.req2res.actionarybe.domain.study.dto.event.ParticipantLeftEvent;
 import com.req2res.actionarybe.domain.study.entity.Study;
 import com.req2res.actionarybe.domain.study.entity.StudyParticipant;
 import com.req2res.actionarybe.domain.study.repository.StudyParticipantRepository;
 import com.req2res.actionarybe.domain.study.repository.StudyRepository;
 import com.req2res.actionarybe.domain.studyTime.dto.StudyTimeTypeRequestDto;
 import com.req2res.actionarybe.domain.studyTime.service.StudyTimeService;
+import com.req2res.actionarybe.global.Event;
 import com.req2res.actionarybe.global.exception.CustomException;
 import com.req2res.actionarybe.global.exception.ErrorCode;
 
@@ -39,6 +44,7 @@ public class StudyParticipantService {
 	private final StudyTimeService studyTimeService;
 
 	private final RedisTemplate<String, String> redisTemplate;
+	private final SimpMessagingTemplate messagingTemplate;
 
 	public StudyParticipantResponseDto createStudyParticipantPublic(Member member, Long studyId) {
 
@@ -61,6 +67,18 @@ public class StudyParticipantService {
 			.build();
 
 		studyParticipantRepository.save(studyParticipant);
+
+		messagingTemplate.convertAndSend(
+			"/topic/studies/" + studyId,
+			new Event<>(
+				"PARTICIPANT_JOINED",
+				new ParticipantJoinedEvent(
+					studyId,
+					studyParticipant.getId(),
+					studyParticipant.getMember().getId()
+				)
+			)
+		);
 
 		return StudyParticipantResponseDto.from(studyParticipant);
 	}
@@ -147,6 +165,18 @@ public class StudyParticipantService {
 				request.getNowState()
 			);
 
+		messagingTemplate.convertAndSend(
+			"/topic/studies/" + studyId,
+			new Event<>(
+				"NOW_STATE_CHANGED",
+				new NowStateChangedEvent(
+					studyId,
+					studyParticipant.getId(),
+					request.getNowState()
+				)
+			)
+		);
+
 		return StudyParticipantNowStateResponseDto.builder()
 			.studyId(studyId)
 			.studyParticipantId(studyParticipant.getId())
@@ -174,6 +204,18 @@ public class StudyParticipantService {
 			redisKey,
 			studyParticipant.getId().toString()
 		);
+
+		messagingTemplate.convertAndSend(
+			"/topic/studies/" + studyId,
+			new Event<>(
+				"PARTICIPANT_LEFT",
+				new ParticipantLeftEvent(
+					studyId,
+					studyParticipant.getId()
+				)
+			)
+		);
+
 	}
 
 }

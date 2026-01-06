@@ -31,17 +31,19 @@ public class SecurityConfig {
 			.csrf(csrf -> csrf.disable())
 			.sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 			.authorizeHttpRequests(auth -> auth
+				.requestMatchers("/ws/**")
+				.permitAll()
 				.requestMatchers("/api/auth/login", "/api/auth/signup",
 					"/swagger", "/swagger-ui.html", "/swagger-ui/**",
 					"/api-docs", "/api-docs/**", "/v3/api-docs/**")
 				.permitAll()
-					.requestMatchers(HttpMethod.GET, "/api/search/**")
-					.permitAll()
+				.requestMatchers(HttpMethod.GET, "/api/search/**")
+				.permitAll()
 				.requestMatchers(HttpMethod.GET, "/api/studies/my", "/api/studies/*/participating/**")
 				.authenticated()
-				.requestMatchers(HttpMethod.GET, "/api/studies/**","/api/users/*/points")
+				.requestMatchers(HttpMethod.GET, "/api/studies/**", "/api/users/*/points")
 				.permitAll()
-					.anyRequest().authenticated()
+				.anyRequest().authenticated()
 			)
 			.addFilterBefore(new JwtAuthenticationFilter(tokenProvider),
 				UsernamePasswordAuthenticationFilter.class);
