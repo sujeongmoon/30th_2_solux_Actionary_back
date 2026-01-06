@@ -67,8 +67,10 @@ public enum ErrorCode {
 	MISSING_TOKEN(HttpStatus.UNAUTHORIZED, "토큰이 존재하지 않습니다."),
 
     // badge
-    BADGE_NOT_FOUND(HttpStatus.INTERNAL_SERVER_ERROR, "뱃지가 존재하지 않습니다.");
+    BADGE_NOT_FOUND(HttpStatus.INTERNAL_SERVER_ERROR, "뱃지가 존재하지 않습니다."),
 
+    // post
+    POST_NOT_FOUND(HttpStatus.INTERNAL_SERVER_ERROR, "게시물이 존재하지 않습니다.");
 
     private final HttpStatus status;
 	private final String message;
