@@ -55,15 +55,15 @@ public class Member extends Timestamped {
 
     @Builder
     public Member(String loginId, String password, String name, String email,
-                String phoneNumber, LocalDate birthday, String imageUrl, String nickname, Badge badge) {
+                  String phoneNumber, LocalDate birthday, String profileImageUrl, String nickname, Badge badge) {
         this.loginId = loginId;
         this.password = password;
         this.name = name;
         this.email = email;
         this.phoneNumber = phoneNumber;
         this.birthday = birthday;
-        this.profileImageUrl = (imageUrl == null || imageUrl.isBlank())
-                ? "http://.../default_profile.png" : imageUrl;
+        this.profileImageUrl = (profileImageUrl == null || profileImageUrl.isBlank())
+                ? "http://.../default_profile.png" : profileImageUrl;
         this.nickname = (nickname == null || nickname.isBlank())
                 ? generateDefaultNickname() : nickname;
         this.badge = badge;
@@ -77,6 +77,7 @@ public class Member extends Timestamped {
     public void setProfileImageUrl(String profileImageUrl) {
         this.profileImageUrl = profileImageUrl;
     }
+
     public void setNickname(String nickname) {
         this.nickname=nickname;
     }
