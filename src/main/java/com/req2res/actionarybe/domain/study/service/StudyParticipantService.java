@@ -55,6 +55,10 @@ public class StudyParticipantService {
 			throw new CustomException(ErrorCode.STUDY_CAPACITY_EXCEEDED);
 		}
 
+		if (studyParticipantRepository.existsByStudy_IdAndMember_IdAndIsActiveTrue(studyId, member.getId())) {
+			throw new CustomException(ErrorCode.STUDY_PARTICIPANT_ALREADY_JOINED);
+		}
+
 		if (!study.getIsPublic()) {
 			throw new CustomException(ErrorCode.STUDY_PARTICIPANT_PASSWORD_REQUIRED);
 		}
@@ -91,6 +95,10 @@ public class StudyParticipantService {
 
 		if (studyParticipantRepository.countByStudyAndIsActiveTrue(study) >= study.getMemberLimit()) {
 			throw new CustomException(ErrorCode.STUDY_CAPACITY_EXCEEDED);
+		}
+
+		if (studyParticipantRepository.existsByStudy_IdAndMember_IdAndIsActiveTrue(studyId, member.getId())) {
+			throw new CustomException(ErrorCode.STUDY_PARTICIPANT_ALREADY_JOINED);
 		}
 
 		if (study.getIsPublic()) {

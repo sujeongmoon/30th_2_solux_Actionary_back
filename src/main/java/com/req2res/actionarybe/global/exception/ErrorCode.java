@@ -33,6 +33,7 @@ public enum ErrorCode {
 	STUDY_PARTICIPANT_PASSWORD_UNREQUIRED(HttpStatus.BAD_REQUEST, "공개 스터디 입장 시 비밀번호가 필요하지 않습니다."),
 	STUDY_PARTICIPANT_PASSWORD_BAD_CREDENTIALS(HttpStatus.UNAUTHORIZED, "비공개 스터디 입장 비밀번호가 일치하지 않습니다."),
 	STUDY_PARTICIPANT_NOT_JOINED(HttpStatus.FORBIDDEN, "유저가 해당 스터디에 참여하고 있지 않습니다."),
+	STUDY_PARTICIPANT_ALREADY_JOINED(HttpStatus.CONFLICT, "유저가 이미 해당 스터디에 접속 중입니다."),
 
 	//to-do
 	TODO_INVALID_TITLE(HttpStatus.BAD_REQUEST, "할 일 제목은 비어 있을 수 없습니다."),
@@ -75,13 +76,13 @@ public enum ErrorCode {
 	EXPIRED_TOKEN(HttpStatus.UNAUTHORIZED, "토큰이 만료되었습니다."),
 	MISSING_TOKEN(HttpStatus.UNAUTHORIZED, "토큰이 존재하지 않습니다."),
 
-    // badge
-    BADGE_NOT_FOUND(HttpStatus.INTERNAL_SERVER_ERROR, "뱃지가 존재하지 않습니다."),
+	// badge
+	BADGE_NOT_FOUND(HttpStatus.INTERNAL_SERVER_ERROR, "뱃지가 존재하지 않습니다."),
 
-    // post
-    POST_NOT_FOUND(HttpStatus.INTERNAL_SERVER_ERROR, "게시물이 존재하지 않습니다.");
+	// post
+	POST_NOT_FOUND(HttpStatus.INTERNAL_SERVER_ERROR, "게시물이 존재하지 않습니다.");
 
-    private final HttpStatus status;
+	private final HttpStatus status;
 	private final String message;
 
 }

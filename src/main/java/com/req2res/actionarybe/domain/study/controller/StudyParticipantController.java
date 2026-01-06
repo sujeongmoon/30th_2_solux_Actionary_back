@@ -74,6 +74,16 @@ public class StudyParticipantController {
 				"""))
 		),
 		@ApiResponse(
+			responseCode = "409",
+			description = "유저가 이미 해당 스터디에 접속해있는 경우",
+			content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
+				{
+					"code": 409,
+					"message": "유저가 이미 해당 스터디에 접속 중입니다."
+				}
+				"""))
+		),
+		@ApiResponse(
 			responseCode = "403",
 			description = "비공개 스터디에 공개 스터디 입장 API를 요청한 경우",
 			content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
@@ -124,6 +134,16 @@ public class StudyParticipantController {
 				{
 					"code": 409,
 					"message": "스터디 참여 인원이 이미 정원에 도달했습니다."
+				}
+				"""))
+		),
+		@ApiResponse(
+			responseCode = "409",
+			description = "유저가 이미 해당 스터디에 접속해있는 경우",
+			content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
+				{
+					"code": 409,
+					"message": "유저가 이미 해당 스터디에 접속 중입니다."
 				}
 				"""))
 		),
