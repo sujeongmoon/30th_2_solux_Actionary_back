@@ -54,6 +54,9 @@ public enum ErrorCode {
 	STUDY_PARTICIPATION_TIME_NOT_ENOUGH(HttpStatus.BAD_REQUEST, "참여 시간은 30분 이상이어야 포인트가 적립됩니다."),
 	TODO_POINT_ALREADY_EARNED(HttpStatus.CONFLICT, "이미 해당 투두 완료 포인트를 적립했습니다."),
 
+	//search
+	SEARCH_NOT_FOUND(HttpStatus.NOT_FOUND, "검색 결과를 찾을 수 없습니다."),
+
 	//user
 	EMAIL_DUPLICATED(HttpStatus.CONFLICT, "중복된 이메일입니다"),
 	MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 사용자입니다."),

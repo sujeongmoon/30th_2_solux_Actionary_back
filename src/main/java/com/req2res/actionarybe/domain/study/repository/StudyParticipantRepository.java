@@ -86,4 +86,7 @@ public interface StudyParticipantRepository extends JpaRepository<StudyParticipa
 	List<StudyParticipantUserDto> findParticipantUserByStudyAndIsActiveTrue(Long studyId);
 
 	Optional<StudyParticipant> findByStudyAndMemberAndIsActiveTrue(Study study, Member member);
+
+	// 로그인 유저가 해당 스터디 참여 중인지 (is_active=1)
+	boolean existsByStudy_IdAndMember_IdAndIsActiveTrue(Long studyId, Long memberId);
 }
