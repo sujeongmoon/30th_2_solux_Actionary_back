@@ -13,28 +13,6 @@ import java.util.List;
 
 public interface SearchRepository extends JpaRepository<Post, Long>, SearchRepositoryCustom {
 
-    // 최신순 (RECENT)
-    @EntityGraph(attributePaths = {"member"})
-    @Query("""
-        SELECT p
-        FROM Post p
-        WHERE LOWER(p.title) LIKE LOWER(CONCAT('%', :q, '%'))
-           OR LOWER(p.text)  LIKE LOWER(CONCAT('%', :q, '%'))
-        ORDER BY p.createdAt DESC
-    """)
-    Page<Post> searchPostRecent(@Param("q") String q, Pageable pageable);
-
-    // 인기순 (POPULAR) : 댓글 수 기준, 동률이면 최신순
-    @EntityGraph(attributePaths = {"member"})
-    @Query("""
-        SELECT p
-        FROM Post p
-        WHERE LOWER(p.title) LIKE LOWER(CONCAT('%', :q, '%'))
-           OR LOWER(p.text)  LIKE LOWER(CONCAT('%', :q, '%'))
-        ORDER BY p.commentsCount DESC, p.createdAt DESC
-    """)
-    Page<Post> searchPostPopular(@Param("q") String q, Pageable pageable);
-
     // 띄어쓰기 포함 여러 단어 검색
     Page<Post> searchPostsByKeywords(List<String> keywords, SearchSort sort, Pageable pageable);
 }
