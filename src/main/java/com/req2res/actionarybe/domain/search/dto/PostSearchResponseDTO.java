@@ -1,5 +1,6 @@
 package com.req2res.actionarybe.domain.search.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 import lombok.Getter;
@@ -37,5 +38,6 @@ public class PostSearchResponseDTO {
             description = "내가 작성한 게시글 여부 (비로그인 시 false)",
             example = "true"
     )
+    @JsonProperty("isMine")
     private boolean isMine;
 }

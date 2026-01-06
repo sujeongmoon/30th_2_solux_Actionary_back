@@ -1,5 +1,6 @@
 package com.req2res.actionarybe.domain.search.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 import lombok.Getter;
@@ -27,6 +28,7 @@ public class StudySearchResponseDTO {
     private String thumbnailUrl;
 
     @Schema(description = "로그인한 사용자가 참여 중인지 여부(비로그인 시 false)", example = "false")
+    @JsonProperty("isJoined")
     private boolean isJoined;
 
     @Schema(description = "생성일", example = "2025-11-02T12:30:00")
