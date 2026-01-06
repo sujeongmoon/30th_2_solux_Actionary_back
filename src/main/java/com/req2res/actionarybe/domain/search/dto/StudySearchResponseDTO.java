@@ -1,6 +1,7 @@
 package com.req2res.actionarybe.domain.search.dto;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonGetter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 import lombok.Getter;
@@ -27,9 +28,14 @@ public class StudySearchResponseDTO {
     @Schema(description = "썸네일 이미지 URL(없으면 null)", example = "https://.../thumb.png", nullable = true)
     private String thumbnailUrl;
 
-    @Schema(description = "로그인한 사용자가 참여 중인지 여부(비로그인 시 false)", example = "false")
-    @JsonProperty("isJoined")
+    @JsonIgnore
     private boolean isJoined;
+
+    @JsonGetter("isJoined")
+    @Schema(description = "로그인한 사용자가 참여 중인지 여부(비로그인 시 false)", example = "false")
+    public boolean getIsJoined() {
+        return isJoined;
+    }
 
     @Schema(description = "생성일", example = "2025-11-02T12:30:00")
     private LocalDateTime createdAt;

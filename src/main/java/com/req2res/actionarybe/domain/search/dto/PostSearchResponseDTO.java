@@ -1,6 +1,7 @@
 package com.req2res.actionarybe.domain.search.dto;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonGetter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 import lombok.Getter;
@@ -34,10 +35,12 @@ public class PostSearchResponseDTO {
     @Schema(description = "댓글 개수", example = "3")
     private int commentCount;
 
-    @Schema(
-            description = "내가 작성한 게시글 여부 (비로그인 시 false)",
-            example = "true"
-    )
-    @JsonProperty("isMine")
+    @JsonIgnore
     private boolean isMine;
+
+    @JsonGetter("isMine")
+    @Schema(description = "내가 작성한 게시글 여부 (비로그인 시 false)", example = "true")
+    public boolean getIsMine() {
+        return isMine;
+    }
 }
