@@ -60,7 +60,7 @@ public class SearchRepositoryImpl implements SearchRepositoryCustom {
         for (String kw : keywords) {
             if (kw == null || kw.isBlank()) continue;
             String pattern = "%" + kw.toLowerCase() + "%";
-            
+
             ors.add(cb.like(cb.lower(study.get("name")), pattern));
             ors.add(cb.like(cb.lower(study.get("description")), pattern));
             ors.add(cb.like(cb.lower(study.get("category").as(String.class)), pattern));

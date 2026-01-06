@@ -31,7 +31,7 @@ public class SearchController {
     @Operation(
             summary = "스터디 검색 결과 조회",
             description = """
-                        검색어(q)를 기반으로 스터디를 조회합니다.  
+                        검색어(q)를 기반으로 스터디를 조회합니다.(띄어쓰기 포함 단어 검색 가능)
                         - 검색 대상: 스터디 제목(name), 카테고리(category), 스터디 설명(description)
                         - 정렬: RECENT(기본), POPULAR(즐겨찾기 수 기준)
                         - 인증: permitAll (Authorization 헤더는 선택)
@@ -64,9 +64,8 @@ public class SearchController {
             @RequestParam(name = "page", required = false) Integer page,
 
             @Parameter(description = "페이지당 결과 수, 기본 10", example = "10")
-            @RequestParam(name = "size", required = false) Integer size,
+            @RequestParam(name = "size", required = false) Integer size
 
-            @RequestHeader(name = "Authorization", required = false) String authorization
     ) {
         Long userId = null;
 
@@ -90,7 +89,7 @@ public class SearchController {
     @Operation(
             summary = "게시글 검색 결과 조회",
             description = """
-                    검색어(q)를 기반으로 게시글을 조회합니다.
+                    검색어(q)를 기반으로 게시글을 조회합니다. (띄어쓰기 포함 단어 검색 가능)
                     - 검색 대상: 게시글 제목(title), 내용(text)
                     - 정렬: RECENT(기본), POPULAR(댓글 수 기준)
                     - 인증: permitAll (Authorization 헤더는 선택)
@@ -123,9 +122,7 @@ public class SearchController {
             @RequestParam(name = "page", required = false) Integer page,
 
             @Parameter(description = "페이지당 결과 수, 기본 10", example = "10")
-            @RequestParam(name = "size", required = false) Integer size,
-
-            @RequestHeader(name = "Authorization", required = false) String authorization
+            @RequestParam(name = "size", required = false) Integer size
     ) {
         Long userId = null;
 
