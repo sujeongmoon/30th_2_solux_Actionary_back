@@ -7,5 +7,8 @@ import com.req2res.actionarybe.domain.study.entity.Study;
 import com.req2res.actionarybe.domain.study.entity.StudyLike;
 
 public interface StudyLikeRepository extends JpaRepository<StudyLike, Long> {
+
 	boolean existsByStudyAndMember(Study study, Member member);
+
+	StudyLike findByStudyAndMember(Study study, Member member);
 }
