@@ -25,7 +25,7 @@ jobs:
         run: chmod +x gradlew
 
       - name: Build & Test
-        run: ./gradlew clean test bootJar
+        run: ./gradlew clean test bootJar --info
         env:
           JANUS_BASE_URL: ${{ secrets.JANUS_BASE_URL }}
           JANUS_ADMIN_SECRET: ${{ secrets.JANUS_ADMIN_SECRET }}
