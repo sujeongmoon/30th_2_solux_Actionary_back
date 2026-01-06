@@ -96,5 +96,15 @@ Authorization: {{accessToken}}
 Content-Type: application/json
 
 {
-  "nowState": "조금만 쉬고 올게요"
+  "nowState": "조금만 쉬고 올게요!"
+}
+
+
+### 스터디 퇴장
+PATCH http://localhost:8080/api/studies/1/participating
+Authorization: {{accessToken}}
+Content-Type: application/json
+
+{
+  "type": "STUDY"
 }
