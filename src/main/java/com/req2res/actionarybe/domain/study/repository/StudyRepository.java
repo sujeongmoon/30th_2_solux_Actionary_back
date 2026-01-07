@@ -9,6 +9,7 @@ import com.req2res.actionarybe.domain.member.entity.Member;
 import com.req2res.actionarybe.domain.study.dto.StudyInteractionSummaryDto;
 import com.req2res.actionarybe.domain.study.entity.Category;
 import com.req2res.actionarybe.domain.study.entity.Study;
+import org.springframework.data.repository.query.Param;
 
 public interface StudyRepository extends JpaRepository<Study, Long> {
 
@@ -98,4 +99,48 @@ public interface StudyRepository extends JpaRepository<Study, Long> {
 		    order by sl.createdAt desc
 		""")
 	Page<StudyInteractionSummaryDto> findMyLikedStudies(Member member, Pageable pageable);
+
+	// RECENT: 최신순
+	@Query(
+			value = """
+            SELECT s.*
+            FROM study s
+            WHERE (LOWER(s.name) LIKE LOWER(CONCAT('%', :q, '%'))
+               OR LOWER(s.description) LIKE LOWER(CONCAT('%', :q, '%'))
+               OR LOWER(s.category) LIKE LOWER(CONCAT('%', :q, '%')))
+            ORDER BY s.created_at DESC
+        """,
+			countQuery = """
+            SELECT COUNT(*)
+            FROM study s
+            WHERE (LOWER(s.name) LIKE LOWER(CONCAT('%', :q, '%'))
+               OR LOWER(s.description) LIKE LOWER(CONCAT('%', :q, '%'))
+               OR LOWER(s.category) LIKE LOWER(CONCAT('%', :q, '%')))
+        """,
+			nativeQuery = true
+	)
+	Page<Study> searchRecent(@Param("q") String q, Pageable pageable);
+
+	// POPULAR: 즐겨찾기 수 기준 인기순
+	@Query(
+			value = """
+            SELECT s.*
+            FROM study s
+            LEFT JOIN study_like sl ON sl.study_id = s.id
+            WHERE (LOWER(s.name) LIKE LOWER(CONCAT('%', :q, '%'))
+               OR LOWER(s.description) LIKE LOWER(CONCAT('%', :q, '%'))
+               OR LOWER(s.category) LIKE LOWER(CONCAT('%', :q, '%')))
+            GROUP BY s.id
+            ORDER BY COUNT(sl.id) DESC, s.created_at DESC
+        """,
+			countQuery = """
+            SELECT COUNT(*)
+            FROM study s
+            WHERE (LOWER(s.name) LIKE LOWER(CONCAT('%', :q, '%'))
+               OR LOWER(s.description) LIKE LOWER(CONCAT('%', :q, '%'))
+               OR LOWER(s.category) LIKE LOWER(CONCAT('%', :q, '%')))
+        """,
+			nativeQuery = true
+	)
+	Page<Study> searchPopular(@Param("q") String q, Pageable pageable);
 }
