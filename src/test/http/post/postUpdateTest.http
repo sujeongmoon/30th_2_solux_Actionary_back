@@ -1,0 +1,40 @@
+@access_token = 여기에 입력
+
+### 게시글 생성 1
+POST http://localhost:8080/api/posts
+Authorization: {{accessToken}}
+Content-Type: application/json
+
+{
+  "member_id": 1,
+  "type": "인증",
+  "title": "오늘의 스터디2",
+  "content": {
+    "textContent": "자료구조 스터디 완료",
+    "imageUrls": [
+      "https://storage.com/aaa.jpg",
+      "https://storage.com/bbb.jpg"
+    ]
+  }
+}
+
+### 게시글1 수정
+PATCH http://localhost:8080/api/posts/2
+Authorization: {{accessToken}}
+Content-Type: application/json
+
+{
+  "type": "인증",
+  "title": "수정된 스터디",
+  "text": "ERD 설계는 정말 중요합니다.",
+  "imageUrls": [
+    "https://storage.com/a.jpg",
+    "https://storage.com/b.jpg"
+  ]
+}
+
+
+### 게시글 목록 조회
+GET http://localhost:8080/api/posts/2
+Authorization: {{accessToken}}
+Content-Type: application/json
