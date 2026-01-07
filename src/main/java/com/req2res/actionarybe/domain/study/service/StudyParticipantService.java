@@ -28,7 +28,8 @@ import com.req2res.actionarybe.domain.study.repository.StudyParticipantRepositor
 import com.req2res.actionarybe.domain.study.repository.StudyRepository;
 import com.req2res.actionarybe.domain.studyTime.dto.StudyTimeTypeRequestDto;
 import com.req2res.actionarybe.domain.studyTime.service.StudyTimeService;
-import com.req2res.actionarybe.global.Event;
+import com.req2res.actionarybe.global.event.Event;
+import com.req2res.actionarybe.global.event.EventType;
 import com.req2res.actionarybe.global.exception.CustomException;
 import com.req2res.actionarybe.global.exception.ErrorCode;
 
@@ -74,14 +75,18 @@ public class StudyParticipantService {
 
 		messagingTemplate.convertAndSend(
 			"/topic/studies/" + studyId,
-			new Event<>(
-				"PARTICIPANT_JOINED",
-				new ParticipantJoinedEvent(
-					studyId,
-					studyParticipant.getId(),
-					studyParticipant.getMember().getId()
-				)
-			)
+			Event.builder()
+				.type(EventType.PARTICIPANT_JOINED)
+				.data(ParticipantJoinedEvent.builder()
+					.studyParticipantId(studyParticipant.getId())
+					.studyId(studyId)
+					.userId(member.getId())
+					.userNickname(member.getNickname())
+					.profileImageUrl(member.getProfileImageUrl())
+					.badgeId(member.getBadge().getId())
+					.badgeImageUrl(member.getBadge().getImageUrl())
+					.build())
+				.build()
 		);
 
 		return StudyParticipantResponseDto.from(studyParticipant);
@@ -175,14 +180,15 @@ public class StudyParticipantService {
 
 		messagingTemplate.convertAndSend(
 			"/topic/studies/" + studyId,
-			new Event<>(
-				"NOW_STATE_CHANGED",
-				new NowStateChangedEvent(
-					studyId,
-					studyParticipant.getId(),
-					request.getNowState()
-				)
-			)
+			Event.builder()
+				.type(EventType.NOW_STATE_CHANGED)
+				.data(NowStateChangedEvent.builder()
+					.studyParticipantId(studyParticipant.getId())
+					.studyId(studyId)
+					.userId(member.getId())
+					.nowState(request.getNowState())
+					.build())
+				.build()
 		);
 
 		return StudyParticipantNowStateResponseDto.builder()
@@ -215,13 +221,13 @@ public class StudyParticipantService {
 
 		messagingTemplate.convertAndSend(
 			"/topic/studies/" + studyId,
-			new Event<>(
-				"PARTICIPANT_LEFT",
-				new ParticipantLeftEvent(
-					studyId,
-					studyParticipant.getId()
-				)
-			)
+			Event.builder()
+				.type(EventType.NOW_STATE_CHANGED)
+				.data(ParticipantLeftEvent.builder()
+					.studyId(studyId)
+					.studyParticipantId(studyParticipant.getId())
+					.build())
+				.build()
 		);
 
 	}
