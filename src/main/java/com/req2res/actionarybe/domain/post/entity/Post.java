@@ -1,6 +1,5 @@
 package com.req2res.actionarybe.domain.post.entity;
 
-import com.req2res.actionarybe.domain.comment.entity.Comment;
 import com.req2res.actionarybe.domain.member.entity.Member;
 import com.req2res.actionarybe.global.Timestamped;
 import jakarta.persistence.*;
