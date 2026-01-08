@@ -94,4 +94,12 @@ public class CommentService {
                 pageInfo
         );
     }
+
+    @Transactional
+    public DeleteCommentResponseDTO deleteComment(Long commentId){
+        commentRepository.deleteById(commentId);
+        return new DeleteCommentResponseDTO(
+                commentId
+        );
+    }
 }

@@ -80,7 +80,10 @@ public enum ErrorCode {
 	BADGE_NOT_FOUND(HttpStatus.INTERNAL_SERVER_ERROR, "뱃지가 존재하지 않습니다."),
 
 	// post
-	POST_NOT_FOUND(HttpStatus.INTERNAL_SERVER_ERROR, "게시물이 존재하지 않습니다.");
+	POST_NOT_FOUND(HttpStatus.INTERNAL_SERVER_ERROR, "게시물이 존재하지 않습니다."),
+
+    // post comment
+    POST_COMMENT_NOT_FOUND(HttpStatus.INTERNAL_SERVER_ERROR, "게시글의 댓글이 존재하지 않습니다.");
 
 	private final HttpStatus status;
 	private final String message;
