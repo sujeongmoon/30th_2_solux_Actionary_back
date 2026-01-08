@@ -1,6 +1,5 @@
 package com.req2res.actionarybe.domain.comment.dto;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
@@ -14,6 +13,6 @@ public class CreateCommentRequestDTO {
     private String content;
 
     @NotBlank
-    @Schema(example = "이것은 댓글 내용입니다.")
+    @Schema(example = "true")
     private Boolean isSecret;
 }
