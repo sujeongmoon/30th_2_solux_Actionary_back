@@ -46,7 +46,7 @@ public class AuthService {
 
         // 1. 로그인 인증 후, DB에서 member 정보 조회
         Member member = memberRepository.findByLoginId(req.getLoginId())
-                .orElseThrow(() -> new CustomException(ErrorCode.BAD_CREDENTIALS));
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_A_MEMBER));
 
         // 2. JWT 생성 시 memberId와 loginId 모두 포함
         String accessToken = tokenProvider.createToken(member.getId(), member.getLoginId());
@@ -67,7 +67,6 @@ public class AuthService {
         // id = 1 → 0P 기본 뱃지
         Badge defaultBadge = badgeRepository.findById(1L)
                 .orElseThrow(() -> new CustomException(ErrorCode.BADGE_NOT_FOUND));
-
 
         // 1. 중복 검사
         if (memberRepository.existsByLoginId(req.getLoginId())) {

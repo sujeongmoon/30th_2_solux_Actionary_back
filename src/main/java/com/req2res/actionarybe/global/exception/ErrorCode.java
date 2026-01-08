@@ -66,7 +66,8 @@ public enum ErrorCode {
 
 	//auth
 	BAD_CREDENTIALS(HttpStatus.UNAUTHORIZED, "아이디 또는 비밀번호가 올바르지 않습니다"),
-	INVALID_CONSTRAINT(HttpStatus.BAD_REQUEST, "요청 값이 올바르지 않습니다."),
+    NOT_A_MEMBER(HttpStatus.UNAUTHORIZED, "회원 가입이 필요합니다."),
+    INVALID_CONSTRAINT(HttpStatus.BAD_REQUEST, "요청 값이 올바르지 않습니다."),
 
 	INVALID_JSON(HttpStatus.BAD_REQUEST, "요청 JSON 형식이 올바르지 않습니다"),
 	JSON_SYNTAX_ERROR(HttpStatus.BAD_REQUEST, "JSON 문법이 잘못되었습니다. (콤마, 중괄호, 따옴표 등을 확인하세요)"),
