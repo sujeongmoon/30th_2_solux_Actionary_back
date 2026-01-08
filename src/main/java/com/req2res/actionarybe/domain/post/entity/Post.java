@@ -93,5 +93,10 @@ public class Post extends Timestamped {
     public void increaseCommentsCount() {
         this.commentsCount++;
     }
+    public void decreaseCommentsCount() {
+        if(this.commentsCount > 0) {
+            this.commentsCount--;
+        }
+    }
 
 }

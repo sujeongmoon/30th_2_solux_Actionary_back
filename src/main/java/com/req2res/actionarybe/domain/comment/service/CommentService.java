@@ -123,7 +123,12 @@ public class CommentService {
     // 댓글 삭제
     @Transactional
     public DeleteCommentResponseDTO deleteComment(Long commentId){
+        Comment comment = commentRepository.findById(commentId)
+                        .orElseThrow(()->new CustomException(ErrorCode.POST_COMMENT_NOT_FOUND));
+
         commentRepository.deleteById(commentId);
+        comment.getPost().decreaseCommentsCount();
+
         return new DeleteCommentResponseDTO(
                 commentId
         );
