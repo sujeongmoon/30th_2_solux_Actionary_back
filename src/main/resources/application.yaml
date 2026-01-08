@@ -12,6 +12,11 @@ spring:
   sql:
     init:
       mode: always
+  data:
+    redis:
+      host: localhost
+      port: 6377
+      timeout: 2000
 
   jpa:
     hibernate:
@@ -27,6 +32,9 @@ spring:
   jwt:
     secret: "my-super-long-secret-key"
     access-token-expiration-ms: 3600000  # 1시간
+
+janus:
+  base-url: http://localhost:8088/janus
 
   cloud:
     aws:

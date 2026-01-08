@@ -20,6 +20,7 @@ import com.req2res.actionarybe.domain.study.entity.Study;
 import com.req2res.actionarybe.domain.study.repository.StudyLikeRepository;
 import com.req2res.actionarybe.domain.study.repository.StudyParticipantRepository;
 import com.req2res.actionarybe.domain.study.repository.StudyRepository;
+import com.req2res.actionarybe.global.config.JanusClient;
 import com.req2res.actionarybe.global.exception.CustomException;
 import com.req2res.actionarybe.global.exception.ErrorCode;
 
@@ -30,6 +31,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class StudyService {
 
+	private final JanusClient janusClient;
 	private final StudyRepository studyRepository;
 	private final StudyParticipantRepository studyParticipantRepository;
 	private final StudyLikeRepository studyLikeRepository;
@@ -57,6 +59,12 @@ public class StudyService {
 			.build();
 
 		studyRepository.save(study);
+
+		try {
+			janusClient.createStudyRoom(study.getId());
+		} catch (Exception e) {
+			throw new CustomException(ErrorCode.STUDY_CREATE_ERROR);
+		}
 
 		return StudyResponseDto.from(study);
 	}

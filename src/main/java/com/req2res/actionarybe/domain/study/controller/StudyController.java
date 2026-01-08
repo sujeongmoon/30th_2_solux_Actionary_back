@@ -50,6 +50,16 @@ public class StudyController {
 					"message": "스터디가 생성되었습니다."
 				}
 				"""))
+		),
+		@ApiResponse(
+			responseCode = "502",
+			description = "스터디 생성 중 야누스와 통신 실패",
+			content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
+				{
+					"code": 502,
+					"message": "Janus 서버와 통신에 실패했습니다."
+				}
+				"""))
 		)
 	})
 	@PostMapping
