@@ -1,5 +1,6 @@
 package com.req2res.actionarybe.domain.study.service;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -8,7 +9,9 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import com.req2res.actionarybe.domain.image.service.ImageService;
 import com.req2res.actionarybe.domain.member.entity.Member;
 import com.req2res.actionarybe.domain.study.dto.StudyDetailResponseDto;
 import com.req2res.actionarybe.domain.study.dto.StudyListResponseDto;
@@ -36,7 +39,12 @@ public class StudyService {
 	private final StudyParticipantRepository studyParticipantRepository;
 	private final StudyLikeRepository studyLikeRepository;
 
-	public StudyResponseDto createStudy(Member member, @Valid StudyRequestDto request) {
+	private final ImageService imageService;
+
+    @Value("${app.default.cover-image}")
+    private String defaultCoverUrl;
+
+	public StudyResponseDto createStudy(Member member, @Valid StudyRequestDto request, MultipartFile coverImage) {
 
 		String encodedPassword = null;
 
@@ -45,11 +53,16 @@ public class StudyService {
 			encodedPassword = encoder.encode(request.getPassword());
 		}
 
-		// TODO: 이미지 값 안 받는 경우 기본이미지 불러올 수 있도록
+		String coverImageUrl;
+		if (coverImage != null && !coverImage.isEmpty()) {
+			coverImageUrl = imageService.saveImage(coverImage);
+		} else {
+			coverImageUrl = defaultCoverUrl;
+		}
 
 		Study study = Study.builder()
 			.name(request.getStudyName())
-			.coverImage(request.getCoverImage())
+			.coverImage(coverImageUrl)
 			.category(request.getCategory())
 			.description(request.getDescription())
 			.memberLimit(request.getMemberLimit())
@@ -81,11 +94,14 @@ public class StudyService {
 			throw new CustomException(ErrorCode.STUDY_NOT_MATCH_MEMBER);
 		}
 
+        imageService.deleteImage(study.getCoverImage());
+
 		studyRepository.delete(study);
 	}
 
 	@Transactional
-	public StudyResponseDto updateStudy(Member member, @Valid StudyRequestDto request, Long studyId) {
+	public StudyResponseDto updateStudy(Member member, @Valid StudyRequestDto request, Long studyId,
+		MultipartFile coverImage) {
 		Study study = studyRepository.findById(studyId).
 			orElseThrow(() -> new CustomException(ErrorCode.STUDY_NOT_FIND));
 
@@ -93,7 +109,14 @@ public class StudyService {
 			throw new CustomException(ErrorCode.STUDY_NOT_MATCH_MEMBER);
 		}
 
-		study.updateStudy(request, member);
+		String coverImageUrl;
+		if (coverImage != null && !coverImage.isEmpty()) {
+			coverImageUrl = imageService.saveImage(coverImage);
+		} else {
+			coverImageUrl = member.getProfileImageUrl();
+		}
+
+		study.updateStudy(request, member, coverImageUrl);
 		return StudyResponseDto.from(study);
 	}
 

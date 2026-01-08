@@ -22,8 +22,8 @@ public class StudyRequestDto {
 	@Schema(description = "스터디 이름", example = "06-12 임용송이 오전 공부반")
 	private String studyName;
 
-	@Schema(description = "스터디 커버 사진", example = "image_url.jpg")
-	private String coverImage;
+	// @Schema(description = "스터디 커버 사진", example = "image_url.jpg")
+	// private String coverImage;
 
 	@NotNull(message = "스터디 카테고리는 비어있을 수 없습니다.")
 	@Schema(description = "스터디 카테고리", example = "TEACHER_EXAM")

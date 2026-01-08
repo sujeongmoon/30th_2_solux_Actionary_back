@@ -1,5 +1,6 @@
 package com.req2res.actionarybe.domain.study.controller;
 
+import org.springframework.http.MediaType;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -7,10 +8,11 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.req2res.actionarybe.domain.member.entity.Member;
 import com.req2res.actionarybe.domain.member.service.MemberService;
@@ -62,13 +64,16 @@ public class StudyController {
 				"""))
 		)
 	})
-	@PostMapping
+	@PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public Response<StudyResponseDto> createStudy(
 		@AuthenticationPrincipal UserDetails userDetails,
-		@RequestBody @Valid StudyRequestDto request
+		@RequestPart(value = "coverImage", required = false) MultipartFile coverImage,
+		@RequestPart(value = "studyInfo")
+		@Parameter(content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE))
+		@Valid StudyRequestDto request
 	) {
 		Member member = memberService.findMemberByLoginId(userDetails.getUsername());
-		StudyResponseDto response = studyService.createStudy(member, request);
+		StudyResponseDto response = studyService.createStudy(member, request, coverImage);
 		return Response.success("스터디가 생성되었습니다.", response);
 	}
 
@@ -159,15 +164,18 @@ public class StudyController {
 				"""))
 		)
 	})
-	@PutMapping("/{studyId}")
+	@PutMapping(path = "/{studyId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public Response<StudyResponseDto> updateStudy(
 		@AuthenticationPrincipal UserDetails userDetails,
-		@RequestBody @Valid StudyRequestDto request,
+		@RequestPart(value = "coverImage", required = false) MultipartFile coverImage,
+		@RequestPart(value = "studyInfo")
+		@Parameter(content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE))
+		@Valid StudyRequestDto request,
 		@Parameter(name = "studyId", description = "수정할 스터디의 ID", example = "1")
 		@PathVariable Long studyId
 	) {
 		Member member = memberService.findMemberByLoginId(userDetails.getUsername());
-		StudyResponseDto response = studyService.updateStudy(member, request, studyId);
+		StudyResponseDto response = studyService.updateStudy(member, request, studyId, coverImage);
 		return Response.success("스터디가 수정되었습니다.", response);
 	}
 

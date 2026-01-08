@@ -61,9 +61,8 @@ public class Study extends Timestamped {
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "creator_user_id")
 	private Member creator;
-  
 
-	public void updateStudy(@Valid StudyRequestDto request, Member member) {
+	public void updateStudy(@Valid StudyRequestDto request, Member member, String coverImageUrl) {
 
 		String encodedPassword = null;
 
@@ -73,7 +72,7 @@ public class Study extends Timestamped {
 		}
 
 		this.name = request.getStudyName();
-		this.coverImage = request.getCoverImage();
+		this.coverImage = coverImageUrl;
 		this.category = request.getCategory();
 		this.description = request.getDescription();
 		this.memberLimit = request.getMemberLimit();
