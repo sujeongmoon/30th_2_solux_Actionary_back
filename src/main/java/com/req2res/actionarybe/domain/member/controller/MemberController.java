@@ -21,50 +21,44 @@ public class MemberController {
     // 로그인 유저 정보 조회
     @GetMapping("/me/info")
     @SecurityRequirement(name = "Bearer Token")
-    public Response<LoginMemberResponseDTO> meInfo(
+    public ResponseEntity<Response<LoginMemberResponseDTO>> meInfo(
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
         Long id = userDetails.getId();
         LoginMemberResponseDTO result = memberService.getLoginMemberInfo(id);
-        return Response.success("로그인 유저 정보 조회 성공", result);
-    }
-
-    // 타인 정보 조회
-    @GetMapping("/{memberId}")
-    public Response<OtherMemberResponseDTO> memberInfo(){
-
+        return ResponseEntity.ok(Response.success("로그인 유저 정보 조회 성공", result));
     }
 
     // 프로필 사진 수정
     @PatchMapping("me/profile")
-    public Response<UpdateProfileRequestDTO> profile(
+    public ResponseEntity<Response<UpdateProfileRequestDTO>> profile(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @RequestBody @Valid UpdateProfileRequestDTO updateProfileRequestDTO
     ) {
         Long id=userDetails.getId();
         memberService.updateProfile(id,updateProfileRequestDTO.getImageUrl());
-        return Response.success("프로필 사진 변경에 성공했습니다.",null);
+        return ResponseEntity.ok(Response.success("프로필 사진 변경에 성공했습니다.",null));
     }
 
     // 닉네임 수정
     @PatchMapping("me/nickname")
-    public Response<UpdateNicknameResponseDTO> nickname(
+    public ResponseEntity<Response<UpdateNicknameResponseDTO>> nickname(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @RequestBody @Valid UpdateNicknameRequestDTO updateNickNameRequestDTO
     ){
         Long id = userDetails.getId();
         String nickname=updateNickNameRequestDTO.getNickname();
         UpdateNicknameResponseDTO result=memberService.updateNickname(id,nickname);
-        return Response.success("닉네임 변경에 성공했습니다.",result);
+        return ResponseEntity.ok(Response.success("닉네임 변경에 성공했습니다.",result));
     }
 
     // 뱃지 조회
     @GetMapping("me/badge")
-    public Response<BadgeResponseDTO> badge(
+    public ResponseEntity<Response<BadgeResponseDTO>> badge(
             @AuthenticationPrincipal CustomUserDetails userDetails
     ){
         Long id=userDetails.getId();
         BadgeResponseDTO result = memberService.badge(id);
-        return Response.success("뱃지 정보 조회에 성공했습니다.",result);
+        return ResponseEntity.ok(Response.success("뱃지 정보 조회에 성공했습니다.",result));
     }
 }

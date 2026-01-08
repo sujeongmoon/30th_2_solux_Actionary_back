@@ -21,29 +21,29 @@ public class AuthController {
 
     // 회원가입
     @PostMapping("/signup")
-    public Response<SignupResponseDTO> signup(@Valid @RequestBody SignupRequestDTO req){
+    public ResponseEntity<Response<SignupResponseDTO>> signup(@Valid @RequestBody SignupRequestDTO req){
         SignupResponseDTO result = authService.signup(req);
-        return Response.success("회원가입에 성공하였습니다.", result);
+        return ResponseEntity.ok(Response.success("회원가입에 성공하였습니다.", result));
     }
 
     // 로그인
     @PostMapping("/login")
-    public Response<LoginResponseDTO> login(@Valid @RequestBody LoginRequestDTO req) {
+    public ResponseEntity<Response<LoginResponseDTO>> login(@Valid @RequestBody LoginRequestDTO req) {
         LoginResponseDTO result = authService.login(req);
-        return Response.success("로그인에 성공하였습니다.", result);
+        return ResponseEntity.ok(Response.success("로그인에 성공하였습니다.", result));
     }
 
     // 회원 탈퇴
     @DeleteMapping("/withdraw")
-    public Response<Void> withdraw(@AuthenticationPrincipal CustomUserDetails userDetails){
+    public ResponseEntity<Response<Void>> withdraw(@AuthenticationPrincipal CustomUserDetails userDetails){
         Long id = userDetails.getId();
         authService.withdrawMember(id);
-        return Response.success("회원 탈퇴에 성공하였습니다.",null);
+        return ResponseEntity.ok(Response.success("회원 탈퇴에 성공하였습니다.",null));
     }
 
     // 로그인 유지 (refreshToken 활용)
     @PostMapping("/refresh")
-    public Response<RefreshTokenResponseDTO> refreshAccessToken(
+    public ResponseEntity<Response<RefreshTokenResponseDTO>> refreshAccessToken(
             @RequestBody @Valid RefreshTokenRequestDTO request
     ) {
         String refreshToken = request.getRefreshToken();
@@ -59,6 +59,7 @@ public class AuthController {
         // 새 access token 생성
         String newAccessToken = tokenProvider.createToken(null, loginId); // id 없이 생성
 
-        return Response.success("AccessToken 재발급 완료", new RefreshTokenResponseDTO(newAccessToken));
+        return ResponseEntity.ok(Response.success("AccessToken 재발급 완료",
+                new RefreshTokenResponseDTO(newAccessToken)));
     }
 }

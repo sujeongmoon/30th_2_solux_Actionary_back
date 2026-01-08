@@ -22,19 +22,19 @@ public class CommentController {
 
     // 댓글 생성
     @PostMapping("/{postId}/comments")
-    public Response<CommentResponseDTO> createComment(
+    public ResponseEntity<?> createComment(
             @PathVariable("postId") Long postId,
             @RequestBody CreateCommentRequestDTO response,
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
         Long memberId=userDetails.getId();
         CommentResponseDTO result = commentService.createComment(postId, response, memberId);
-        return Response.success("댓글 생성 성공", result);
+        return ResponseEntity.ok(Response.success("댓글 생성 성공", result));
     }
 
     // 최신순 정렬된 댓글 조회
     @GetMapping("/{postId}/comments")
-    public Response<GetCommentResponseDTO> getLatestPosts(
+    public ResponseEntity<Response<GetCommentResponseDTO>> getLatestPosts(
             @RequestParam(defaultValue = "0", required = false) int page,
             @PathVariable("postId") Long postId
     ) {
@@ -45,25 +45,25 @@ public class CommentController {
         );
 
         GetCommentResponseDTO result = commentService.getCommentsByPostId(postId, pageable);
-        return Response.success("특정 게시글의 댓글 조회 성공", result);
+        return ResponseEntity.ok(Response.success("특정 게시글의 댓글 조회 성공", result));
     }
 
     // 댓글 수정
     @PatchMapping("/comments/{commentId}")
-    public Response<CommentResponseDTO> updateComment(
+    public ResponseEntity<Response<CommentResponseDTO>> updateComment(
         @PathVariable("commentId") Long commentId,
         @Valid@RequestBody UpdateCommentRequestDTO request
     ){
         CommentResponseDTO result = commentService.updateComment(commentId, request);
-        return Response.success("게시글 댓글 수정 성공", result);
+        return ResponseEntity.ok(Response.success("게시글 댓글 수정 성공", result));
     }
 
     // 댓글 삭제
     @DeleteMapping("/comments/{commentId}")
-    public Response<DeleteCommentResponseDTO> deleteComment(
+    public ResponseEntity<Response<DeleteCommentResponseDTO>> deleteComment(
             @PathVariable("commentId") Long commentId
     ){
         DeleteCommentResponseDTO result=commentService.deleteComment(commentId);
-        return Response.success("게시글 댓글 삭제 성공", result);
+        return ResponseEntity.ok(Response.success("게시글 댓글 삭제 성공", result));
     }
 }
