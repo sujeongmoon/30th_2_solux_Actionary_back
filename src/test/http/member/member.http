@@ -1,6 +1,0 @@
-@access_token = 여기에 입력
-
-### 멤버2 정보 가져오기
-GET http://localhost:8080/api/members/1
-Authorization: {{accessToken}}
-Content-Type: application/json

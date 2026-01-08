@@ -38,17 +38,6 @@ public class MemberService {
         );
     }
 
-    // 타인정보 조회
-    public OtherMemberResponseDTO getOtherMemberInfo(Long id) {
-        Member member = memberRepository.findById(id)
-                .orElseThrow(()->new CustomException(ErrorCode.MEMBER_NOT_FOUND));
-        return new OtherMemberResponseDTO(
-                member.getId(),
-                member.getNickname(),
-                member.getProfileImageUrl()
-        );
-    }
-
     // 프로필 사진 변경
     @Transactional
     public UpdateProfileRequestDTO updateProfile(Long id, String imageUrl){

@@ -31,11 +31,8 @@ public class MemberController {
 
     // 타인 정보 조회
     @GetMapping("/{memberId}")
-    public Response<OtherMemberResponseDTO> memberInfo(
-            @PathVariable("memberId") Long memberId
-    ){
-        OtherMemberResponseDTO result=memberService.getOtherMemberInfo(memberId);
-        return Response.success("타인정보 조회 성공",result);
+    public Response<OtherMemberResponseDTO> memberInfo(){
+
     }
 
     // 프로필 사진 수정
