@@ -1,6 +1,5 @@
 package com.req2res.actionarybe.domain.post.entity;
 
-import com.req2res.actionarybe.domain.comment.entity.Comment;
 import com.req2res.actionarybe.domain.member.entity.Member;
 import com.req2res.actionarybe.global.Timestamped;
 import jakarta.persistence.*;
@@ -45,6 +44,7 @@ public class Post extends Timestamped {
             orphanRemoval = true
     )
     private List<PostImage> images = new ArrayList<>();
+
     public void addImage(PostImage image) {
         images.add(image);
     }
@@ -65,6 +65,8 @@ public class Post extends Timestamped {
         정보
     }
 
+    // 필요 정보만 바꿀 수 있도록 일부러 @Getter 안 씀
+    // 단점: 코드 길어짐 (but, 4줄),
     public void setType(Type type) {
         this.type = type;
     }
@@ -76,5 +78,4 @@ public class Post extends Timestamped {
     public void setText(String text) {
         this.text = text;
     }
-
 }

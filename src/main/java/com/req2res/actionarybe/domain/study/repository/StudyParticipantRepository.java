@@ -10,6 +10,7 @@ import org.springframework.data.jpa.repository.Query;
 import com.req2res.actionarybe.domain.member.entity.Member;
 import com.req2res.actionarybe.domain.study.dto.RankingDurationDto;
 import com.req2res.actionarybe.domain.study.dto.StudyParticipantUserDto;
+import com.req2res.actionarybe.domain.study.dto.event.ChatSenderInfo;
 import com.req2res.actionarybe.domain.study.entity.Study;
 import com.req2res.actionarybe.domain.study.entity.StudyParticipant;
 
@@ -86,6 +87,26 @@ public interface StudyParticipantRepository extends JpaRepository<StudyParticipa
 	List<StudyParticipantUserDto> findParticipantUserByStudyAndIsActiveTrue(Long studyId);
 
 	Optional<StudyParticipant> findByStudyAndMemberAndIsActiveTrue(Study study, Member member);
+
+	@Query("""
+		select new com.req2res.actionarybe.domain.study.dto.event.ChatSenderInfo(
+		    sp.id,
+		    m.id,
+		    m.nickname,
+		    b.id,
+		    b.imageUrl
+		)
+		from StudyParticipant sp
+		join sp.member m
+		join m.badge b
+		where sp.study.id = :studyId
+		  and m.id = :memberId
+		  and sp.isActive = true
+		""")
+	Optional<ChatSenderInfo> findChatSenderInfo(
+		Long studyId,
+		Long memberId
+	);
 
 	// 로그인 유저가 해당 스터디 참여 중인지 (is_active=1)
 	boolean existsByStudy_IdAndMember_IdAndIsActiveTrue(Long studyId, Long memberId);

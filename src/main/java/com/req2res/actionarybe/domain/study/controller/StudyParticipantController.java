@@ -1,5 +1,7 @@
 package com.req2res.actionarybe.domain.study.controller;
 
+import org.springframework.messaging.handler.annotation.DestinationVariable;
+import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,6 +19,7 @@ import com.req2res.actionarybe.domain.study.dto.StudyParticipantNowStateResponse
 import com.req2res.actionarybe.domain.study.dto.StudyParticipantPrivateRequestDto;
 import com.req2res.actionarybe.domain.study.dto.StudyParticipantResponseDto;
 import com.req2res.actionarybe.domain.study.dto.StudyParticipantUsersResponseDto;
+import com.req2res.actionarybe.domain.study.dto.event.ChatMessageRequestEvent;
 import com.req2res.actionarybe.domain.study.service.StudyParticipantService;
 import com.req2res.actionarybe.domain.studyTime.dto.StudyTimeResponseDto;
 import com.req2res.actionarybe.domain.studyTime.dto.StudyTimeTypeRequestDto;
@@ -360,6 +363,16 @@ public class StudyParticipantController {
 		Member member = memberService.findMemberByLoginId(userDetails.getUsername());
 		StudyTimeResponseDto response = studyTimeService.createStudyTimeToDto(member, studyId, request);
 		return Response.success("이전 누적 시간이 저장되고 타이머가 전환되었습니다.", response);
+	}
+
+	@MessageMapping("/studies/{studyId}/chat")
+	public void sendChatMessage(
+		@DestinationVariable Long studyId,
+		ChatMessageRequestEvent request
+	) {
+
+		studyParticipantService.sendChatMessage(studyId, request);
+
 	}
 
 }
