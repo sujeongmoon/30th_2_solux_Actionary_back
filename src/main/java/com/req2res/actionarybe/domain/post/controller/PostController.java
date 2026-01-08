@@ -22,46 +22,46 @@ public class PostController {
 
     // 게시글 생성
     @PostMapping("")
-    public ResponseEntity<Response<CreatePostResponseDTO>> createPost(
+    public Response<CreatePostResponseDTO> createPost(
             @Valid @RequestBody CreatePostRequestDTO createPostRequestDTO,
             @AuthenticationPrincipal CustomUserDetails userDetails
     ){
         Long member_id = userDetails.getId();
         CreatePostResponseDTO result = postService.createPost(createPostRequestDTO, member_id);
-        return ResponseEntity.ok(Response.success("게시글 생성 성공",result));
+        return Response.success("게시글 생성 성공",result);
     }
 
     // 게시글 조회 (post_id에 따른)
     @GetMapping("/{post_id}")
-    public ResponseEntity<Response<GetPostResponseDTO>> getPostById(
+    public Response<GetPostResponseDTO> getPostById(
             @PathVariable("post_id") Long postId
     ){
         GetPostResponseDTO result = postService.getPost(postId);
-        return ResponseEntity.ok(Response.success("post_id에 따른 게시글 조회 성공", result));
+        return Response.success("post_id에 따른 게시글 조회 성공", result);
     }
 
     // 게시글 수정
     @PatchMapping("/{post_id}")
-    public ResponseEntity<Response<UpdatePostResponseDTO>> updatePost(
+    public Response<UpdatePostResponseDTO> updatePost(
             @PathVariable("post_id") Long postId,
             @Valid@RequestBody UpdatePostRequestDTO request
     ){
         UpdatePostResponseDTO result = postService.updatePost(postId, request);
-        return ResponseEntity.ok(Response.success("게시글 수정 성공", result));
+        return Response.success("게시글 수정 성공", result);
     }
 
     // 게시글 삭제
     @DeleteMapping("/{post_id}")
-    public ResponseEntity<Response<DeletePostResponseDTO>> deletePost(
+    public Response<DeletePostResponseDTO> deletePost(
             @PathVariable("post_id") Long postId
     ){
         DeletePostResponseDTO result = postService.deletePost(postId);
-        return ResponseEntity.ok(Response.success("게시글 삭제 성공", result));
+        return Response.success("게시글 삭제 성공", result);
     }
 
     // 최신순 정렬된 게시글 조회
     @GetMapping("/latest")
-    public ResponseEntity<Response<SortedResponseDTO>> getLatestPosts(
+    public Response<SortedResponseDTO> getLatestPosts(
             @RequestParam(defaultValue = "0", required = false) int page,
             @RequestParam(required = false) Post.Type type
     ) {
@@ -73,14 +73,12 @@ public class PostController {
 
         SortedResponseDTO result = postService.getSortedPosts(type, pageable);
 
-        return ResponseEntity.ok(
-                Response.success("최신순 게시글 조회를 성공했습니다.", result)
-        );
+        return Response.success("최신순 게시글 조회를 성공했습니다.", result);
     }
 
     // 인기순(댓글 개수) 정렬된 게시글 조회
     @GetMapping("/popular")
-    public ResponseEntity<Response<SortedResponseDTO>> getPopularPosts(
+    public Response<SortedResponseDTO> getPopularPosts(
             @RequestParam(defaultValue = "0", required = false) int page,
             @RequestParam(required = false) Post.Type type
     ) {
@@ -92,8 +90,6 @@ public class PostController {
 
         SortedResponseDTO result = postService.getSortedPosts(type, pageable);
 
-        return ResponseEntity.ok(
-                Response.success("인기순 게시글 조회를 성공했습니다.", result)
-        );
+        return Response.success("인기순 게시글 조회를 성공했습니다.", result);
     }
 }
