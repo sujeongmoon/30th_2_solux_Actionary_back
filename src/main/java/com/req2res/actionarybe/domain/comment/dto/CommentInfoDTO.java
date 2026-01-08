@@ -20,6 +20,6 @@ public class CommentInfoDTO {
         private Long memberId;
         private String nickname;
         private String profileImageUrl;
-        private Long badge_id;
+        private Long badgeId;
     }
 }

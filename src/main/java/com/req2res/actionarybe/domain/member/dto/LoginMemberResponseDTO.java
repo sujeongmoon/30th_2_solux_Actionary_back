@@ -9,7 +9,7 @@ import java.time.LocalDate;
 @AllArgsConstructor
 public class LoginMemberResponseDTO {
     Long id;
-    String profile_image_url;
+    String profileImageUrl;
     String nickname;
     String phoneNumber;
     LocalDate Birthday;

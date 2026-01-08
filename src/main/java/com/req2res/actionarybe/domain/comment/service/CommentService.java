@@ -13,11 +13,9 @@ import com.req2res.actionarybe.global.exception.ErrorCode;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -29,7 +27,7 @@ public class CommentService {
 
     // 댓글 생성
     @Transactional
-    public CreateCommentResponseDTO  createComment(Long post_id, CreateCommentRequestDTO request, Long member_id){
+    public CommentResponseDTO createComment(Long post_id, CreateCommentRequestDTO request, Long member_id){
         Post post = postRepository.findById(post_id)
                 .orElseThrow(()->new CustomException(ErrorCode.POST_NOT_FOUND));
         Member member = memberRepository.findById(member_id)
@@ -50,7 +48,7 @@ public class CommentService {
                 comment.getMember().getNickname()
         );
 
-        return new CreateCommentResponseDTO(
+        return new CommentResponseDTO(
                 comment.getId(),
                 comment.getContent(),
                 comment.getIsSecret(),
@@ -95,6 +93,34 @@ public class CommentService {
         );
     }
 
+    // 댓글 수정
+    @Transactional
+    public CommentResponseDTO updateComment(Long comment_id, UpdateCommentRequestDTO request){
+        Comment comment = commentRepository.findById(comment_id)
+                .orElseThrow(()->new CustomException(ErrorCode.POST_COMMENT_NOT_FOUND));
+
+        if(request.getContent()!=null){
+            comment.setContent(request.getContent());
+        }
+        if(request.getIsSecret()!=null){
+            comment.setIsSecret(request.getIsSecret());
+        }
+
+        AuthorCommentDTO author = new AuthorCommentDTO(
+            comment.getMember().getId(),
+            comment.getMember().getNickname()
+        );
+
+        return new CommentResponseDTO(
+                comment.getId(),
+                comment.getContent(),
+                comment.getIsSecret(),
+                comment.getCreatedAt(),
+                author
+        );
+    }
+
+    // 댓글 삭제
     @Transactional
     public DeleteCommentResponseDTO deleteComment(Long commentId){
         commentRepository.deleteById(commentId);

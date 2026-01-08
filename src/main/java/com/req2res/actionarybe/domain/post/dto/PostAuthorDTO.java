@@ -6,8 +6,8 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public class PostAuthorDTO {
-    private Long member_id;
+    private Long memberId;
     private String nickname;
-    private String profile_image_url;
+    private String profileImageUrl;
     private Long badge;
 }

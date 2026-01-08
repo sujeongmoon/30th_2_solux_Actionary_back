@@ -46,4 +46,11 @@ public class Comment extends Timestamped {
         if (content != null) this.content = content;
         if (isSecret != null) this.isSecret = isSecret;
     }
+
+    public void setContent(String content) {
+        if (content != null) this.content = content;
+    }
+    public void setIsSecret(Boolean isSecret) {
+        this.isSecret = isSecret;
+    }
 }

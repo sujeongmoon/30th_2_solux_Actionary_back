@@ -15,6 +15,5 @@ public class CreateCommentRequestDTO {
 
     @NotBlank
     @Schema(example = "이것은 댓글 내용입니다.")
-    @JsonProperty("is_secret")
     private Boolean isSecret;
 }

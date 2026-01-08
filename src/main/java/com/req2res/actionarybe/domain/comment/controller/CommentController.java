@@ -1,12 +1,10 @@
 package com.req2res.actionarybe.domain.comment.controller;
 
-import com.req2res.actionarybe.domain.comment.dto.CreateCommentRequestDTO;
-import com.req2res.actionarybe.domain.comment.dto.CreateCommentResponseDTO;
-import com.req2res.actionarybe.domain.comment.dto.DeleteCommentResponseDTO;
-import com.req2res.actionarybe.domain.comment.dto.GetCommentResponseDTO;
+import com.req2res.actionarybe.domain.comment.dto.*;
 import com.req2res.actionarybe.domain.comment.service.CommentService;
 import com.req2res.actionarybe.global.Response;
 import com.req2res.actionarybe.global.security.CustomUserDetails;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -29,8 +27,8 @@ public class CommentController {
             @RequestBody CreateCommentRequestDTO response,
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
-        Long member_id=userDetails.getId();
-        CreateCommentResponseDTO result = commentService.createComment(postId, response, member_id);
+        Long memberId=userDetails.getId();
+        CommentResponseDTO result = commentService.createComment(postId, response, memberId);
         return ResponseEntity.ok(Response.success("댓글 생성 성공", result));
     }
 
@@ -48,6 +46,16 @@ public class CommentController {
 
         GetCommentResponseDTO result = commentService.getCommentsByPostId(postId, pageable);
         return ResponseEntity.ok(Response.success("특정 게시글의 댓글 조회 성공", result));
+    }
+
+    // 댓글 수정
+    @PatchMapping("/comments/{commentId}")
+    public ResponseEntity<Response<CommentResponseDTO>> updateComment(
+        @PathVariable("commentId") Long commentId,
+        @Valid@RequestBody UpdateCommentRequestDTO request
+    ){
+        CommentResponseDTO result = commentService.updateComment(commentId, request);
+        return ResponseEntity.ok(Response.success("게시글 댓글 수정 성공", result));
     }
 
     // 댓글 삭제
