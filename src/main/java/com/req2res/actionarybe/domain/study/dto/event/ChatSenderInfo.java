@@ -7,11 +7,12 @@ import lombok.Getter;
 @Getter
 @Builder
 @AllArgsConstructor
-public class NowStateChangedEvent {
+public class ChatSenderInfo {
 
-	private Long studyParticipantId;
-	private Long studyId;
-	private Long userId;
-	private String nowState;
+	Long studyParticipantId;
+	Long senderId;
+	String senderNickname;
+	Long badgeId;
+	String badgeImageUrl;
 
 }
