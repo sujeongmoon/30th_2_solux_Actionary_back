@@ -1,5 +1,7 @@
 package com.req2res.actionarybe.domain.study.entity;
 
+import java.time.LocalDateTime;
+
 import com.req2res.actionarybe.domain.member.entity.Member;
 import com.req2res.actionarybe.global.Timestamped;
 
@@ -29,6 +31,12 @@ public class StudyParticipant extends Timestamped {
 	@Column
 	private Long id;
 
+	@Column(nullable = false)
+	private Boolean isActive;
+
+	@Column(nullable = false)
+	private LocalDateTime lastStateChangedAt;
+
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "study_id", nullable = false)
 	private Study study;
@@ -36,5 +44,13 @@ public class StudyParticipant extends Timestamped {
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "user_id", nullable = false)
 	private Member member;
+
+	public void updateIsActiveFalse(StudyParticipant studyParticipant) {
+		this.isActive = false;
+	}
+
+	public void updateLastStateChangedAt(LocalDateTime lastStateChangedAt) {
+		this.lastStateChangedAt = lastStateChangedAt;
+	}
 
 }

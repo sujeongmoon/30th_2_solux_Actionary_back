@@ -25,4 +25,3 @@ public class Badge {
     private String imageUrl;
 
 }
-

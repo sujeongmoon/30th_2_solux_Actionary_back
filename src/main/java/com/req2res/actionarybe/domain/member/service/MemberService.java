@@ -1,9 +1,6 @@
 package com.req2res.actionarybe.domain.member.service;
 
-import com.req2res.actionarybe.domain.member.dto.BadgeResponseDTO;
-import com.req2res.actionarybe.domain.member.dto.LoginMemberResponseDTO;
-import com.req2res.actionarybe.domain.member.dto.UpdateNicknameResponseDTO;
-import com.req2res.actionarybe.domain.member.dto.UpdateProfileRequestDTO;
+import com.req2res.actionarybe.domain.member.dto.*;
 import com.req2res.actionarybe.domain.member.entity.Badge;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;

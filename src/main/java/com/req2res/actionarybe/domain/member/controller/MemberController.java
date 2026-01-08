@@ -13,15 +13,15 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/me")
+@RequestMapping("/api/members")
 public class MemberController {
 
     private final MemberService memberService;
 
     // 로그인 유저 정보 조회
-    @GetMapping("/info")
+    @GetMapping("/me/info")
     @SecurityRequirement(name = "Bearer Token")
-    public ResponseEntity<Response<LoginMemberResponseDTO>> info(
+    public ResponseEntity<Response<LoginMemberResponseDTO>> meInfo(
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
         Long id = userDetails.getId();
@@ -30,7 +30,7 @@ public class MemberController {
     }
 
     // 프로필 사진 수정
-    @PatchMapping("/profile")
+    @PatchMapping("me/profile")
     public ResponseEntity<Response<UpdateProfileRequestDTO>> profile(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @RequestBody @Valid UpdateProfileRequestDTO updateProfileRequestDTO
@@ -41,7 +41,7 @@ public class MemberController {
     }
 
     // 닉네임 수정
-    @PatchMapping("/nickname")
+    @PatchMapping("me/nickname")
     public ResponseEntity<Response<UpdateNicknameResponseDTO>> nickname(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @RequestBody @Valid UpdateNicknameRequestDTO updateNickNameRequestDTO
@@ -53,7 +53,7 @@ public class MemberController {
     }
 
     // 뱃지 조회
-    @GetMapping("/badge")
+    @GetMapping("me/badge")
     public ResponseEntity<Response<BadgeResponseDTO>> badge(
             @AuthenticationPrincipal CustomUserDetails userDetails
     ){

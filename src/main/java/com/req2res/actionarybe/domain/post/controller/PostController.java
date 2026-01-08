@@ -34,16 +34,16 @@ public class PostController {
     // 게시글 조회 (post_id에 따른)
     @GetMapping("/{post_id}")
     public ResponseEntity<Response<GetPostResponseDTO>> getPostById(
-            @RequestParam Long post_id
+            @PathVariable("post_id") Long postId
     ){
-        GetPostResponseDTO result = postService.getPost(post_id);
+        GetPostResponseDTO result = postService.getPost(postId);
         return ResponseEntity.ok(Response.success("post_id에 따른 게시글 조회 성공", result));
     }
 
     // 게시글 수정
     @PatchMapping("/{post_id}")
     public ResponseEntity<Response<UpdatePostResponseDTO>> updatePost(
-            @RequestParam Long postId,
+            @PathVariable("post_id") Long postId,
             @Valid@RequestBody UpdatePostRequestDTO request
     ){
         UpdatePostResponseDTO result = postService.updatePost(postId, request);
@@ -53,9 +53,9 @@ public class PostController {
     // 게시글 삭제
     @DeleteMapping("/{post_id}")
     public ResponseEntity<Response<DeletePostResponseDTO>> deletePost(
-        @RequestParam Long post_id
+            @PathVariable("post_id") Long postId
     ){
-        DeletePostResponseDTO result = postService.deletePost(post_id);
+        DeletePostResponseDTO result = postService.deletePost(postId);
         return ResponseEntity.ok(Response.success("게시글 삭제 성공", result));
     }
 

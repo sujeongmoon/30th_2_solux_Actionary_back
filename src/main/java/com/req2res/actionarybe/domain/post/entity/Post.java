@@ -76,6 +76,8 @@ public class Post extends Timestamped {
         정보
     }
 
+    // 필요 정보만 바꿀 수 있도록 일부러 @Getter 안 씀
+    // 단점: 코드 길어짐 (but, 4줄),
     public void setType(Type type) {
         this.type = type;
     }

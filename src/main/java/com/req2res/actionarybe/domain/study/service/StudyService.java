@@ -20,6 +20,7 @@ import com.req2res.actionarybe.domain.study.entity.Study;
 import com.req2res.actionarybe.domain.study.repository.StudyLikeRepository;
 import com.req2res.actionarybe.domain.study.repository.StudyParticipantRepository;
 import com.req2res.actionarybe.domain.study.repository.StudyRepository;
+import com.req2res.actionarybe.global.config.JanusClient;
 import com.req2res.actionarybe.global.exception.CustomException;
 import com.req2res.actionarybe.global.exception.ErrorCode;
 
@@ -30,6 +31,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class StudyService {
 
+	private final JanusClient janusClient;
 	private final StudyRepository studyRepository;
 	private final StudyParticipantRepository studyParticipantRepository;
 	private final StudyLikeRepository studyLikeRepository;
@@ -58,6 +60,12 @@ public class StudyService {
 
 		studyRepository.save(study);
 
+		try {
+			janusClient.createStudyRoom(study.getId());
+		} catch (Exception e) {
+			throw new CustomException(ErrorCode.STUDY_CREATE_ERROR);
+		}
+
 		return StudyResponseDto.from(study);
 	}
 
@@ -69,7 +77,7 @@ public class StudyService {
 			throw new CustomException(ErrorCode.STUDY_NOT_MATCH_MEMBER);
 		}
 
-		if (studyParticipantRepository.countByStudyAndUpdatedAtIsNull(study) != 0) {
+		if (studyParticipantRepository.countByStudyAndIsActiveTrue(study) != 0) {
 			throw new CustomException(ErrorCode.STUDY_NOT_MATCH_MEMBER);
 		}
 
@@ -100,7 +108,7 @@ public class StudyService {
 			.category(study.getCategory())
 			.categoryLabel(study.getCategory().getLabel())
 			.description(study.getDescription())
-			.memberNow(studyParticipantRepository.countByStudyAndUpdatedAtIsNull(study))
+			.memberNow(studyParticipantRepository.countByStudyAndIsActiveTrue(study))
 			.memberLimit(study.getMemberLimit())
 			.isPublic(study.getIsPublic())
 			.isStudyLike(studyLikeRepository.existsByStudyAndMember(study, member))
