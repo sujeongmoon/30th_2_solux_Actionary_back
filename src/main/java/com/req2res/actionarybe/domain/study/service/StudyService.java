@@ -1,5 +1,6 @@
 package com.req2res.actionarybe.domain.study.service;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -40,6 +41,9 @@ public class StudyService {
 
 	private final ImageService imageService;
 
+    @Value("${app.default.cover-image}")
+    private String defaultCoverUrl;
+
 	public StudyResponseDto createStudy(Member member, @Valid StudyRequestDto request, MultipartFile coverImage) {
 
 		String encodedPassword = null;
@@ -53,7 +57,7 @@ public class StudyService {
 		if (coverImage != null && !coverImage.isEmpty()) {
 			coverImageUrl = imageService.saveImage(coverImage);
 		} else {
-			coverImageUrl = ""; // defaultCoverUrl;
+			coverImageUrl = defaultCoverUrl;
 		}
 
 		Study study = Study.builder()
@@ -89,6 +93,8 @@ public class StudyService {
 		if (studyParticipantRepository.countByStudyAndIsActiveTrue(study) != 0) {
 			throw new CustomException(ErrorCode.STUDY_NOT_MATCH_MEMBER);
 		}
+
+        imageService.deleteImage(study.getCoverImage());
 
 		studyRepository.delete(study);
 	}

@@ -50,3 +50,6 @@ spring:
 janus:
   base-url: http://localhost:8088/janus
 
+app:
+  default:
+    cover-image: "https://${S3_BUCKET_NAME}.s3.ap-northeast-2.amazonaws.com/static/default_cover/default_cover.png"
