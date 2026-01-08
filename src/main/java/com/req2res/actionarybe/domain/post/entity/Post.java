@@ -1,5 +1,6 @@
 package com.req2res.actionarybe.domain.post.entity;
 
+import com.req2res.actionarybe.domain.comment.entity.Comment;
 import com.req2res.actionarybe.domain.member.entity.Member;
 import com.req2res.actionarybe.global.Timestamped;
 import jakarta.persistence.*;
@@ -44,10 +45,20 @@ public class Post extends Timestamped {
             orphanRemoval = true
     )
     private List<PostImage> images = new ArrayList<>();
-
     public void addImage(PostImage image) {
         images.add(image);
     }
+
+
+    // Comment 정보도 객체로 다룰 수 있게 해줌 (Comment만 Post 존재 아는건 비효율적이니)
+    @OneToMany(
+            mappedBy = "post",
+            cascade = CascadeType.PERSIST,
+            orphanRemoval = true
+    )
+    private List<Comment> comments = new ArrayList<>();
+    public void addComment(Comment comment) {comments.add(comment);}
+
 
     public Post(Member member, Type type, String title, String text) {
         this.member = member;
@@ -78,4 +89,14 @@ public class Post extends Timestamped {
     public void setText(String text) {
         this.text = text;
     }
+
+    public void increaseCommentsCount() {
+        this.commentsCount++;
+    }
+    public void decreaseCommentsCount() {
+        if(this.commentsCount > 0) {
+            this.commentsCount--;
+        }
+    }
+
 }

@@ -1,13 +1,11 @@
-package com.req2res.actionarybe.domain.post.dto;
+package com.req2res.actionarybe.domain.comment.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public class PostAuthorDTO {
+public class AuthorCommentDTO {
     private Long memberId;
     private String nickname;
-    private String profileImageUrl;
-    private Long badge;
 }

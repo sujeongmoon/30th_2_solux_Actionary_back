@@ -6,6 +6,6 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public class UpdatePostResponseDTO {
-    private Long post_id;
+    private Long postId;
     private String title;
 }

@@ -77,10 +77,13 @@ public enum ErrorCode {
 	MISSING_TOKEN(HttpStatus.UNAUTHORIZED, "토큰이 존재하지 않습니다."),
 
 	// badge
-	BADGE_NOT_FOUND(HttpStatus.INTERNAL_SERVER_ERROR, "뱃지가 존재하지 않습니다."),
+	BADGE_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 뱃지입니다."),
 
 	// post
-	POST_NOT_FOUND(HttpStatus.INTERNAL_SERVER_ERROR, "게시물이 존재하지 않습니다.");
+	POST_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 게시물입니다."),
+
+    // post comment
+    POST_COMMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 댓글입니다.");
 
 	private final HttpStatus status;
 	private final String message;
