@@ -13,7 +13,7 @@ public class CreatePostRequestDTO {
 
     @Schema(example = "1")
     @JsonProperty(value = "member_id")
-    private Long membreId;
+    private Long memberId;
 
     @Schema(example = "인증")
     @NotBlank

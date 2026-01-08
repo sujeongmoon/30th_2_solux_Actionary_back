@@ -91,6 +91,21 @@ public class PostService {
         );
     }
 
+    // 게시글 images 수정 (전체 삭제 -> '전체 image' 다시 설정)
+    @Transactional
+    public void updatePostImages(UpdatePostRequestDTO request, Post post) {
+        post.getImages().clear(); // 해당 게시글의 이미지 url 모두 삭제
+
+        int i=0;
+        for(String img : request.getImageUrls()){
+            post.addImage(new PostImage(
+                    post,
+                    img,
+                    i++
+            ));
+        }
+    }
+
     // 게시글 수정
     @Transactional
     public UpdatePostResponseDTO updatePost(Long post_id, UpdatePostRequestDTO request) {
@@ -103,10 +118,9 @@ public class PostService {
             post.setTitle(request.getTitle());
         if(request.getText()!=null)
             post.setText(request.getText());
-        if(request.getImageUrls()!=null);
-            // 마저 짜기
-
-
+        if(request.getImageUrls()!=null){
+            updatePostImages(request, post);
+        }
 
         return new UpdatePostResponseDTO(
                 post.getId(),
