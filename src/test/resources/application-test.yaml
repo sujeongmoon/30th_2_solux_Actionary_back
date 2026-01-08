@@ -12,3 +12,16 @@ spring:
     hibernate:
       ddl-auto: create-drop
     database-platform: org.hibernate.dialect.H2Dialect
+
+  cloud:
+    aws:
+      s3:
+        bucket: test-bucket
+        base-url: https://test-bucket.s3.ap-northeast-2.amazonaws.com
+      region:
+        static: ap-northeast-2
+      credentials:
+        access-key: dummy
+        secret-key: dummy
+      stack:
+        auto: false

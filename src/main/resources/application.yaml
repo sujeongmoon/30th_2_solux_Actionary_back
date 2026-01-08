@@ -33,9 +33,6 @@ spring:
     secret: "my-super-long-secret-key"
     access-token-expiration-ms: 3600000  # 1시간
 
-janus:
-  base-url: http://localhost:8088/janus
-
   cloud:
     aws:
       s3:
@@ -49,4 +46,7 @@ janus:
         secret-key: ${S3_SECRET_KEY}
       stack:
         auto: false
+
+janus:
+  base-url: http://localhost:8088/janus
 
