@@ -21,16 +21,16 @@ public class AuthController {
 
     // 회원가입
     @PostMapping("/signup")
-    public Response<SignupResponseDTO> signup(@Valid @RequestBody SignupRequestDTO req){
+    public ResponseEntity<Response<SignupResponseDTO>> signup(@Valid @RequestBody SignupRequestDTO req){
         SignupResponseDTO result = authService.signup(req);
-        return Response.success("회원가입에 성공하였습니다.", result);
+        return ResponseEntity.ok(Response.success("회원가입에 성공하였습니다.", result));
     }
 
     // 로그인
     @PostMapping("/login")
-    public Response<LoginResponseDTO> login(@Valid @RequestBody LoginRequestDTO req) {
+    public ResponseEntity<Response<LoginResponseDTO>> login(@Valid @RequestBody LoginRequestDTO req) {
         LoginResponseDTO result = authService.login(req);
-        return Response.success("로그인에 성공하였습니다.", result);
+        return ResponseEntity.ok(Response.success("로그인에 성공하였습니다.", result));
     }
 
     // 회원 탈퇴
@@ -50,7 +50,7 @@ public class AuthController {
 
         // Refresh Token 유효성 검사
         if (!tokenProvider.validate(refreshToken)) {
-            return ResponseEntity.badRequest().body(Response.fail("Refresh Token이 유효하지 않습니다."));
+            return Response.<RefreshTokenResponseDTO>fail("Refresh Token이 유효하지 않습니다.");
         }
 
         // loginId 추출
