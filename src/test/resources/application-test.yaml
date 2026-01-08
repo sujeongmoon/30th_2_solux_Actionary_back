@@ -25,3 +25,7 @@ spring:
         secret-key: dummy
       stack:
         auto: false
+
+app:
+  default:
+    cover-image: "https://test-bucket.s3.ap-northeast-2.amazonaws.com/static/default_cover/default_cover.png"
