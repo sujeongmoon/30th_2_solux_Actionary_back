@@ -11,6 +11,7 @@ import com.req2res.actionarybe.domain.member.repository.MemberRepository;
 import com.req2res.actionarybe.global.exception.CustomException;
 import com.req2res.actionarybe.global.exception.ErrorCode;
 import com.req2res.actionarybe.global.security.JwtTokenProvider;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -29,12 +30,23 @@ public class AuthService {
     private final BadgeRepository badgeRepository;
     private final PasswordEncoder passwordEncoder;
 
-    // 회원 탈퇴
+    // 회원 탈퇴 (member 남기고, 이름/닉네임 익명화)
+    @Transactional
     public void withdrawMember(Long id){
-        if(!memberRepository.existsById(id)){
-            throw new CustomException(ErrorCode.MEMBER_NOT_FOUND);
+        Member member = memberRepository.findById(id)
+                .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
+
+        // 이미 탈퇴한 회원이면 404에러
+        if (member.isWithdrawn()) {
+            throw new CustomException(ErrorCode.WITHDRAWN_MEMBER);
         }
-        memberRepository.deleteById(id);
+
+        // 가시적 정보만 (익명)으로 바꿈.
+        member.setNickname("(익명)");
+        member.setName("(익명)");
+
+        // 탈퇴했음 표시
+        member.setWithdrawn(true);
     }
 
     // 로그인
@@ -48,7 +60,12 @@ public class AuthService {
         Member member = memberRepository.findByLoginId(req.getLoginId())
                 .orElseThrow(() -> new CustomException(ErrorCode.BAD_CREDENTIALS));
 
-        // 2. JWT 생성 시 memberId와 loginId 모두 포함
+        // 2. 이미 탈퇴한 멤버면 404에러
+        if(member.isWithdrawn()){
+            throw new CustomException(ErrorCode.WITHDRAWN_MEMBER);
+        }
+
+        // 3. JWT 생성 시 memberId와 loginId 모두 포함
         String accessToken = tokenProvider.createToken(member.getId(), member.getLoginId());
         String refreshToken = tokenProvider.createRefreshToken(member.getLoginId());
 
@@ -67,7 +84,6 @@ public class AuthService {
         // id = 1 → 0P 기본 뱃지
         Badge defaultBadge = badgeRepository.findById(1L)
                 .orElseThrow(() -> new CustomException(ErrorCode.BADGE_NOT_FOUND));
-
 
         // 1. 중복 검사
         if (memberRepository.existsByLoginId(req.getLoginId())) {
