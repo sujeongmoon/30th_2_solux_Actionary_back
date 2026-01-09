@@ -69,7 +69,6 @@ public class AuthService {
         String accessToken = tokenProvider.createToken(member.getId(), member.getLoginId());
         String refreshToken = tokenProvider.createRefreshToken(member.getLoginId());
 
-
         return new LoginResponseDTO(
                 member.getId(),
                 member.getNickname(),
@@ -85,8 +84,8 @@ public class AuthService {
         Badge defaultBadge = badgeRepository.findById(1L)
                 .orElseThrow(() -> new CustomException(ErrorCode.BADGE_NOT_FOUND));
 
-        // 1. 중복 검사
-        if (memberRepository.existsByLoginId(req.getLoginId())) {
+        // 1. 중복 검사 (탈퇴한 id/pw는 제외, 다른 사람이 쓸 수 있게끔)
+        if (memberRepository.existsByLoginIdAndWithdrawnFalse(req.getLoginId())) {
             throw new CustomException(ErrorCode.LOGIN_ID_DUPLICATED);
         }
 
