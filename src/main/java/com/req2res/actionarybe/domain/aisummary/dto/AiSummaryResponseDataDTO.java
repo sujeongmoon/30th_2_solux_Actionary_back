@@ -33,7 +33,7 @@ public class AiSummaryResponseDataDTO {
             description = "요약 작업이 큐에 들어간 시각 (202 응답 시)",
             example = "2026-01-08T12:30:00Z"
     )
-    private Instant queuedAt;
+    private String queuedAt;
 
     @Schema(description = "요약 실패 시 에러 정보 (FAILED 상태일 때만 존재)")
     private AiError error;

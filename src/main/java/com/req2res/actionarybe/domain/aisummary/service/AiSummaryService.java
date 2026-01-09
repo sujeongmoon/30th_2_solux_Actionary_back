@@ -154,7 +154,11 @@ public class AiSummaryService {
         AiSummaryResponseDataDTO pending = AiSummaryResponseDataDTO.builder()
                 .status(AiSummaryResponseDataDTO.Status.PENDING)
                 .jobId(jobId)
-                .queuedAt(java.time.Instant.now())
+                .queuedAt(
+                        job.getQueuedAt() != null
+                                ? job.getQueuedAt().toString()
+                                : null
+                )
                 .build();
 
         redisRepo.saveJob(jobId, pending, JOB_TTL);
