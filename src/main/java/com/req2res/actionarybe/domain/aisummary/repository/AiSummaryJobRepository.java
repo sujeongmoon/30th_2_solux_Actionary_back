@@ -9,5 +9,4 @@ import java.util.Optional;
 
 public interface AiSummaryJobRepository extends JpaRepository<AiSummaryJob, Long> {
     Optional<AiSummaryJob> findByJobId(String jobId);
-    Page<AiSummaryJob> findAllByUserIdOrderByIdDesc(Long userId, Pageable pageable);
 }

@@ -44,14 +44,14 @@ public class AiSummaryWorker {
         redisRepo.saveJob(jobId, running, JOB_TTL);
 
         try {
-            // 1️⃣ 실제 요약 실행 (🔥 여기서 OpenAI + S3 사용)
+            // 1) 실제 요약 실행 (여기서 OpenAI + S3 사용)
             String summary = aiSummaryService.summarizeFileFromS3Key(
-                    job.getFilePath(),   // ✅ S3 key
+                    job.getFilePath(),   // S3 key
                     job.getLanguage(),   // 요약 언어
-                    300                  // maxTokens (고정 or job에 저장해도 됨)
+                    600
             );
 
-            // 2️⃣ 결과 DB 저장
+            // 2) 결과 DB 저장
             resultRepo.save(
                     AiSummaryResult.builder()
                             .jobId(jobId)
@@ -59,11 +59,11 @@ public class AiSummaryWorker {
                             .build()
             );
 
-            // 3️⃣ Job 상태 성공 처리
+            // 3) Job 상태 성공 처리
             job.markSucceeded(true);
             jobRepo.save(job);
 
-            // 4️⃣ Redis에 SUCCEEDED + 짧은 summary 저장
+            // 4) Redis에 SUCCEEDED + 짧은 summary 저장
             AiSummaryResponseDataDTO done = AiSummaryResponseDataDTO.builder()
                     .status(AiSummaryResponseDataDTO.Status.SUCCEEDED)
                     .jobId(jobId)

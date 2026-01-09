@@ -10,12 +10,15 @@ import com.req2res.actionarybe.domain.aisummary.repository.AiSummaryResultReposi
 import com.req2res.actionarybe.global.exception.CustomException;
 import com.req2res.actionarybe.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 import java.io.InputStream;
 import java.time.Duration;
@@ -26,6 +29,7 @@ import java.util.UUID;
 import static com.req2res.actionarybe.domain.aisummary.entity.AiSummaryEnums.SourceType;
 import static com.req2res.actionarybe.domain.aisummary.entity.AiSummaryEnums.Status;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AiSummaryService {
@@ -44,6 +48,7 @@ public class AiSummaryService {
     private static final int QUICK_MAX_PAGES = 30;
     private static final Duration JOB_TTL = Duration.ofHours(6);
 
+    // 1. 파일 요약 API
     public AiSummaryResponseDataDTO summarizeFile(MultipartFile file, String language, Integer maxTokens, Long userIdOrNull) {
         if (file == null || file.isEmpty()) {
             throw new CustomException(ErrorCode.BAD_REQUEST, "file은 필수입니다.");
@@ -110,7 +115,23 @@ public class AiSummaryService {
                                 .message(e.getMessage())
                                 .build())
                         .build();
-            } catch (Exception e) {
+            } catch (WebClientResponseException.TooManyRequests e) {
+                log.error("OpenAI error status={}, body={}", e.getStatusCode(), e.getResponseBodyAsString(), e);
+
+                log.warn("OpenAI rate limit exceeded. jobId={}", jobId);
+
+                job.markFailed("RATE_LIMIT", "요약 요청이 많아 잠시 후 다시 시도해주세요.");
+                jobRepo.save(job);
+
+                return AiSummaryResponseDataDTO.builder()
+                        .status(AiSummaryResponseDataDTO.Status.FAILED)
+                        .error(AiSummaryResponseDataDTO.AiError.builder()
+                                .code("RATE_LIMIT")
+                                .message("요약 요청이 많아 잠시 후 다시 시도해주세요.")
+                                .build())
+                        .build();
+            }catch (Exception e) {
+                log.error("AI summary failed. jobId={}, fileName={}", jobId, file.getOriginalFilename(), e);
                 job.markFailed("INTERNAL_ERROR", "요약 처리 중 오류가 발생했습니다.");
                 jobRepo.save(job);
 
@@ -122,6 +143,8 @@ public class AiSummaryService {
                                 .build())
                         .build();
             }
+
+
         }
 
         // 3) 대형이면 비동기 큐 등록
@@ -137,9 +160,10 @@ public class AiSummaryService {
         redisRepo.saveJob(jobId, pending, JOB_TTL);
         redisRepo.enqueue(jobId);
 
-        return pending; // Controller에서 202로 감싸면 됨
+        return pending;
     }
 
+    // 2. URL 파일 요약 API
     public AiSummaryResponseDataDTO summarizeUrl(AiSummaryUrlRequestDTO req, Long userIdOrNull) {
         String jobId = newJobId();
         String lang = (req.getLanguage() == null || req.getLanguage().isBlank()) ? "ko" : req.getLanguage();
@@ -276,28 +300,95 @@ public class AiSummaryService {
         }
     }
 
-    private String callOpenAi(String inputText, String language, int maxOutputTokens) {
-        Map<String, Object> body = Map.of(
-                "model", model,
-                "instructions", "너는 문서를 요약하는 도우미야. 출력 언어는 " + language + "로. 최대 300토큰 내로 요약해.",
-                "max_output_tokens", maxOutputTokens,
-                "input", inputText
-        );
-
-        Map<?, ?> res = openAiWebClient.post()
-                .uri("/responses")
-                .bodyValue(body)
-                .retrieve()
-                .bodyToMono(Map.class)
-                .block();
-
-        if (res == null) throw new RuntimeException("OpenAI 응답이 비었습니다.");
-
+    private String extractOutputText(Map<?, ?> res) {
         Object outputText = res.get("output_text");
         if (outputText instanceof String s && !s.isBlank()) return s;
 
-        // fallback
-        return res.toString();
+        Object output = res.get("output");
+        if (output instanceof java.util.List<?> list) {
+            for (Object item : list) {
+                if (!(item instanceof Map<?, ?> m)) continue;
+                Object content = m.get("content");
+                if (!(content instanceof java.util.List<?> clist)) continue;
+
+                for (Object c : clist) {
+                    if (!(c instanceof Map<?, ?> cm)) continue;
+                    Object text = cm.get("text");
+                    if (text instanceof String s2 && !s2.isBlank()) return s2;
+                }
+            }
+        }
+        return null;
+    }
+
+    @SuppressWarnings("unchecked")
+    private String extractSummaryText(Map<String, Object> res) {
+
+        // 1) 가장 쉬운 케이스: output_text
+        Object outputText = res.get("output_text");
+        if (outputText instanceof String s && !s.isBlank()) return s.trim();
+
+        // 2) output -> content -> text
+        Object output = res.get("output");
+        if (output instanceof java.util.List<?> outList) {
+            for (Object item : outList) {
+                if (!(item instanceof Map<?, ?> m)) continue;
+
+                Object content = m.get("content");
+                if (content instanceof java.util.List<?> cList) {
+                    for (Object c : cList) {
+                        if (!(c instanceof Map<?, ?> cm)) continue;
+
+                        Object text = cm.get("text");
+                        if (text instanceof String s && !s.isBlank()) return s.trim();
+
+                        // 혹시 { text: { value: "..." } } 형태일 수도 있어서 대비
+                        if (text instanceof Map<?, ?> tm) {
+                            Object value = tm.get("value");
+                            if (value instanceof String s2 && !s2.isBlank()) return s2.trim();
+                        }
+                    }
+                }
+
+                // 3) 혹시 item 자체에 text가 있는 구조 대비
+                Object text = m.get("text");
+                if (text instanceof String s && !s.isBlank()) return s.trim();
+            }
+        }
+
+        // 4) 마지막 fallback: 전체 JSON을 로그로 보고 구조 확인
+        return null;
+    }
+
+
+    private String callOpenAi(String inputText, String language, int maxOutputTokens) {
+        Map<String, Object> body = Map.of(
+                "model", model,
+                "instructions", "너는 문서를 요약하는 도우미야. 출력 언어는 " + language + "로. 300토큰 이내로 요약만 출력해.",
+                "input", inputText,
+                "max_output_tokens", maxOutputTokens,
+                "text", Map.of(
+                        "format", Map.of("type", "text")
+                )
+        );
+
+        Map<String, Object> res = openAiWebClient.post()
+                .uri("/responses")
+                .bodyValue(body)
+                .retrieve()
+                .bodyToMono(new ParameterizedTypeReference<Map<String, Object>>() {})
+                .block();
+
+        String summary = extractSummaryText(res);
+
+        if (summary == null || summary.isBlank()) {
+            log.error("OpenAI response has no extractable text. res={}", res);
+            throw new RuntimeException("OpenAI 응답에서 요약 텍스트를 찾지 못했습니다.");
+        }
+
+        return summary;
+
+
     }
 
     private static class UnsupportedPdfException extends RuntimeException {

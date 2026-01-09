@@ -13,6 +13,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -34,34 +35,43 @@ public class AiSummaryController {
             summary = "파일 요약",
             description = "PDF/문서 파일을 업로드하여 AI 요약을 수행합니다. 비동기 처리 시 202 상태로 jobId를 반환합니다."
     )
-    @PostMapping(
-            value = "/file",
-            consumes = MediaType.MULTIPART_FORM_DATA_VALUE
-    )
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Response<AiSummaryResponseDataDTO>> summarizeFile(
-            @AuthenticationPrincipal UserDetails userDetails,
-
-            @Parameter(description = "요약할 파일", required = true)
             @RequestPart("file") MultipartFile file,
-
-            @Parameter(description = "요약 언어 (기본값: ko)", example = "ko")
-            @RequestPart(value = "language", required = false) String language,
-
-            @Parameter(description = "최대 토큰 수", example = "300")
-            @RequestPart(value = "maxTokens", required = false) Integer maxTokens
+            @RequestParam(value = "language", required = false) String language,
+            @RequestParam(value = "maxTokens", required = false) Integer maxTokens,
+            @AuthenticationPrincipal UserDetails userDetails
     ) {
-        Long userId = extractUserId(userDetails);
+        Long userId = null;
+        if (userDetails != null) {
+            String loginId = userDetails.getUsername();
+            Member member = memberRepository.findByLoginId(loginId)
+                    .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND));
+            userId = member.getId();
+        }
 
         AiSummaryResponseDataDTO data =
                 aiSummaryService.summarizeFile(file, language, maxTokens, userId);
 
         if (data.getStatus() == AiSummaryResponseDataDTO.Status.PENDING) {
-            return ResponseEntity.accepted()
+            return ResponseEntity
+                    .accepted()
                     .body(Response.success("요약 작업이 접수되었습니다.", data));
         }
 
-        return ResponseEntity.ok(Response.success("요약이 완료되었습니다.", data));
+        if (data.getStatus() == AiSummaryResponseDataDTO.Status.FAILED) {
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Response.fail("요약 처리 중 오류가 발생했습니다."));
+        }
+
+        // SUCCEEDED
+        return ResponseEntity.ok(
+                Response.success("요약이 완료되었습니다.", data)
+        );
     }
+
+
 
     // B) URL 요약
     @Operation(

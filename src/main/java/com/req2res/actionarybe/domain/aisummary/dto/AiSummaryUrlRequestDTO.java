@@ -19,15 +19,15 @@ public class AiSummaryUrlRequestDTO {
 
     @Schema(
             description = "요약 언어 (기본값: ko)",
-            example = "ko",
+            example = "ko,en",
             defaultValue = "ko"
     )
     private String language = "ko";
 
     @Schema(
             description = "최대 토큰 수 (요약 길이 제한)",
-            example = "300",
-            defaultValue = "300"
+            example = "1000",
+            defaultValue = "600"
     )
-    private Integer maxTokens = 300;
+    private Integer maxTokens = 600;
 }

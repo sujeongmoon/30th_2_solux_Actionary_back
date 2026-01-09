@@ -1,6 +1,10 @@
 spring:
   application:
     name: actionarybe
+  servlet:
+    multipart:
+      max-file-size: 200MB
+      max-request-size: 200MB
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3333/actionary_db
