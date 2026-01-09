@@ -23,7 +23,7 @@ public enum ErrorCode {
 	BOOKMARK_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 북마크입니다."),
 	BOOKMARK_NOT_MATCH_MEMBER(HttpStatus.FORBIDDEN, "사용자의 북마크가 아닙니다."),
 
-	//study
+	// study
 	STUDY_NOT_FIND(HttpStatus.NOT_FOUND, "존재하지 않는 스터디입니다."),
 	STUDY_NOT_MATCH_MEMBER(HttpStatus.FORBIDDEN, "사용자가 방장인 스터디가 아닙니다."),
 	STUDY_HAVE_USER(HttpStatus.CONFLICT, "스터디에 참여 중인 사용자가 있습니다."),
@@ -34,6 +34,9 @@ public enum ErrorCode {
 	STUDY_PARTICIPANT_PASSWORD_BAD_CREDENTIALS(HttpStatus.UNAUTHORIZED, "비공개 스터디 입장 비밀번호가 일치하지 않습니다."),
 	STUDY_PARTICIPANT_NOT_JOINED(HttpStatus.FORBIDDEN, "유저가 해당 스터디에 참여하고 있지 않습니다."),
 	STUDY_PARTICIPANT_ALREADY_JOINED(HttpStatus.CONFLICT, "유저가 이미 해당 스터디에 접속 중입니다."),
+
+	// studytime
+	STUDY_TIME_MANUAL_FUTURE_DATE_NOT_ALLOWED(HttpStatus.BAD_REQUEST, "미래 날짜에는 공부 시간을 수동으로 추가할 수 없습니다."),
 
 	//to-do
 	TODO_INVALID_TITLE(HttpStatus.BAD_REQUEST, "할 일 제목은 비어 있을 수 없습니다."),
@@ -82,8 +85,8 @@ public enum ErrorCode {
 	// post
 	POST_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 게시물입니다."),
 
-    // post comment
-    POST_COMMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 댓글입니다.");
+	// post comment
+	POST_COMMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 댓글입니다.");
 
 	private final HttpStatus status;
 	private final String message;

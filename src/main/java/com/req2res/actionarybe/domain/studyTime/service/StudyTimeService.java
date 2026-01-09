@@ -1,6 +1,7 @@
 package com.req2res.actionarybe.domain.studyTime.service;
 
 import java.time.Duration;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import org.springframework.stereotype.Service;
@@ -11,10 +12,14 @@ import com.req2res.actionarybe.domain.study.entity.Study;
 import com.req2res.actionarybe.domain.study.entity.StudyParticipant;
 import com.req2res.actionarybe.domain.study.repository.StudyParticipantRepository;
 import com.req2res.actionarybe.domain.study.repository.StudyRepository;
+import com.req2res.actionarybe.domain.studyTime.dto.StudyTimeManualRequestDto;
+import com.req2res.actionarybe.domain.studyTime.dto.StudyTimeManualResponseDto;
 import com.req2res.actionarybe.domain.studyTime.dto.StudyTimeResponseDto;
 import com.req2res.actionarybe.domain.studyTime.dto.StudyTimeTypeRequestDto;
 import com.req2res.actionarybe.domain.studyTime.entity.StudyTime;
+import com.req2res.actionarybe.domain.studyTime.entity.StudyTimeManual;
 import com.req2res.actionarybe.domain.studyTime.entity.Type;
+import com.req2res.actionarybe.domain.studyTime.repository.StudyTimeManualRepository;
 import com.req2res.actionarybe.domain.studyTime.repository.StudyTimeRepository;
 import com.req2res.actionarybe.global.exception.CustomException;
 import com.req2res.actionarybe.global.exception.ErrorCode;
@@ -29,6 +34,7 @@ public class StudyTimeService {
 	private final StudyTimeRepository studyTimeRepository;
 	private final StudyParticipantRepository studyParticipantRepository;
 	private final StudyRepository studyRepository;
+	private final StudyTimeManualRepository studyTimeManualRepository;
 
 	@Transactional
 	public StudyTime createStudyTime(Type type, StudyParticipant studyParticipant) {
@@ -84,5 +90,25 @@ public class StudyTimeService {
 			.totalStudySeconds(totalStudySeconds)
 			.totalBreakSeconds(totalBreakSeconds)
 			.build();
+	}
+
+	public StudyTimeManualResponseDto createStudyTimeManual(Member member, @Valid StudyTimeManualRequestDto request) {
+
+		LocalDate date = request.getDate();
+		LocalDate today = LocalDate.now();
+
+		if (date.isAfter(today)) {
+			throw new CustomException(ErrorCode.STUDY_TIME_MANUAL_FUTURE_DATE_NOT_ALLOWED);
+		}
+
+		StudyTimeManual studyTimeManual = StudyTimeManual.builder()
+			.userId(member.getId())
+			.manualDate(date)
+			.durationSecond(request.getDurationSecond())
+			.build();
+
+		studyTimeManualRepository.save(studyTimeManual);
+
+		return StudyTimeManualResponseDto.from(studyTimeManual);
 	}
 }
