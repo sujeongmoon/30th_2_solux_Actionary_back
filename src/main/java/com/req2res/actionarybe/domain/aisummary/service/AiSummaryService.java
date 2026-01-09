@@ -173,7 +173,6 @@ public class AiSummaryService {
         String lang = (req.getLanguage() == null || req.getLanguage().isBlank()) ? "ko" : req.getLanguage();
         int outTokens = (req.getMaxTokens() == null) ? 300 : req.getMaxTokens();
 
-        // URL은 일단 동기 처리(스펙상 비동기로 돌릴 수도 있지만 처음엔 단순하게)
         try {
             AiSummaryJob job = AiSummaryJob.builder()
                     .userId(userIdOrNull)
@@ -187,7 +186,15 @@ public class AiSummaryService {
                     .build();
             jobRepo.save(job);
 
-            String summary = callOpenAi("다음 URL 내용을 요약해줘: " + req.getSourceUrl(), lang, outTokens);
+            // URL 다운로드 → PDF 텍스트 추출 → 요약
+            byte[] bytes = downloadUrlAsBytes(req.getSourceUrl());
+
+            if (!looksLikePdf(bytes)) {
+                throw new UnsupportedPdfException("URL이 PDF를 반환하지 않습니다. (HTML/기타 파일일 수 있음)");
+            }
+            
+            String text = extractPdfTextFromBytes(bytes);
+            String summary = callOpenAi(text, lang, outTokens);
 
             resultRepo.save(AiSummaryResult.builder()
                     .jobId(jobId)
@@ -200,6 +207,20 @@ public class AiSummaryService {
             return AiSummaryResponseDataDTO.builder()
                     .status(AiSummaryResponseDataDTO.Status.SUCCEEDED)
                     .summary(summary)
+                    .build();
+
+        } catch (UnsupportedPdfException e) {
+            jobRepo.findByJobId(jobId).ifPresent(j -> {
+                j.markFailed("UNSUPPORTED_PDF", e.getMessage());
+                jobRepo.save(j);
+            });
+
+            return AiSummaryResponseDataDTO.builder()
+                    .status(AiSummaryResponseDataDTO.Status.FAILED)
+                    .error(AiSummaryResponseDataDTO.AiError.builder()
+                            .code("UNSUPPORTED_PDF")
+                            .message(e.getMessage())
+                            .build())
                     .build();
 
         } catch (Exception e) {
@@ -218,42 +239,6 @@ public class AiSummaryService {
         }
     }
 
-    public AiSummaryResponseDataDTO getJobStatus(String jobId) {
-        // Redis 우선
-        var cached = redisRepo.findJob(jobId);
-        if (cached.isPresent()) return cached.get();
-
-        // Redis TTL 만료 시: DB 기반으로 반환
-        AiSummaryJob job = jobRepo.findByJobId(jobId)
-                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, "존재하지 않는 jobId 입니다."));
-
-        if (job.getStatus() == Status.SUCCEEDED) {
-            String summary = resultRepo.findByJobId(jobId)
-                    .map(AiSummaryResult::getSummary)
-                    .orElse(null);
-
-            return AiSummaryResponseDataDTO.builder()
-                    .status(AiSummaryResponseDataDTO.Status.SUCCEEDED)
-                    .summary(summary)
-                    .build();
-        }
-
-        if (job.getStatus() == Status.FAILED) {
-            return AiSummaryResponseDataDTO.builder()
-                    .status(AiSummaryResponseDataDTO.Status.FAILED)
-                    .error(AiSummaryResponseDataDTO.AiError.builder()
-                            .code(job.getErrorCode())
-                            .message(job.getErrorMessage())
-                            .build())
-                    .build();
-        }
-
-        // PENDING/RUNNING
-        return AiSummaryResponseDataDTO.builder()
-                .status(AiSummaryResponseDataDTO.Status.valueOf(job.getStatus().name()))
-                .jobId(jobId)
-                .build();
-    }
 
     // ===== helpers =====
 
@@ -304,27 +289,6 @@ public class AiSummaryService {
         }
     }
 
-    private String extractOutputText(Map<?, ?> res) {
-        Object outputText = res.get("output_text");
-        if (outputText instanceof String s && !s.isBlank()) return s;
-
-        Object output = res.get("output");
-        if (output instanceof java.util.List<?> list) {
-            for (Object item : list) {
-                if (!(item instanceof Map<?, ?> m)) continue;
-                Object content = m.get("content");
-                if (!(content instanceof java.util.List<?> clist)) continue;
-
-                for (Object c : clist) {
-                    if (!(c instanceof Map<?, ?> cm)) continue;
-                    Object text = cm.get("text");
-                    if (text instanceof String s2 && !s2.isBlank()) return s2;
-                }
-            }
-        }
-        return null;
-    }
-
     @SuppressWarnings("unchecked")
     private String extractSummaryText(Map<String, Object> res) {
 
@@ -368,7 +332,8 @@ public class AiSummaryService {
     private String callOpenAi(String inputText, String language, int maxOutputTokens) {
         Map<String, Object> body = Map.of(
                 "model", model,
-                "instructions", "너는 문서를 요약하는 도우미야. 출력 언어는 " + language + "로. 300토큰 이내로 요약만 출력해.",
+                "instructions", "너는 문서를 요약하는 도우미야. 출력 언어는 " + language
+                        + "로. 요약만 출력해. 최대 " + maxOutputTokens + " 토큰 이내.",
                 "input", inputText,
                 "max_output_tokens", maxOutputTokens,
                 "text", Map.of(
@@ -403,5 +368,50 @@ public class AiSummaryService {
         String text = extractPdfTextFromS3(s3Key);
         return callOpenAi(text, language, outTokens);
     }
+
+    //URL → PDF bytes 다운로드 메서드
+    private byte[] downloadUrlAsBytes(String url) {
+        try {
+            return WebClient.builder()
+                    .build()
+                    .get()
+                    .uri(url)
+                    // 일부 사이트는 User-Agent 없으면 403
+                    .header("User-Agent", "Mozilla/5.0")
+                    .retrieve()
+                    .bodyToMono(byte[].class)
+                    .block();
+        } catch (Exception e) {
+            throw new RuntimeException("URL에서 파일 다운로드 실패: " + e.getMessage(), e);
+        }
+    }
+
+    //PDF bytes → 텍스트 추출 메서드
+    private String extractPdfTextFromBytes(byte[] pdfBytes) {
+        try (PDDocument doc = PDDocument.load(pdfBytes)) {
+            if (doc.isEncrypted()) throw new UnsupportedPdfException("암호화된 PDF는 처리할 수 없습니다.");
+
+            PDFTextStripper stripper = new PDFTextStripper();
+            String text = stripper.getText(doc);
+
+            // 너무 길면 자르기 (임시)
+            int maxChars = 12000;
+            if (text.length() > maxChars) text = text.substring(0, maxChars);
+
+            return text;
+
+        } catch (UnsupportedPdfException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new UnsupportedPdfException("PDF 텍스트 추출에 실패했습니다.");
+        }
+    }
+
+    //pdf인지 확인하는 메소드
+    private boolean looksLikePdf(byte[] bytes) {
+        return bytes != null && bytes.length >= 4
+                && bytes[0] == '%' && bytes[1] == 'P' && bytes[2] == 'D' && bytes[3] == 'F';
+    }
+
 
 }
