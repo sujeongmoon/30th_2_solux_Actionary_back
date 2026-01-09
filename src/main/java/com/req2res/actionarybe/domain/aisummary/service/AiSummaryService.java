@@ -14,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -40,6 +41,8 @@ public class AiSummaryService {
     private final AiSummaryJobRepository jobRepo;
     private final AiSummaryResultRepository resultRepo;
     private final AiSummaryRedisRepository redisRepo;
+
+    private final WebClient downloadClient;
 
     @Value("${openai.model}")
     private String model;
@@ -173,71 +176,85 @@ public class AiSummaryService {
         String lang = (req.getLanguage() == null || req.getLanguage().isBlank()) ? "ko" : req.getLanguage();
         int outTokens = (req.getMaxTokens() == null) ? 300 : req.getMaxTokens();
 
+        // 항상 DB에 job 생성
+        AiSummaryJob job = AiSummaryJob.builder()
+                .userId(userIdOrNull)
+                .jobId(jobId)
+                .sourceType(SourceType.URL)
+                .title(buildTitleFromUrl(req.getSourceUrl()))
+                .sourceUrl(req.getSourceUrl())
+                .language(lang)
+                .status(Status.PENDING)
+                .hasFullSummary(false)
+                .build();
+        jobRepo.save(job);
+
+        Duration ttl = Duration.ofMinutes(30);
+
         try {
-            AiSummaryJob job = AiSummaryJob.builder()
-                    .userId(userIdOrNull)
-                    .jobId(jobId)
-                    .sourceType(SourceType.URL)
-                    .title(buildTitleFromUrl(req.getSourceUrl()))
-                    .sourceUrl(req.getSourceUrl())
-                    .language(lang)
-                    .status(Status.RUNNING)
-                    .hasFullSummary(false)
-                    .build();
-            jobRepo.save(job);
+            UrlMeta meta = fetchUrlMeta(req.getSourceUrl());
 
-            // URL 다운로드 → PDF 텍스트 추출 → 요약
-            byte[] bytes = downloadUrlAsBytes(req.getSourceUrl());
+            boolean shouldSync =
+                    meta.contentLength() != -1 && meta.contentLength() <= SYNC_MAX_BYTES;
 
-            if (!looksLikePdf(bytes)) {
-                throw new UnsupportedPdfException("URL이 PDF를 반환하지 않습니다. (HTML/기타 파일일 수 있음)");
+            if (shouldSync) {
+                job.markRunning();
+                jobRepo.save(job);
+
+                byte[] bytes = downloadUrlAsBytes(req.getSourceUrl());
+                validatePdfOrThrow(bytes);
+
+                String text = extractPdfTextFromBytes(bytes);
+                String summary = callOpenAi(text, lang, outTokens);
+
+                resultRepo.save(AiSummaryResult.builder().jobId(jobId).summary(summary).build());
+                job.markSucceeded(true);
+                jobRepo.save(job);
+
+                AiSummaryResponseDataDTO successDto = AiSummaryResponseDataDTO.builder()
+                        .status(AiSummaryResponseDataDTO.Status.SUCCEEDED)
+                        .jobId(jobId)
+                        .summary(summary)
+                        .build();
+
+                redisRepo.saveJob(jobId, successDto, ttl);
+                return successDto;
             }
-            
-            String text = extractPdfTextFromBytes(bytes);
-            String summary = callOpenAi(text, lang, outTokens);
 
-            resultRepo.save(AiSummaryResult.builder()
+            // 기본: 비동기
+            AiSummaryResponseDataDTO pendingDto = AiSummaryResponseDataDTO.builder()
+                    .status(AiSummaryResponseDataDTO.Status.PENDING)
                     .jobId(jobId)
-                    .summary(summary)
-                    .build());
-
-            job.markSucceeded(true);
-            jobRepo.save(job);
-
-            return AiSummaryResponseDataDTO.builder()
-                    .status(AiSummaryResponseDataDTO.Status.SUCCEEDED)
-                    .summary(summary)
                     .build();
 
-        } catch (UnsupportedPdfException e) {
-            jobRepo.findByJobId(jobId).ifPresent(j -> {
-                j.markFailed("UNSUPPORTED_PDF", e.getMessage());
-                jobRepo.save(j);
-            });
+            redisRepo.saveJob(jobId, pendingDto, ttl);
+            redisRepo.enqueue(jobId);
 
-            return AiSummaryResponseDataDTO.builder()
-                    .status(AiSummaryResponseDataDTO.Status.FAILED)
-                    .error(AiSummaryResponseDataDTO.AiError.builder()
-                            .code("UNSUPPORTED_PDF")
-                            .message(e.getMessage())
-                            .build())
-                    .build();
+            return pendingDto;
 
         } catch (Exception e) {
+            log.error("summarizeUrl failed. jobId={}, url={}", jobId, req.getSourceUrl(), e);
+
             jobRepo.findByJobId(jobId).ifPresent(j -> {
-                j.markFailed("INTERNAL_ERROR", "요약 처리 중 오류가 발생했습니다.");
+                j.markFailed("INTERNAL_ERROR", e.getMessage());
                 jobRepo.save(j);
             });
 
-            return AiSummaryResponseDataDTO.builder()
+            AiSummaryResponseDataDTO failDto = AiSummaryResponseDataDTO.builder()
                     .status(AiSummaryResponseDataDTO.Status.FAILED)
+                    .jobId(jobId)
                     .error(AiSummaryResponseDataDTO.AiError.builder()
                             .code("INTERNAL_ERROR")
                             .message("요약 처리 중 오류가 발생했습니다.")
                             .build())
                     .build();
+
+            redisRepo.saveJob(jobId, failDto, ttl); // 실패도 캐시(선택)
+            return failDto;
         }
     }
+
+
 
 
     // ===== helpers =====
@@ -371,12 +388,15 @@ public class AiSummaryService {
 
     //URL → PDF bytes 다운로드 메서드
     private byte[] downloadUrlAsBytes(String url) {
+        WebClient wc = WebClient.builder()
+                .codecs(configurer ->
+                        configurer.defaultCodecs().maxInMemorySize(25 * 1024 * 1024) // 25MB
+                )
+                .build();
+
         try {
-            return WebClient.builder()
-                    .build()
-                    .get()
+            return downloadClient.get()
                     .uri(url)
-                    // 일부 사이트는 User-Agent 없으면 403
                     .header("User-Agent", "Mozilla/5.0")
                     .retrieve()
                     .bodyToMono(byte[].class)
@@ -385,6 +405,7 @@ public class AiSummaryService {
             throw new RuntimeException("URL에서 파일 다운로드 실패: " + e.getMessage(), e);
         }
     }
+
 
     //PDF bytes → 텍스트 추출 메서드
     private String extractPdfTextFromBytes(byte[] pdfBytes) {
@@ -408,10 +429,36 @@ public class AiSummaryService {
     }
 
     //pdf인지 확인하는 메소드
-    private boolean looksLikePdf(byte[] bytes) {
-        return bytes != null && bytes.length >= 4
-                && bytes[0] == '%' && bytes[1] == 'P' && bytes[2] == 'D' && bytes[3] == 'F';
+    private void validatePdfOrThrow(byte[] bytes) {
+        if (bytes == null || bytes.length < 4 ||
+                bytes[0] != '%' || bytes[1] != 'P' || bytes[2] != 'D' || bytes[3] != 'F') {
+            throw new UnsupportedPdfException("URL이 PDF를 반환하지 않습니다. (HTML/에러 페이지일 수 있음)");
+        }
     }
 
+
+    //URL 메타(HEAD) 조회로 “작은 파일인지” 판단
+    private static final long SYNC_MAX_BYTES = 2L * 1024 * 1024; // 2MB
+    private static final long ABSOLUTE_MAX_BYTES = 20L * 1024 * 1024; // 20MB (하드 제한)
+
+    private UrlMeta fetchUrlMeta(String url) {
+        // HEAD가 막힌 서버도 있으니 실패하면 GET 헤더로 대체하도록 설계
+        try {
+            return downloadClient.head()
+                    .uri(url)
+                    .header("User-Agent", "Mozilla/5.0")
+                    .exchangeToMono(resp -> {
+                        String ct = resp.headers().contentType().map(Object::toString).orElse(null);
+                        long len = resp.headers().contentLength().orElse(-1);
+                        return reactor.core.publisher.Mono.just(new UrlMeta(ct, len));
+                    })
+                    .block();
+        } catch (Exception e) {
+            // HEAD 실패 → len unknown 처리
+            return new UrlMeta(null, -1);
+        }
+    }
+
+    private record UrlMeta(String contentType, long contentLength) {}
 
 }
