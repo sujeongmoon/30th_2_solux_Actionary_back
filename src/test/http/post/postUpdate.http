@@ -6,11 +6,11 @@ Authorization: {{accessToken}}
 Content-Type: application/json
 
 {
-  "member_id": 1,
+  "memberId": 1,
   "type": "인증",
   "title": "오늘의 스터디2",
   "content": {
-    "textContent": "자료구조 스터디 완료",
+    "text": "자료구조 스터디 완료1",
     "imageUrls": [
       "https://storage.com/aaa.jpg",
       "https://storage.com/bbb.jpg"

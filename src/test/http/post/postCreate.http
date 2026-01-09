@@ -1,0 +1,48 @@
+@access_token = 여기에 입력
+
+### 게시글 생성1
+POST http://localhost:8080/api/posts
+Authorization: {{accessToken}}
+Content-Type: application/json
+
+{
+  "memberId": 1,
+  "type": "인증",
+  "title": "오늘의 스터디1",
+  "content": {
+    "text": "자료구조 스터디 완료1",
+    "imageUrls": [
+      "https://storage.com/aaa.jpg",
+      "https://storage.com/bbb.jpg"
+    ]
+  }
+}
+
+### 게시글 조회
+GET http://localhost:8080/api/posts/1
+Authorization: {{accessToken}}
+Content-Type: application/json
+
+
+### 게시글 생성2
+POST http://localhost:8080/api/posts
+Authorization: {{accessToken}}
+Content-Type: application/json
+
+{
+  "memberId": 1,
+  "type": "인증",
+  "title": "오늘의 스터디2",
+  "content": {
+    "text": "자료구조 스터디 완료2",
+    "imageUrls": [
+      "https://storage.com/aaa.jpg",
+      "https://storage.com/bbb.jpg"
+    ]
+  }
+}
+
+### 게시글 조회
+GET http://localhost:8080/api/posts/2
+Authorization: {{accessToken}}
+Content-Type: application/json

@@ -37,7 +37,6 @@ public class Post extends Timestamped {
     @Column(nullable = false)
     private int commentsCount;
 
-
     // PostImage 정보도 객체로 다룰 수 있게 해줌 (PostImage만 Post 존재 아는건 비효율적이니)
     @OneToMany(
             mappedBy = "post",
