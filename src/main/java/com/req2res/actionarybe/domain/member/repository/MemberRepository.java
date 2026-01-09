@@ -9,7 +9,6 @@ import java.util.Optional;
 @Repository
 public interface MemberRepository extends JpaRepository<Member, Long> {
     Optional<Member> findByLoginId(String loginId);
-    boolean existsByLoginIdAndWithdrawnFalse(String loginId); // 탈퇴 회원 id/pw는 타인이 쓸 수 있음
-
-//    boolean existsByLoginId(String loginId);
+    boolean existsByLoginIdAndWithdrawnTrue(String loginId); // 이미 탈퇴한 로그인id는 다시 사용 불가
+    boolean existsByLoginId(String loginId);
 }

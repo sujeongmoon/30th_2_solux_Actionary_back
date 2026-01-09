@@ -62,7 +62,7 @@ public class AuthService {
 
         // 2. 이미 탈퇴한 멤버면 404에러
         if(member.isWithdrawn()){
-            throw new CustomException(ErrorCode.WITHDRAWN_MEMBER);
+            throw new CustomException(ErrorCode.MEMBER_NOT_FOUND);
         }
 
         // 3. JWT 생성 시 memberId와 loginId 모두 포함
@@ -84,8 +84,13 @@ public class AuthService {
         Badge defaultBadge = badgeRepository.findById(1L)
                 .orElseThrow(() -> new CustomException(ErrorCode.BADGE_NOT_FOUND));
 
-        // 1. 중복 검사 (탈퇴한 id/pw는 제외, 다른 사람이 쓸 수 있게끔)
-        if (memberRepository.existsByLoginIdAndWithdrawnFalse(req.getLoginId())) {
+        // 탈퇴한 loginId로 회원가입하려고 하면, 이전에 사용했던 id는 다시 못쓴다고 exception 발생
+        if (memberRepository.existsByLoginIdAndWithdrawnTrue(req.getLoginId())) {
+            throw new CustomException(ErrorCode.ACCOUNT_UNRESTORABLE);
+        }
+
+        // 1. 중복 검사
+        if (memberRepository.existsByLoginId(req.getLoginId())) {
             throw new CustomException(ErrorCode.LOGIN_ID_DUPLICATED);
         }
 

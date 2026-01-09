@@ -77,6 +77,7 @@ public enum ErrorCode {
 	MISSING_TOKEN(HttpStatus.UNAUTHORIZED, "토큰이 존재하지 않습니다."),
 
     WITHDRAWN_MEMBER(HttpStatus.NOT_FOUND,"이미 탈퇴한 유저입니다."),
+    ACCOUNT_UNRESTORABLE(HttpStatus.CONFLICT, "이 아이디는 이전에 사용된 계정으로, 사용할 수 없습니다."),
 
 	// badge
 	BADGE_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 뱃지입니다."),
