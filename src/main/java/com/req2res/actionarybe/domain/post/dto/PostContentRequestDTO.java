@@ -14,7 +14,7 @@ public class PostContentRequestDTO {
 
     @Schema(
             description = "게시글 본문 내용",
-            example = "자료구조 스터디 완료"
+            example = "자료구조 스터디\n완료"
     )
     @NotBlank
     private String text;

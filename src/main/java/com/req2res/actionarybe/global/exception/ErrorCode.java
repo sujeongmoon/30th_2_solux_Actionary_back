@@ -73,6 +73,8 @@ public enum ErrorCode {
 	INVALID_FIELD_TYPE(HttpStatus.BAD_REQUEST, "JSON 필드 타입이 올바르지 않습니다"),
 
 	INVALID_TOKEN(HttpStatus.UNAUTHORIZED, "유효하지 않은 토큰입니다."),
+	INVALID_REFRESHTOKEN(HttpStatus.UNAUTHORIZED, "유효하지 않은 refreshToken입니다."),
+	NOT_REFRESHTOKEN(HttpStatus.BAD_REQUEST, "refreshToken이 아닙니다."),
 	EXPIRED_TOKEN(HttpStatus.UNAUTHORIZED, "토큰이 만료되었습니다."),
 	MISSING_TOKEN(HttpStatus.UNAUTHORIZED, "토큰이 존재하지 않습니다."),
 

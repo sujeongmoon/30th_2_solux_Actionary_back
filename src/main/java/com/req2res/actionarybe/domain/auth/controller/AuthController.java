@@ -268,20 +268,7 @@ public class AuthController {
     public ResponseEntity<Response<RefreshTokenResponseDTO>> refreshAccessToken(
             @RequestBody @Valid RefreshTokenRequestDTO request
     ) {
-        String refreshToken = request.getRefreshToken();
-
-        // Refresh Token 유효성 검사
-        if (!tokenProvider.validate(refreshToken)) {
-            return ResponseEntity.badRequest().body(Response.fail("Refresh Token이 유효하지 않습니다."));
-        }
-
-        // loginId 추출
-        String loginId = tokenProvider.getLoginIdFromToken(refreshToken);
-
-        // 새 access token 생성
-        String newAccessToken = tokenProvider.createToken(null, loginId); // id 없이 생성
-
-        return ResponseEntity.ok(Response.success("AccessToken 재발급 완료",
-                new RefreshTokenResponseDTO(newAccessToken)));
+        RefreshTokenResponseDTO result = authService.refreshToken(request);
+        return ResponseEntity.ok(Response.success("accessToken 발급 성공",result));
     }
 }

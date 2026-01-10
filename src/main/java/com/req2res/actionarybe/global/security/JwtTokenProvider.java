@@ -29,34 +29,48 @@ public class JwtTokenProvider {
         this.accessTokenValidityMs = accessMs;
     }
 
-    public String createToken(Long id,String loginId) {
+    public String createAccessToken(String loginId) {
         Date now = new Date();
         Date exp = new Date(now.getTime() + accessTokenValidityMs);
         return Jwts.builder()
                 .setSubject(loginId)
+                .claim("type", "access")         // 토큰 타입
                 .setIssuedAt(now)
                 .setExpiration(exp)
                 .signWith(secretKey, SignatureAlgorithm.HS256)
                 .compact();
     }
 
-    public String createRefreshToken(String loginId) {
+    public String createRefreshToken(String loginId) { // memberId: 나중에 loginId로 DB 조회해서 가져옴
         final long refreshTokenValidityMs = 1209600000; // 2주
         Date now = new Date();
         Date exp = new Date(now.getTime() + refreshTokenValidityMs);
         return Jwts.builder()
                 .setSubject(loginId)
+                .claim("type", "refresh")        // Access Token과 구분
                 .setIssuedAt(now)
                 .setExpiration(exp)
                 .signWith(secretKey, SignatureAlgorithm.HS256)
                 .compact();
+    }
+
+    public boolean isRefreshToken(String token) {
+        Claims claims = Jwts.parserBuilder()
+                .setSigningKey(secretKey)
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
+
+        return "refresh".equals(claims.get("type"));
     }
 
     public boolean validate(String token) {
         try {
             Jwts.parserBuilder().setSigningKey(secretKey).build().parseClaimsJws(token);
             return true;
-        } catch (JwtException | IllegalArgumentException e) { return false; }
+        } catch (JwtException | IllegalArgumentException e) {
+            return false;
+        }
     }
 
     public Authentication getAuthentication(String token) {
