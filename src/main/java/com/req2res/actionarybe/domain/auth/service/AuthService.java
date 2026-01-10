@@ -66,7 +66,7 @@ public class AuthService {
         }
 
         // 3. JWT 생성 시 memberId와 loginId 모두 포함
-        String accessToken = tokenProvider.createToken(member.getId(), member.getLoginId());
+        String accessToken = tokenProvider.createAccessToken(member.getId(), member.getLoginId());
         String refreshToken = tokenProvider.createRefreshToken(member.getLoginId());
 
         return new LoginResponseDTO(

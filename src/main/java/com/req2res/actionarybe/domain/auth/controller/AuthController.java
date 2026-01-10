@@ -279,7 +279,7 @@ public class AuthController {
         String loginId = tokenProvider.getLoginIdFromToken(refreshToken);
 
         // 새 access token 생성
-        String newAccessToken = tokenProvider.createToken(null, loginId); // id 없이 생성
+        String newAccessToken = tokenProvider.createAccessToken(null, loginId); // id 없이 생성
 
         return ResponseEntity.ok(Response.success("AccessToken 재발급 완료",
                 new RefreshTokenResponseDTO(newAccessToken)));

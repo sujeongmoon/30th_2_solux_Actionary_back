@@ -29,7 +29,7 @@ public class JwtTokenProvider {
         this.accessTokenValidityMs = accessMs;
     }
 
-    public String createToken(Long id,String loginId) {
+    public String createAccessToken(Long id, String loginId) {
         Date now = new Date();
         Date exp = new Date(now.getTime() + accessTokenValidityMs);
         return Jwts.builder()
