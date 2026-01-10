@@ -3,6 +3,12 @@ package com.req2res.actionarybe.domain.studyTime.service;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.YearMonth;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -12,6 +18,8 @@ import com.req2res.actionarybe.domain.study.entity.Study;
 import com.req2res.actionarybe.domain.study.entity.StudyParticipant;
 import com.req2res.actionarybe.domain.study.repository.StudyParticipantRepository;
 import com.req2res.actionarybe.domain.study.repository.StudyRepository;
+import com.req2res.actionarybe.domain.studyTime.dto.MonthlyDurationSecondsDto;
+import com.req2res.actionarybe.domain.studyTime.dto.StudyTimeCalendarResponseDto;
 import com.req2res.actionarybe.domain.studyTime.dto.StudyTimeManualRequestDto;
 import com.req2res.actionarybe.domain.studyTime.dto.StudyTimeManualResponseDto;
 import com.req2res.actionarybe.domain.studyTime.dto.StudyTimeResponseDto;
@@ -110,5 +118,40 @@ public class StudyTimeService {
 		studyTimeManualRepository.save(studyTimeManual);
 
 		return StudyTimeManualResponseDto.from(studyTimeManual);
+	}
+
+	public StudyTimeCalendarResponseDto getStudyTimeCalender(Member member, YearMonth yearMonth) {
+
+		LocalDate startDate = yearMonth.atDay(1);
+		LocalDate endDate = yearMonth.atEndOfMonth();
+
+		List<StudyTime> studyTimeList = studyTimeRepository.findStudyTimeByMember(member, Type.STUDY,
+			startDate.atStartOfDay(), endDate.atTime(LocalTime.MAX));
+		List<StudyTimeManual> studyTimeManulList = studyTimeManualRepository.findByUserIdAndManualDateBetween(
+			member.getId(), startDate, endDate);
+
+		Map<LocalDate, Long> durationMap = new HashMap<>();
+
+		for (StudyTime st : studyTimeList) {
+			LocalDate studyTimeDate = st.getCreatedAt().toLocalDate();
+			durationMap.put(studyTimeDate, durationMap.getOrDefault(studyTimeDate, 0L) + st.getDurationSecond());
+		}
+
+		for (StudyTimeManual stm : studyTimeManulList) {
+			durationMap.put(stm.getManualDate(),
+				durationMap.getOrDefault(stm.getManualDate(), 0L) + stm.getDurationSecond());
+		}
+
+		List<MonthlyDurationSecondsDto> monthlyDurationSeconds = new ArrayList<>();
+		for (LocalDate date = startDate; !date.isAfter(endDate); date = date.plusDays(1)) {
+			monthlyDurationSeconds.add(MonthlyDurationSecondsDto.builder()
+				.date(date)
+				.durationSeconds(durationMap.getOrDefault(date, 0L))
+				.build());
+		}
+
+		return StudyTimeCalendarResponseDto.builder()
+			.monthlyDurationSeconds(monthlyDurationSeconds)
+			.build();
 	}
 }

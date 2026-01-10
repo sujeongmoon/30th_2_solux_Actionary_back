@@ -32,6 +32,24 @@ Authorization: {{accessToken}}
 Content-Type: application/json
 
 {
-  "durationSecond": 1838984,
-  "date": "2025-12-26"
+  "durationSecond": 565926402,
+  "date": "2026-01-09"
 }
+
+### 수동으로 공부량 추가2
+POST http://localhost:8080/api/studytimes
+Authorization: {{accessToken}}
+Content-Type: application/json
+
+{
+  "durationSecond": 1000000000,
+  "date": "2026-01-10"
+}
+
+
+
+### 월간 공부 시간 조회
+GET http://localhost:8080/api/studytimes/calender?date=2026-01
+Authorization: {{accessToken}}
+Content-Type: application/json
+

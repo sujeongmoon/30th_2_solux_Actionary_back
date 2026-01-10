@@ -1,14 +1,19 @@
 package com.req2res.actionarybe.domain.studyTime.controller;
 
+import java.time.YearMonth;
+
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.req2res.actionarybe.domain.member.entity.Member;
 import com.req2res.actionarybe.domain.member.service.MemberService;
+import com.req2res.actionarybe.domain.studyTime.dto.StudyTimeCalendarResponseDto;
 import com.req2res.actionarybe.domain.studyTime.dto.StudyTimeManualRequestDto;
 import com.req2res.actionarybe.domain.studyTime.dto.StudyTimeManualResponseDto;
 import com.req2res.actionarybe.domain.studyTime.service.StudyTimeService;
@@ -30,7 +35,7 @@ public class StudyTimeController {
 	private final StudyTimeService studyTimeService;
 	private final MemberService memberService;
 
-	@Operation(summary = "수동 공부량을 추가 API", description = "수동으로 공부량을 추가하는 기능입니다.")
+	@Operation(summary = "수동 공부량 추가 API", description = "수동으로 공부량을 추가하는 기능입니다.")
 	@ApiResponses(value = {
 		@ApiResponse(
 			responseCode = "200",
@@ -61,6 +66,29 @@ public class StudyTimeController {
 		Member member = memberService.findMemberByLoginId(userDetails.getUsername());
 		StudyTimeManualResponseDto response = studyTimeService.createStudyTimeManual(member, request);
 		return Response.success("수동으로 공부량을 추가했습니다.", response);
+	}
+
+	@Operation(summary = "공부량 달력 월별 일간 조회 API", description = "월간 공부 시간 조회 내역입니다.")
+	@ApiResponses(value = {
+		@ApiResponse(
+			responseCode = "200",
+			description = "월간 공부 시간 조회 완료",
+			content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
+				{
+					"code": 200,
+					"message": "월간 공부 시간 조회 내역입니다."
+				}
+				"""))
+		)
+	})
+	@GetMapping("/calender")
+	public Response<StudyTimeCalendarResponseDto> getStudyTimeCalender(
+		@AuthenticationPrincipal UserDetails userDetails,
+		@RequestParam YearMonth date
+	) {
+		Member member = memberService.findMemberByLoginId(userDetails.getUsername());
+		StudyTimeCalendarResponseDto response = studyTimeService.getStudyTimeCalender(member, date);
+		return Response.success("월간 공부 시간 조회 내역입니다.", response);
 	}
 
 }
