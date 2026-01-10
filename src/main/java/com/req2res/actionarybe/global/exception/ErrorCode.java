@@ -76,11 +76,16 @@ public enum ErrorCode {
 	EXPIRED_TOKEN(HttpStatus.UNAUTHORIZED, "토큰이 만료되었습니다."),
 	MISSING_TOKEN(HttpStatus.UNAUTHORIZED, "토큰이 존재하지 않습니다."),
 
+    WITHDRAWN_MEMBER(HttpStatus.NOT_FOUND,"이미 탈퇴한 유저입니다."),
+    ACCOUNT_UNRESTORABLE(HttpStatus.CONFLICT, "이 아이디는 이전에 사용된 계정으로, 사용할 수 없습니다."),
+
 	// badge
 	BADGE_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 뱃지입니다."),
 
 	// post
 	POST_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 게시물입니다."),
+    INVALID_FONT_TYPE(HttpStatus.BAD_REQUEST, "font 값이 올바르지 않습니다."),
+    INVALID_POST_TYPE(HttpStatus.BAD_REQUEST, "게시글 type이 올바르지 않습니다."),
 
     // post comment
     POST_COMMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 댓글입니다.");
