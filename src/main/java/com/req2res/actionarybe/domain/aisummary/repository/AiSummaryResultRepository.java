@@ -7,6 +7,5 @@ import java.util.Optional;
 
 public interface AiSummaryResultRepository
         extends JpaRepository<AiSummaryResult, Long> {
-
     Optional<AiSummaryResult> findByJobId(String jobId);
 }

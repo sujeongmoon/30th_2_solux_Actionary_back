@@ -2,6 +2,7 @@ package com.req2res.actionarybe.domain.aisummary.service;
 
 import com.req2res.actionarybe.domain.aisummary.dto.AiSummaryResponseDataDTO;
 import com.req2res.actionarybe.domain.aisummary.dto.AiSummaryUrlRequestDTO;
+import com.req2res.actionarybe.domain.aisummary.entity.AiSummaryEnums;
 import com.req2res.actionarybe.domain.aisummary.entity.AiSummaryJob;
 import com.req2res.actionarybe.domain.aisummary.entity.AiSummaryResult;
 import com.req2res.actionarybe.domain.aisummary.repository.AiSummaryJobRepository;
@@ -75,7 +76,7 @@ public class AiSummaryService {
                 .status(Status.PENDING)
                 .hasFullSummary(false)
                 .build();
-        
+
         Integer pageCount = null;
         if (isPdf(file)) {
             pageCount = getPdfPageCountFromS3(s3Key);
@@ -101,7 +102,7 @@ public class AiSummaryService {
                 jobRepo.save(job);
 
                 return AiSummaryResponseDataDTO.builder()
-                        .status(AiSummaryResponseDataDTO.Status.SUCCEEDED)
+                        .status(AiSummaryEnums.Status.SUCCEEDED)
                         .summary(summary)
                         .build();
 
@@ -110,7 +111,7 @@ public class AiSummaryService {
                 jobRepo.save(job);
 
                 return AiSummaryResponseDataDTO.builder()
-                        .status(AiSummaryResponseDataDTO.Status.FAILED)
+                        .status(AiSummaryEnums.Status.FAILED)
                         .error(AiSummaryResponseDataDTO.AiError.builder()
                                 .code("UNSUPPORTED_PDF")
                                 .message(e.getMessage())
@@ -125,7 +126,7 @@ public class AiSummaryService {
                 jobRepo.save(job);
 
                 return AiSummaryResponseDataDTO.builder()
-                        .status(AiSummaryResponseDataDTO.Status.FAILED)
+                        .status(AiSummaryEnums.Status.FAILED)
                         .error(AiSummaryResponseDataDTO.AiError.builder()
                                 .code("RATE_LIMIT")
                                 .message("요약 요청이 많아 잠시 후 다시 시도해주세요.")
@@ -137,7 +138,7 @@ public class AiSummaryService {
                 jobRepo.save(job);
 
                 return AiSummaryResponseDataDTO.builder()
-                        .status(AiSummaryResponseDataDTO.Status.FAILED)
+                        .status(AiSummaryEnums.Status.FAILED)
                         .error(AiSummaryResponseDataDTO.AiError.builder()
                                 .code("INTERNAL_ERROR")
                                 .message("요약 처리 중 오류가 발생했습니다.")
@@ -153,7 +154,7 @@ public class AiSummaryService {
         jobRepo.save(job);
 
         AiSummaryResponseDataDTO pending = AiSummaryResponseDataDTO.builder()
-                .status(AiSummaryResponseDataDTO.Status.PENDING)
+                .status(AiSummaryEnums.Status.PENDING)
                 .jobId(jobId)
                 .queuedAt(
                         job.getQueuedAt() != null
@@ -225,7 +226,7 @@ public class AiSummaryService {
                 jobRepo.save(job);
 
                 return AiSummaryResponseDataDTO.builder()
-                        .status(AiSummaryResponseDataDTO.Status.SUCCEEDED)
+                        .status(AiSummaryEnums.Status.SUCCEEDED)
                         .jobId(jobId)
                         .summary(summary)
                         .build();
@@ -239,7 +240,7 @@ public class AiSummaryService {
             jobRepo.save(job);
 
             return AiSummaryResponseDataDTO.builder()
-                    .status(AiSummaryResponseDataDTO.Status.FAILED)
+                    .status(AiSummaryEnums.Status.FAILED)
                     .jobId(jobId)
                     .error(AiSummaryResponseDataDTO.AiError.builder()
                             .code("UNSUPPORTED_PDF")
@@ -255,7 +256,7 @@ public class AiSummaryService {
             jobRepo.save(job);
 
             return AiSummaryResponseDataDTO.builder()
-                    .status(AiSummaryResponseDataDTO.Status.FAILED)
+                    .status(AiSummaryEnums.Status.FAILED)
                     .jobId(jobId)
                     .error(AiSummaryResponseDataDTO.AiError.builder()
                             .code("RATE_LIMIT")
@@ -270,7 +271,7 @@ public class AiSummaryService {
             jobRepo.save(job);
 
             return AiSummaryResponseDataDTO.builder()
-                    .status(AiSummaryResponseDataDTO.Status.FAILED)
+                    .status(AiSummaryEnums.Status.FAILED)
                     .jobId(jobId)
                     .error(AiSummaryResponseDataDTO.AiError.builder()
                             .code("INTERNAL_ERROR")
@@ -286,7 +287,7 @@ public class AiSummaryService {
         jobRepo.save(job);
 
         AiSummaryResponseDataDTO pending = AiSummaryResponseDataDTO.builder()
-                .status(AiSummaryResponseDataDTO.Status.PENDING)
+                .status(AiSummaryEnums.Status.PENDING)
                 .jobId(jobId)
                 .queuedAt(job.getQueuedAt() != null ? job.getQueuedAt().toString() : null)
                 .build();
@@ -307,8 +308,6 @@ public class AiSummaryService {
             throw new UnsupportedPdfException("PDF를 읽을 수 없습니다. (손상/암호화 가능)");
         }
     }
-
-
 
 
 

@@ -1,5 +1,6 @@
 package com.req2res.actionarybe.domain.aisummary.dto;
 
+import com.req2res.actionarybe.domain.aisummary.entity.AiSummaryEnums;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 
@@ -15,7 +16,7 @@ public class AiSummaryResponseDataDTO {
             example = "SUCCEEDED",
             allowableValues = {"PENDING", "RUNNING", "SUCCEEDED", "FAILED"}
     )
-    private Status status;
+    private AiSummaryEnums.Status status;
 
     @Schema(
             description = "요약 결과 텍스트 (SUCCEEDED 상태일 때만 존재)",

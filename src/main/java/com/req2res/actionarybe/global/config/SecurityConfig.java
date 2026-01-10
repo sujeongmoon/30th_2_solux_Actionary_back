@@ -44,8 +44,8 @@ public class SecurityConfig {
 				.requestMatchers(HttpMethod.GET, "/api/studies/**", "/api/users/*/points")
 				.permitAll()
 					.requestMatchers(HttpMethod.POST, "/api/ai-summary/**").permitAll()
-
-				.anyRequest().authenticated()
+					.requestMatchers(HttpMethod.GET, "/api/ai-summary/**").permitAll()
+					.anyRequest().authenticated()
 			)
 			.addFilterBefore(new JwtAuthenticationFilter(tokenProvider),
 				UsernamePasswordAuthenticationFilter.class);

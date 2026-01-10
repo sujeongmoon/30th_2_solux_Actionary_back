@@ -1,6 +1,7 @@
 package com.req2res.actionarybe.domain.aisummary.worker;
 
 import com.req2res.actionarybe.domain.aisummary.dto.AiSummaryResponseDataDTO;
+import com.req2res.actionarybe.domain.aisummary.entity.AiSummaryEnums;
 import com.req2res.actionarybe.domain.aisummary.entity.AiSummaryJob;
 import com.req2res.actionarybe.domain.aisummary.entity.AiSummaryResult;
 import com.req2res.actionarybe.domain.aisummary.repository.AiSummaryJobRepository;
@@ -38,7 +39,7 @@ public class AiSummaryWorker {
         jobRepo.save(job);
 
         AiSummaryResponseDataDTO running = AiSummaryResponseDataDTO.builder()
-                .status(AiSummaryResponseDataDTO.Status.RUNNING)
+                .status(AiSummaryEnums.Status.RUNNING)
                 .jobId(jobId)
                 .build();
         redisRepo.saveJob(jobId, running, JOB_TTL);
@@ -65,7 +66,7 @@ public class AiSummaryWorker {
 
             // 4) Redis에 SUCCEEDED + 짧은 summary 저장
             AiSummaryResponseDataDTO done = AiSummaryResponseDataDTO.builder()
-                    .status(AiSummaryResponseDataDTO.Status.SUCCEEDED)
+                    .status(AiSummaryEnums.Status.SUCCEEDED)
                     .jobId(jobId)
                     .summary(
                             summary.length() > 600
@@ -81,7 +82,7 @@ public class AiSummaryWorker {
             jobRepo.save(job);
 
             AiSummaryResponseDataDTO failed = AiSummaryResponseDataDTO.builder()
-                    .status(AiSummaryResponseDataDTO.Status.FAILED)
+                    .status(AiSummaryEnums.Status.FAILED)
                     .jobId(jobId)
                     .error(AiSummaryResponseDataDTO.AiError.builder()
                             .code("INTERNAL_ERROR")
