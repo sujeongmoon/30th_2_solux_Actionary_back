@@ -9,7 +9,6 @@ import com.req2res.actionarybe.global.Response;
 import com.req2res.actionarybe.global.exception.CustomException;
 import com.req2res.actionarybe.global.exception.ErrorCode;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -70,8 +69,6 @@ public class AiSummaryController {
                 Response.success("요약이 완료되었습니다.", data)
         );
     }
-
-
 
     // B) URL 요약
     @Operation(

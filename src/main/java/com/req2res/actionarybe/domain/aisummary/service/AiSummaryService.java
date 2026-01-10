@@ -14,7 +14,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -59,7 +58,7 @@ public class AiSummaryService {
 
         String jobId = newJobId();
         String lang = (language == null || language.isBlank()) ? "ko" : language;
-        int outTokens = (maxTokens == null) ? 300 : maxTokens;
+        int outTokens = (maxTokens == null) ? 600 : maxTokens;
 
         // 1) S3 업로드 먼저 (워커가 읽어야 함)
         String s3Key = s3StorageService.upload(file);
@@ -76,8 +75,7 @@ public class AiSummaryService {
                 .status(Status.PENDING)
                 .hasFullSummary(false)
                 .build();
-
-        // PDF pageCount 기준 필요하면 여기서 계산(소형 판별용)
+        
         Integer pageCount = null;
         if (isPdf(file)) {
             pageCount = getPdfPageCountFromS3(s3Key);
@@ -172,11 +170,15 @@ public class AiSummaryService {
 
     // 2. URL 파일 요약 API
     public AiSummaryResponseDataDTO summarizeUrl(AiSummaryUrlRequestDTO req, Long userIdOrNull) {
+        if (req == null || req.getSourceUrl() == null || req.getSourceUrl().isBlank()) {
+            throw new CustomException(ErrorCode.BAD_REQUEST, "sourceUrl은 필수입니다.");
+        }
+
         String jobId = newJobId();
         String lang = (req.getLanguage() == null || req.getLanguage().isBlank()) ? "ko" : req.getLanguage();
-        int outTokens = (req.getMaxTokens() == null) ? 300 : req.getMaxTokens();
+        int outTokens = (req.getMaxTokens() == null) ? 600 : req.getMaxTokens();
 
-        // 항상 DB에 job 생성
+        // 1) Job 먼저 저장
         AiSummaryJob job = AiSummaryJob.builder()
                 .userId(userIdOrNull)
                 .jobId(jobId)
@@ -189,58 +191,85 @@ public class AiSummaryService {
                 .build();
         jobRepo.save(job);
 
-        Duration ttl = Duration.ofMinutes(30);
-
         try {
-            UrlMeta meta = fetchUrlMeta(req.getSourceUrl());
+            // 2) URL 다운로드 (동기 기본)
+            job.markRunning();
+            jobRepo.save(job);
 
-            boolean shouldSync =
-                    meta.contentLength() != -1 && meta.contentLength() <= SYNC_MAX_BYTES;
+            byte[] bytes = downloadUrlAsBytes(req.getSourceUrl());
 
-            if (shouldSync) {
-                job.markRunning();
-                jobRepo.save(job);
+            // 2-1) 절대 용량 제한 (안전장치)
+            if (bytes.length > QUICK_MAX_BYTES) {
+                return enqueueUrlJob(job, jobId, "파일이 커서 비동기로 처리합니다.");
+            }
 
-                byte[] bytes = downloadUrlAsBytes(req.getSourceUrl());
-                validatePdfOrThrow(bytes);
+            // 2-2) PDF 검증
+            validatePdfOrThrow(bytes);
 
+            // 2-3) 페이지 수 확인
+            int pageCount = getPdfPageCountFromBytes(bytes);
+
+            boolean isQuick = (bytes.length < QUICK_MAX_BYTES) && (pageCount < QUICK_MAX_PAGES);
+
+            if (isQuick) {
+                // 즉시 요약 (동기)
                 String text = extractPdfTextFromBytes(bytes);
                 String summary = callOpenAi(text, lang, outTokens);
 
-                resultRepo.save(AiSummaryResult.builder().jobId(jobId).summary(summary).build());
+                resultRepo.save(AiSummaryResult.builder()
+                        .jobId(jobId)
+                        .summary(summary)
+                        .build());
+
                 job.markSucceeded(true);
                 jobRepo.save(job);
 
-                AiSummaryResponseDataDTO successDto = AiSummaryResponseDataDTO.builder()
+                return AiSummaryResponseDataDTO.builder()
                         .status(AiSummaryResponseDataDTO.Status.SUCCEEDED)
                         .jobId(jobId)
                         .summary(summary)
                         .build();
-
-                redisRepo.saveJob(jobId, successDto, ttl);
-                return successDto;
             }
 
-            // 기본: 비동기
-            AiSummaryResponseDataDTO pendingDto = AiSummaryResponseDataDTO.builder()
-                    .status(AiSummaryResponseDataDTO.Status.PENDING)
+            // 큰 PDF면 비동기(파일요약과 동일)
+            return enqueueUrlJob(job, jobId, "페이지 수가 많아 비동기로 처리합니다.");
+
+        } catch (UnsupportedPdfException e) {
+            job.markFailed("UNSUPPORTED_PDF", e.getMessage());
+            jobRepo.save(job);
+
+            return AiSummaryResponseDataDTO.builder()
+                    .status(AiSummaryResponseDataDTO.Status.FAILED)
                     .jobId(jobId)
+                    .error(AiSummaryResponseDataDTO.AiError.builder()
+                            .code("UNSUPPORTED_PDF")
+                            .message(e.getMessage())
+                            .build())
                     .build();
 
-            redisRepo.saveJob(jobId, pendingDto, ttl);
-            redisRepo.enqueue(jobId);
+        } catch (WebClientResponseException.TooManyRequests e) {
+            // OpenAI rate limit
+            log.error("OpenAI error status={}, body={}", e.getStatusCode(), e.getResponseBodyAsString(), e);
 
-            return pendingDto;
+            job.markFailed("RATE_LIMIT", "요약 요청이 많아 잠시 후 다시 시도해주세요.");
+            jobRepo.save(job);
+
+            return AiSummaryResponseDataDTO.builder()
+                    .status(AiSummaryResponseDataDTO.Status.FAILED)
+                    .jobId(jobId)
+                    .error(AiSummaryResponseDataDTO.AiError.builder()
+                            .code("RATE_LIMIT")
+                            .message("요약 요청이 많아 잠시 후 다시 시도해주세요.")
+                            .build())
+                    .build();
 
         } catch (Exception e) {
             log.error("summarizeUrl failed. jobId={}, url={}", jobId, req.getSourceUrl(), e);
 
-            jobRepo.findByJobId(jobId).ifPresent(j -> {
-                j.markFailed("INTERNAL_ERROR", e.getMessage());
-                jobRepo.save(j);
-            });
+            job.markFailed("INTERNAL_ERROR", "요약 처리 중 오류가 발생했습니다.");
+            jobRepo.save(job);
 
-            AiSummaryResponseDataDTO failDto = AiSummaryResponseDataDTO.builder()
+            return AiSummaryResponseDataDTO.builder()
                     .status(AiSummaryResponseDataDTO.Status.FAILED)
                     .jobId(jobId)
                     .error(AiSummaryResponseDataDTO.AiError.builder()
@@ -248,11 +277,37 @@ public class AiSummaryService {
                             .message("요약 처리 중 오류가 발생했습니다.")
                             .build())
                     .build();
-
-            redisRepo.saveJob(jobId, failDto, ttl); // 실패도 캐시(선택)
-            return failDto;
         }
     }
+
+    private AiSummaryResponseDataDTO enqueueUrlJob(AiSummaryJob job, String jobId, String reason) {
+        // 파일요약과 동일하게 QUEUED 처리
+        job.markQueued(LocalDateTime.now());
+        jobRepo.save(job);
+
+        AiSummaryResponseDataDTO pending = AiSummaryResponseDataDTO.builder()
+                .status(AiSummaryResponseDataDTO.Status.PENDING)
+                .jobId(jobId)
+                .queuedAt(job.getQueuedAt() != null ? job.getQueuedAt().toString() : null)
+                .build();
+
+        redisRepo.saveJob(jobId, pending, JOB_TTL);
+        redisRepo.enqueue(jobId);
+
+        return pending;
+    }
+
+    private int getPdfPageCountFromBytes(byte[] pdfBytes) {
+        try (PDDocument doc = PDDocument.load(pdfBytes)) {
+            if (doc.isEncrypted()) throw new UnsupportedPdfException("암호화된 PDF는 처리할 수 없습니다.");
+            return doc.getNumberOfPages();
+        } catch (UnsupportedPdfException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new UnsupportedPdfException("PDF를 읽을 수 없습니다. (손상/암호화 가능)");
+        }
+    }
+
 
 
 
@@ -388,12 +443,6 @@ public class AiSummaryService {
 
     //URL → PDF bytes 다운로드 메서드
     private byte[] downloadUrlAsBytes(String url) {
-        WebClient wc = WebClient.builder()
-                .codecs(configurer ->
-                        configurer.defaultCodecs().maxInMemorySize(25 * 1024 * 1024) // 25MB
-                )
-                .build();
-
         try {
             return downloadClient.get()
                     .uri(url)
