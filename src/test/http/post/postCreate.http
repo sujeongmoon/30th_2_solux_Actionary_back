@@ -1,5 +1,3 @@
-@access_token = 여기에 입력
-
 ### 게시글 생성1
 POST http://localhost:8080/api/posts
 Authorization: {{accessToken}}
