@@ -1,6 +1,7 @@
 package com.req2res.actionarybe.domain.aisummary.controller;
 
 import com.req2res.actionarybe.domain.aisummary.dto.AiSummaryJobGetResponseDTO;
+import com.req2res.actionarybe.domain.aisummary.dto.AiSummaryListResponseDTO;
 import com.req2res.actionarybe.domain.aisummary.dto.AiSummaryResponseDataDTO;
 import com.req2res.actionarybe.domain.aisummary.dto.AiSummaryUrlRequestDTO;
 import com.req2res.actionarybe.domain.aisummary.entity.AiSummaryEnums;
@@ -140,6 +141,51 @@ public class AiSummaryController {
 
         return ResponseEntity.ok(
                 Response.success(queryService.resolveMessage(data.getStatus()), data)
+        );
+    }
+
+    // 4. 내 요약 목록 조회 API (기본값 고정)
+    @Operation(
+            summary = "내 요약 목록 조회",
+            description = """
+            로그인한 사용자가 요청한 모든 요약 이력(동기 + 비동기 job 포함)을 조회합니다.
+
+            - Query Parameter를 받지 않습니다.
+            - 기본값으로 고정:
+              • page = 1
+              • size = 10
+              • sort = createdAt,DESC
+            """
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "요약 목록 조회 성공"),
+            @ApiResponse(responseCode = "401", description = "인증 실패 (토큰 없음/만료)"),
+            @ApiResponse(responseCode = "500", description = "서버 내부 오류")
+    })
+    @GetMapping
+    public ResponseEntity<Response<AiSummaryListResponseDTO>> getMySummaryList(
+            @AuthenticationPrincipal UserDetails userDetails
+    ) {
+        // 로그인 필수
+        if (userDetails == null) {
+            throw new CustomException(ErrorCode.UNAUTHORIZED);
+        }
+
+        // ✅ 기존 로직 그대로: username(loginId) -> member -> userId
+        String loginId = userDetails.getUsername();
+        Member member = memberRepository.findByLoginId(loginId)
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND));
+        Long userId = member.getId();
+
+        // ✅ 기본값 고정
+        int page = 1;
+        int size = 10;
+        String sort = "createdAt,DESC";
+
+        AiSummaryListResponseDTO data = queryService.getMySummaryList(userId);
+
+        return ResponseEntity.ok(
+                Response.success("요약 목록 조회에 성공했습니다.", data)
         );
     }
 

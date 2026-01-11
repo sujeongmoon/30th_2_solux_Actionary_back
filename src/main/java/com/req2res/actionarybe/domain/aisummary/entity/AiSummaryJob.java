@@ -62,6 +62,10 @@ public class AiSummaryJob extends Timestamped {
     @Column(name = "queued_at")
     private LocalDateTime queuedAt; // 비동기 큐 진입 시간
 
+    @Column(name = "finished_at")
+    private LocalDateTime finishedAt; // 완료 시간
+
+
     @Column(name = "error_code", length = 100)
     private String errorCode;
 
@@ -82,12 +86,14 @@ public class AiSummaryJob extends Timestamped {
     public void markSucceeded(boolean hasFullSummary) {
         this.status = Status.SUCCEEDED;
         this.hasFullSummary = hasFullSummary;
+        this.finishedAt = LocalDateTime.now();
         this.errorCode = null;
         this.errorMessage = null;
     }
 
     public void markFailed(String code, String message) {
         this.status = Status.FAILED;
+        this.finishedAt = LocalDateTime.now();
         this.errorCode = code;
         this.errorMessage = message;
     }
