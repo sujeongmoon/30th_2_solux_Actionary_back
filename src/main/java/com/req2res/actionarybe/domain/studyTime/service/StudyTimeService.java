@@ -22,8 +22,10 @@ import com.req2res.actionarybe.domain.studyTime.dto.MonthlyDurationSecondsDto;
 import com.req2res.actionarybe.domain.studyTime.dto.StudyTimeCalendarResponseDto;
 import com.req2res.actionarybe.domain.studyTime.dto.StudyTimeManualRequestDto;
 import com.req2res.actionarybe.domain.studyTime.dto.StudyTimeManualResponseDto;
+import com.req2res.actionarybe.domain.studyTime.dto.StudyTimePeriodResponseDto;
 import com.req2res.actionarybe.domain.studyTime.dto.StudyTimeResponseDto;
 import com.req2res.actionarybe.domain.studyTime.dto.StudyTimeTypeRequestDto;
+import com.req2res.actionarybe.domain.studyTime.entity.Period;
 import com.req2res.actionarybe.domain.studyTime.entity.StudyTime;
 import com.req2res.actionarybe.domain.studyTime.entity.StudyTimeManual;
 import com.req2res.actionarybe.domain.studyTime.entity.Type;
@@ -152,6 +154,33 @@ public class StudyTimeService {
 
 		return StudyTimeCalendarResponseDto.builder()
 			.monthlyDurationSeconds(monthlyDurationSeconds)
+			.build();
+	}
+
+	public StudyTimePeriodResponseDto getStudyTimePeriod(Member member, LocalDate date, Period period) {
+
+		LocalDate startDate = date;
+		LocalDate endDate = date;
+
+		if (period == Period.WEEK) {
+			startDate = date.with(java.time.DayOfWeek.MONDAY);
+			endDate = date.with(java.time.DayOfWeek.SUNDAY);
+		} else if (period == Period.MONTH) {
+			startDate = date.withDayOfMonth(1);
+			endDate = date.with(java.time.temporal.TemporalAdjusters.lastDayOfMonth());
+		} else if (period == Period.YEAR) {
+			startDate = date.withDayOfYear(1);
+			endDate = date.with(java.time.temporal.TemporalAdjusters.lastDayOfYear());
+		}
+
+		Long durationSeconds = studyTimeRepository.sumTodaySeconds(member.getId(), startDate.atStartOfDay(),
+			endDate.plusDays(1).atStartOfDay());
+		durationSeconds += studyTimeManualRepository.sumTodaySeconds(member.getId(), startDate, endDate);
+
+		return StudyTimePeriodResponseDto.builder()
+			.period(period)
+			.date(date)
+			.durationSeconds(durationSeconds)
 			.build();
 	}
 }

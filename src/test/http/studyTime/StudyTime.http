@@ -33,7 +33,7 @@ Content-Type: application/json
 
 {
   "durationSecond": 565926402,
-  "date": "2026-01-09"
+  "date": "2026-01-01"
 }
 
 ### 수동으로 공부량 추가2
@@ -47,9 +47,31 @@ Content-Type: application/json
 }
 
 
-
 ### 월간 공부 시간 조회
 GET http://localhost:8080/api/studytimes/calender?date=2026-01
 Authorization: {{accessToken}}
 Content-Type: application/json
 
+
+### 일간/주간/월간/연간 공부 시간 조회 (일간)
+GET http://localhost:8080/api/studytimes?period=DAY&date=2026-01-11
+Authorization: {{accessToken}}
+Content-Type: application/json
+
+
+### 일간/주간/월간/연간 공부 시간 조회 (주간)
+GET http://localhost:8080/api/studytimes?period=WEEK&date=2026-01-11
+Authorization: {{accessToken}}
+Content-Type: application/json
+
+
+### 일간/주간/월간/연간 공부 시간 조회 (월간)
+GET http://localhost:8080/api/studytimes?period=MONTH&date=2026-01-11
+Authorization: {{accessToken}}
+Content-Type: application/json
+
+
+### 일간/주간/월간/연간 공부 시간 조회 (연간)
+GET http://localhost:8080/api/studytimes?period=YEAR&date=2026-01-11
+Authorization: {{accessToken}}
+Content-Type: application/json

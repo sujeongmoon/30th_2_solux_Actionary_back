@@ -23,4 +23,12 @@ public interface StudyTimeManualRepository extends JpaRepository<StudyTimeManual
 		@Param("manualDate") LocalDate manualDate);
 
 	List<StudyTimeManual> findByUserIdAndManualDateBetween(Long userId, LocalDate start, LocalDate end);
+
+	@Query("""
+		    select coalesce(sum(sm.durationSecond), 0)
+		    from StudyTimeManual sm
+		    where sm.userId = :userId
+		      and sm.manualDate between :startDate and :endDate
+		""")
+	long sumTodaySeconds(Long userId, LocalDate startDate, LocalDate endDate);
 }
