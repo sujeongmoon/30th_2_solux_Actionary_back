@@ -1,4 +1,9 @@
-### 회원가입
+### test 의도
+### 1. 사람1: 게시글 & 댓글 생성
+### 2. 사람2: 사람1 게시글에 댓글 생성
+### 3. 사람1에게 댓글 생성 알림 갔는지 확인
+
+### 회원가입 (사람1)
 POST http://localhost:8080/api/auth/signup
 Content-Type: application/json
 
@@ -12,7 +17,21 @@ Content-Type: application/json
   "birthday": "1999-09-15"
 }
 
-### 로그인
+### 회원가입 (사람2)
+POST http://localhost:8080/api/auth/signup
+Content-Type: application/json
+
+{
+"profileImageUrl": "https://cdn.example.com/profiles/user456.jpg",
+"loginId": "soojin_dev",
+"password": "MySecurePwd#2025",
+"phoneNumber": "010-2222-3333",
+"email": "soojin.dev@example.com",
+"name": "박수진",
+"birthday": "1995-04-22"
+}
+
+### 로그인 (사람1)
 POST http://localhost:8080/api/auth/login
 Content-Type: application/json
 
@@ -26,7 +45,9 @@ Content-Type: application/json
     client.global.set("refreshToken", response.body.data.refreshToken);
 %}
 
-### 게시글 생성
+
+### 1. 사람1: 게시글 & 댓글 생성
+### 게시글 생성 (사람1)
 POST http://localhost:8080/api/posts
 Authorization: {{accessToken}}
 Content-Type: application/json
@@ -44,23 +65,59 @@ Content-Type: application/json
   }
 }
 
-
-### 댓글 생성
+### 댓글 생성 (사람1)
 POST http://localhost:8080/api/posts/1/comments
 Authorization: {{accessToken}}
 Content-Type: application/json
 
 {
-  "content": "이것은 댓글 내용입니다.",
+  "content": "사람1 댓글",
   "isSecret": false
 }
 
-### 댓글 조회 (최신순 정렬)
-GET http://localhost:8080/api/posts/1/comments
+
+### 2. 사람2: 사람1 게시글에 댓글 생성
+### 로그인 (사람2)
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "loginId": "jaehyun99",
+  "password": "securePass!2025"
+}
+
+> {%
+    client.global.set("accessToken", "Bearer " + response.body.data.accessToken);
+    client.global.set("refreshToken", response.body.data.refreshToken);
+%}
+
+### 댓글 생성 (사람2)
+POST http://localhost:8080/api/posts/1/comments
 Authorization: {{accessToken}}
 Content-Type: application/json
 
-### 댓글 알림 조회
+{
+  "content": "사람2 댓글",
+  "isSecret": false
+}
+
+### 로그인 (사람1)
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "loginId": "jaehyun99",
+  "password": "securePass!2025"
+}
+
+> {%
+    client.global.set("accessToken", "Bearer " + response.body.data.accessToken);
+    client.global.set("refreshToken", response.body.data.refreshToken);
+%}
+
+
+### 3. 사람1에게 댓글 생성 알림 갔는지 확인
+### 댓글 알림 조회 (사람1)
 GET http://localhost:8080/api/notifications
 Authorization: {{accessToken}}
 Content-Type: application/json
