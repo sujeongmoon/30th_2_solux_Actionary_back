@@ -1,6 +1,10 @@
 spring:
   application:
     name: actionarybe
+  servlet:
+    multipart:
+      max-file-size: 200MB
+      max-request-size: 200MB
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3333/actionary_db
@@ -53,3 +57,8 @@ janus:
 app:
   default:
     cover-image: "https://${S3_BUCKET_NAME}.s3.ap-northeast-2.amazonaws.com/static/default_cover/default_cover.png"
+
+openai:
+  api-key: ${OPENAI_API_KEY}
+  base-url: https://api.openai.com/v1
+  model: gpt-5-mini
