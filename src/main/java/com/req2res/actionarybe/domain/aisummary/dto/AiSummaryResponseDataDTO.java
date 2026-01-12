@@ -4,7 +4,6 @@ import com.req2res.actionarybe.domain.aisummary.entity.AiSummaryEnums;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 
-import java.time.Instant;
 
 @Getter @Setter
 @NoArgsConstructor @AllArgsConstructor @Builder

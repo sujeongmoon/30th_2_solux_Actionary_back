@@ -22,11 +22,6 @@ public class AiSummaryResult extends Timestamped {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    /**
-     * jobId로 조인하기 (FK + UNIQUE 권장)
-     * - DB에서는 ai_summary_job.job_id 를 참조하는 FK
-     * - JPA에서는 단순 문자열로 두고, 필요하면 서비스에서 jobId로 찾는 게 가장 단순
-     */
     @Column(name = "job_id", nullable = false, unique = true, length = 50)
     private String jobId;
 

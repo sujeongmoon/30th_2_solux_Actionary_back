@@ -80,7 +80,7 @@ public class AiSummaryController {
     // 2. URL 요약
     @Operation(
             summary = "URL 요약",
-            description = "URL로 제공된 문서를 AI로 요약합니다. (application/json)"
+            description = "URL로 제공된 문서를 AI로 요약합니다. 비동기 처리 시 202 상태로 jobId를 반환합니다."
     )
     @PostMapping(
             value = "/url",
@@ -144,7 +144,7 @@ public class AiSummaryController {
         );
     }
 
-    // 4. 내 요약 목록 조회 API (기본값 고정)
+    // 4. 내 요약 목록 조회 API
     @Operation(
             summary = "내 요약 목록 조회",
             description = """
@@ -171,13 +171,12 @@ public class AiSummaryController {
             throw new CustomException(ErrorCode.UNAUTHORIZED);
         }
 
-        // ✅ 기존 로직 그대로: username(loginId) -> member -> userId
         String loginId = userDetails.getUsername();
         Member member = memberRepository.findByLoginId(loginId)
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND));
         Long userId = member.getId();
 
-        // ✅ 기본값 고정
+        // 기본값 고정
         int page = 1;
         int size = 10;
         String sort = "createdAt,DESC";

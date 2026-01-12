@@ -309,27 +309,30 @@ public class AiSummaryService {
         }
     }
 
-
-
     // ===== helpers =====
 
+    // 요약 작업을 식별하기 위한 새로운 jobId 생성 (sb_ + UUID 앞 8자리)
     private String newJobId() {
         return "sb_" + UUID.randomUUID().toString().replace("-", "").substring(0, 8);
     }
 
+    // 업로드된 파일이 PDF인지 Content-Type 기준으로 확인
     private boolean isPdf(MultipartFile file) {
         String ct = file.getContentType();
         return ct != null && ct.toLowerCase().contains("pdf");
     }
 
+    // 파일 업로드 시 파일명을 기반으로 요약 제목 생성
     private String buildTitleFromFile(MultipartFile file) {
         return (file.getOriginalFilename() != null) ? file.getOriginalFilename() : "업로드 파일 요약";
     }
 
+    // URL 요약 시 URL 문자열을 기반으로 요약 제목 생성 (너무 길면 잘라냄)
     private String buildTitleFromUrl(String url) {
         return (url.length() > 60) ? url.substring(0, 60) + "..." : url;
     }
 
+    // S3에 저장된 PDF를 열어 전체 페이지 수를 계산
     private Integer getPdfPageCountFromS3(String key) {
         try (InputStream is = s3StorageService.download(key); PDDocument doc = PDDocument.load(is)) {
             if (doc.isEncrypted()) throw new UnsupportedPdfException("암호화된 PDF는 처리할 수 없습니다.");
@@ -341,6 +344,7 @@ public class AiSummaryService {
         }
     }
 
+    // S3에 저장된 PDF에서 텍스트를 추출 (최대 길이 제한 포함)
     private String extractPdfTextFromS3(String key) {
         try (InputStream is = s3StorageService.download(key); PDDocument doc = PDDocument.load(is)) {
             if (doc.isEncrypted()) throw new UnsupportedPdfException("암호화된 PDF는 처리할 수 없습니다.");
@@ -348,7 +352,7 @@ public class AiSummaryService {
             PDFTextStripper stripper = new PDFTextStripper();
             String text = stripper.getText(doc);
 
-            // 토큰 입력 제한: 대충 길이 제한(정교 토큰 계산은 다음 단계)
+            // OpenAI 입력 제한 대비 텍스트 길이 제한
             int maxChars = 6000;
             if (text.length() > maxChars) text = text.substring(0, maxChars);
             return text;
@@ -360,14 +364,15 @@ public class AiSummaryService {
         }
     }
 
+    // OpenAI Responses API 응답에서 요약 텍스트만 안전하게 추출
     @SuppressWarnings("unchecked")
     private String extractSummaryText(Map<String, Object> res) {
 
-        // 1) 가장 쉬운 케이스: output_text
+        // 1) output_text 필드가 바로 있는 경우
         Object outputText = res.get("output_text");
         if (outputText instanceof String s && !s.isBlank()) return s.trim();
 
-        // 2) output -> content -> text
+        // 2) output -> content -> text 구조 탐색
         Object output = res.get("output");
         if (output instanceof java.util.List<?> outList) {
             for (Object item : outList) {
@@ -381,7 +386,7 @@ public class AiSummaryService {
                         Object text = cm.get("text");
                         if (text instanceof String s && !s.isBlank()) return s.trim();
 
-                        // 혹시 { text: { value: "..." } } 형태일 수도 있어서 대비
+                        // { text: { value: "..." } } 형태 대비
                         if (text instanceof Map<?, ?> tm) {
                             Object value = tm.get("value");
                             if (value instanceof String s2 && !s2.isBlank()) return s2.trim();
@@ -389,17 +394,17 @@ public class AiSummaryService {
                     }
                 }
 
-                // 3) 혹시 item 자체에 text가 있는 구조 대비
+                // 3) item 자체에 text가 있는 구조 대비
                 Object text = m.get("text");
                 if (text instanceof String s && !s.isBlank()) return s.trim();
             }
         }
 
-        // 4) 마지막 fallback: 전체 JSON을 로그로 보고 구조 확인
+        // 추출 실패 시 null 반환 (호출부에서 에러 처리)
         return null;
     }
 
-
+    // OpenAI API를 호출하여 텍스트 요약 요청
     private String callOpenAi(String inputText, String language, int maxOutputTokens) {
         Map<String, Object> body = Map.of(
                 "model", model,
@@ -421,26 +426,27 @@ public class AiSummaryService {
 
         String summary = extractSummaryText(res);
 
+        // 요약 텍스트가 없으면 에러 처리
         if (summary == null || summary.isBlank()) {
             log.error("OpenAI response has no extractable text. res={}", res);
             throw new RuntimeException("OpenAI 응답에서 요약 텍스트를 찾지 못했습니다.");
         }
 
         return summary;
-
-
     }
 
+    // PDF 처리 중 발생하는 예외를 표현하기 위한 커스텀 런타임 예외
     private static class UnsupportedPdfException extends RuntimeException {
         UnsupportedPdfException(String msg) { super(msg); }
     }
 
+    // S3에 저장된 PDF를 요약하는 최종 진입 메소드
     public String summarizeFileFromS3Key(String s3Key, String language, int outTokens) {
         String text = extractPdfTextFromS3(s3Key);
         return callOpenAi(text, language, outTokens);
     }
 
-    //URL → PDF bytes 다운로드 메서드
+    // URL로부터 파일을 다운로드하여 byte[] 형태로 반환
     private byte[] downloadUrlAsBytes(String url) {
         try {
             return downloadClient.get()
@@ -454,8 +460,7 @@ public class AiSummaryService {
         }
     }
 
-
-    //PDF bytes → 텍스트 추출 메서드
+    // PDF byte 배열로부터 텍스트를 추출
     private String extractPdfTextFromBytes(byte[] pdfBytes) {
         try (PDDocument doc = PDDocument.load(pdfBytes)) {
             if (doc.isEncrypted()) throw new UnsupportedPdfException("암호화된 PDF는 처리할 수 없습니다.");
@@ -463,8 +468,8 @@ public class AiSummaryService {
             PDFTextStripper stripper = new PDFTextStripper();
             String text = stripper.getText(doc);
 
-            // 너무 길면 자르기 (임시)
-            int maxChars = 12000;
+            // URL PDF는 상대적으로 길 수 있어 더 크게 제한
+            int maxChars = 15000;
             if (text.length() > maxChars) text = text.substring(0, maxChars);
 
             return text;
@@ -476,7 +481,7 @@ public class AiSummaryService {
         }
     }
 
-    //pdf인지 확인하는 메소드
+    // 다운로드한 byte[]가 실제 PDF 파일인지 매직 넘버로 검증
     private void validatePdfOrThrow(byte[] bytes) {
         if (bytes == null || bytes.length < 4 ||
                 bytes[0] != '%' || bytes[1] != 'P' || bytes[2] != 'D' || bytes[3] != 'F') {
@@ -484,29 +489,5 @@ public class AiSummaryService {
         }
     }
 
-
-    //URL 메타(HEAD) 조회로 “작은 파일인지” 판단
-    private static final long SYNC_MAX_BYTES = 2L * 1024 * 1024; // 2MB
-    private static final long ABSOLUTE_MAX_BYTES = 20L * 1024 * 1024; // 20MB (하드 제한)
-
-    private UrlMeta fetchUrlMeta(String url) {
-        // HEAD가 막힌 서버도 있으니 실패하면 GET 헤더로 대체하도록 설계
-        try {
-            return downloadClient.head()
-                    .uri(url)
-                    .header("User-Agent", "Mozilla/5.0")
-                    .exchangeToMono(resp -> {
-                        String ct = resp.headers().contentType().map(Object::toString).orElse(null);
-                        long len = resp.headers().contentLength().orElse(-1);
-                        return reactor.core.publisher.Mono.just(new UrlMeta(ct, len));
-                    })
-                    .block();
-        } catch (Exception e) {
-            // HEAD 실패 → len unknown 처리
-            return new UrlMeta(null, -1);
-        }
-    }
-
-    private record UrlMeta(String contentType, long contentLength) {}
 
 }
