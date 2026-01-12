@@ -1,0 +1,77 @@
+### 회원가입
+POST http://localhost:8080/api/auth/signup
+Content-Type: application/json
+
+{
+  "profileImageUrl": "https://cdn.example.com/profiles/user123.jpg",
+  "loginId": "jaehyun99",
+  "password": "securePass!2025",
+  "phoneNumber": "010-8765-4321",
+  "email": "jaehyun.kim99@example.com",
+  "name": "김재현",
+  "birthday": "1999-09-15"
+}
+
+### 로그인
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "loginId": "jaehyun99",
+  "password": "securePass!2025"
+}
+
+> {%
+    client.global.set("accessToken", "Bearer " + response.body.data.accessToken);
+%}
+
+
+### 수동으로 공부량 추가
+POST http://localhost:8080/api/studytimes
+Authorization: {{accessToken}}
+Content-Type: application/json
+
+{
+  "durationSecond": 565926402,
+  "date": "2026-01-01"
+}
+
+### 수동으로 공부량 추가2
+POST http://localhost:8080/api/studytimes
+Authorization: {{accessToken}}
+Content-Type: application/json
+
+{
+  "durationSecond": 1000000000,
+  "date": "2026-01-10"
+}
+
+
+### 월간 공부 시간 조회
+GET http://localhost:8080/api/studytimes/calender?date=2026-01
+Authorization: {{accessToken}}
+Content-Type: application/json
+
+
+### 일간/주간/월간/연간 공부 시간 조회 (일간)
+GET http://localhost:8080/api/studytimes?period=DAY&date=2026-01-11
+Authorization: {{accessToken}}
+Content-Type: application/json
+
+
+### 일간/주간/월간/연간 공부 시간 조회 (주간)
+GET http://localhost:8080/api/studytimes?period=WEEK&date=2026-01-11
+Authorization: {{accessToken}}
+Content-Type: application/json
+
+
+### 일간/주간/월간/연간 공부 시간 조회 (월간)
+GET http://localhost:8080/api/studytimes?period=MONTH&date=2026-01-11
+Authorization: {{accessToken}}
+Content-Type: application/json
+
+
+### 일간/주간/월간/연간 공부 시간 조회 (연간)
+GET http://localhost:8080/api/studytimes?period=YEAR&date=2026-01-11
+Authorization: {{accessToken}}
+Content-Type: application/json
