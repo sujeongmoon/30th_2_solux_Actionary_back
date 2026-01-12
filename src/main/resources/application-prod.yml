@@ -1,0 +1,55 @@
+spring:
+  application:
+    name: actionarybe
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://actionary-db:3306/actionary_db
+    username: ${MYSQL_USER}
+    password: ${MYSQL_PASSWORD}
+  jackson:
+    deserialization:
+      fail-on-unknown-properties: true
+  sql:
+    init:
+      mode: always
+  data:
+    redis:
+      host: actionary-redis
+      port: 6379
+      timeout: 2000
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    defer-datasource-initialization: true  # JPA 이후 data.sql 실행
+    properties:
+      hibernate:
+        show_sql: true
+        format_sql: true
+        highlight_sql: true
+        use_sql_comments: true
+
+  jwt:
+    secret: ${JWT_SECRET_KEY}
+    access-token-expiration-ms: 3600000  # 1시간
+
+  cloud:
+    aws:
+      s3:
+        bucket: ${S3_BUCKET_NAME}
+        base-url: https://${S3_BUCKET_NAME}.s3.ap-northeast-2.amazonaws.com
+      region:
+        static: ap-northeast-2
+        auto: false
+      credentials:
+        access-key: ${S3_ACCESS_KEY}
+        secret-key: ${S3_SECRET_KEY}
+      stack:
+        auto: false
+
+janus:
+  base-url: http://${EC2_HOST}:8088/janus
+
+app:
+  default:
+    cover-image: "https://${S3_BUCKET_NAME}.s3.ap-northeast-2.amazonaws.com/static/default_cover/default_cover.png"
