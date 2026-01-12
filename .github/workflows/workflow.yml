@@ -68,6 +68,7 @@ jobs:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_KEY }}
+          command_timeout: 30m
           script: |
             cd /home/ubuntu/actionary
             echo "${{ secrets.ENV_PROD }}" > .env
