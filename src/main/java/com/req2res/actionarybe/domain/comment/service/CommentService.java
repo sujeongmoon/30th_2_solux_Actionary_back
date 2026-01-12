@@ -5,6 +5,10 @@ import com.req2res.actionarybe.domain.comment.entity.Comment;
 import com.req2res.actionarybe.domain.comment.repository.CommentRepository;
 import com.req2res.actionarybe.domain.member.entity.Member;
 import com.req2res.actionarybe.domain.member.repository.MemberRepository;
+import com.req2res.actionarybe.domain.notification.dto.NotificationCreateRequestDTO;
+import com.req2res.actionarybe.domain.notification.entity.NotificationType;
+import com.req2res.actionarybe.domain.notification.repository.NotificationRepository;
+import com.req2res.actionarybe.domain.notification.service.NotificationService;
 import com.req2res.actionarybe.domain.post.dto.PageInfoDTO;
 import com.req2res.actionarybe.domain.post.entity.Post;
 import com.req2res.actionarybe.domain.post.repository.PostRepository;
@@ -24,15 +28,27 @@ public class CommentService {
     private final CommentRepository commentRepository;
     private final PostRepository postRepository;
     private final MemberRepository memberRepository;
+    private final NotificationService notificationService;
 
     // 댓글 생성
     @Transactional
-    public CommentResponseDTO createComment(Long post_id, CreateCommentRequestDTO request, Long member_id){
-        Post post = postRepository.findById(post_id)
+    public CommentResponseDTO createComment(Long postId, CreateCommentRequestDTO request, Long memberId){
+        Post post = postRepository.findById(postId)
                 .orElseThrow(()->new CustomException(ErrorCode.POST_NOT_FOUND));
-        Member member = memberRepository.findById(member_id)
+        Member member = memberRepository.findById(memberId)
                 .orElseThrow(()->new CustomException(ErrorCode.MEMBER_NOT_FOUND));
 
+        // 본인 게시글에 댓글 생성 알림
+        NotificationCreateRequestDTO commentNoti = NotificationCreateRequestDTO.of(
+                memberId,
+                NotificationType.COMMENT,
+                "게시글에 답글이 달렸습니다.",
+                request.getContent(),
+                "/api/post/"+postId
+        );
+        notificationService.create(commentNoti);
+
+        // 게시글 댓글 생성
         Comment comment = new Comment(
                 member,
                 post,
