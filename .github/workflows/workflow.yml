@@ -27,6 +27,7 @@ jobs:
       - name: Build & Test
         run: ./gradlew clean test bootJar --info
         env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           JANUS_BASE_URL: ${{ secrets.JANUS_BASE_URL }}
           JANUS_ADMIN_SECRET: ${{ secrets.JANUS_ADMIN_SECRET }}
           S3_BUCKET_NAME: ${{ secrets.S3_BUCKET_NAME }}
