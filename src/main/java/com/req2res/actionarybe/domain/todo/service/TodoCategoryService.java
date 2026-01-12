@@ -13,6 +13,7 @@ import com.req2res.actionarybe.global.exception.ErrorCode;
 
 import lombok.RequiredArgsConstructor;
 import java.util.List;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -21,18 +22,40 @@ public class TodoCategoryService {
     private final TodoRepository todoRepository;
     private final TodoCategoryRepository todoCategoryRepository;
 
+    // 프론트 팔레트 고정값 (대문자 통일)
+    private static final Set<String> ALLOWED_COLORS = Set.of(
+            "#D29AFA", "#6BEBFF", "#9AFF5B", "#FFAD36",
+            "#FF8355", "#FCDF2F", "#FF3D2F", "#FF9E97"
+    );
+
+    private void validatePaletteColor(String color) {
+        if (color == null || color.isBlank()) return; // 색 안 보내면 검증 패스
+        String normalized = color.trim().toUpperCase();
+
+        // 1) 형식 검증 (# + 6자리 hex)
+        if (!normalized.matches("^#[0-9A-F]{6}$")) {
+            throw new CustomException(ErrorCode.BAD_REQUEST, "color 형식이 올바르지 않습니다. 예: #D29AFA");
+        }
+
+        // 2) 팔레트 포함 여부 검증
+        if (!ALLOWED_COLORS.contains(normalized)) {
+            throw new CustomException(ErrorCode.BAD_REQUEST, "허용되지 않은 color 값입니다.");
+        }
+    }
+
+
     //1) 카테고리 생성
     @Transactional
     public TodoCategoryCreateResponseDTO createCategory(Long userId,
                                                         TodoCategoryCreateRequestDTO request) {
+
 
         // 409: 같은 유저 내 동일 이름 카테고리 존재
         if (todoCategoryRepository.existsByUserIdAndName(userId, request.getName())) {
             throw new CustomException(ErrorCode.TODO_CATEGORY_DUPLICATED);
         }
 
-        // TODO: 색상 팔레트 검증은 나중에 프론트 팔레트가 확정되면 여기서 체크하면 됨.
-        // 지금은 "프론트에서 보내는 값을 그대로 받는다"라서 통과시키는 게 자연스러움.
+        validatePaletteColor(request.getColor());
 
         TodoCategory category = TodoCategory.builder()
                 .userId(userId)
@@ -79,7 +102,8 @@ public class TodoCategoryService {
 
         // color 수정 (값이 들어온 경우만)
         if (!isColorEmpty) {
-            category.updateColor(request.getColor());
+            validatePaletteColor(request.getColor());
+            category.updateColor(request.getColor().trim().toUpperCase());
         }
 
         return new TodoCategoryUpdateResponseDTO(
