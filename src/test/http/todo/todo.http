@@ -1,4 +1,4 @@
-@accessToken = eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJqYWVoeXVuOTkiLCJpYXQiOjE3Njc0MjMyMDMsImV4cCI6MTc2NzQyNjgwM30.d1xx8X7LEgBMRnHlRVP0PpHaJMhArzb9VftTiU2TbdU
+@accessToken =
 
 ### 투두 카테고리 생성
 POST http://localhost:8080/api/todo-categories
@@ -7,7 +7,7 @@ Content-Type: application/json
 
 {
   "name": "운동",
-  "color": "#43434"
+  "color": "#FF8355"
 }
 
 ### 카테고리 삭제
@@ -24,7 +24,9 @@ Content-Type: application/json
 Authorization: Bearer {{accessToken}}
 
 {
-  "name": "운동"
+  "name": "운동",
+  "color": "#FCDF2F"
+
 }
 
 ### 카테고리 수정 (색상만 수정)
