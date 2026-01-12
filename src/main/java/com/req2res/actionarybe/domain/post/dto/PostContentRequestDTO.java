@@ -2,6 +2,7 @@ package com.req2res.actionarybe.domain.post.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -13,10 +14,10 @@ public class PostContentRequestDTO {
 
     @Schema(
             description = "게시글 본문 내용",
-            example = "자료구조 스터디 완료"
+            example = "자료구조 스터디\n완료"
     )
     @NotBlank
-    private String textContent;
+    private String text;
 
     @Schema(
             description = "게시글에 포함된 이미지 URL 목록",

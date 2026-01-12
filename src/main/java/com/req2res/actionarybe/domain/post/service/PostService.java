@@ -30,18 +30,19 @@ public class PostService {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
 
+        // 게시글 종류 타입변환
         Post.Type type;
         try {
             type = Post.Type.valueOf(request.getType());
         } catch (IllegalArgumentException e) {
-            throw new CustomException(ErrorCode.BAD_REQUEST);
+            throw new CustomException(ErrorCode.INVALID_POST_TYPE);
         }
 
         Post post = new Post(
                 member,
                 type,
                 request.getTitle(),
-                request.getContent().getTextContent()
+                request.getContent().getText()
         );
 
         int order = 0;

@@ -24,7 +24,7 @@ public class Member extends Timestamped {
     private String loginId;
 
     @Column(nullable=false)
-    private String password;          // BCrypt hash
+    private String password;  // BCrypt hash
 
     @Column(nullable=false, unique=true, length=50)
     private String email;
@@ -43,6 +43,7 @@ public class Member extends Timestamped {
 
     private String profileImageUrl;
 
+    // TimeStamped에서 createdAt, updatedAt 자동으로 넣어줌~
 //    @CreatedDate @Column(updatable = false)
 //    private LocalDateTime createdAt;
 //
@@ -52,6 +53,9 @@ public class Member extends Timestamped {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "badge_id", nullable = false) // FK 컬럼명 (DB에는 badge_id로 연결됨)
     private Badge badge; // member.getBadge().getId() (O) / member.getBadgeId() (X)
+
+    @Column(nullable = false)
+    private boolean withdrawn;
 
     @Builder
     public Member(String loginId, String password, String name, String email,
@@ -67,6 +71,7 @@ public class Member extends Timestamped {
         this.nickname = (nickname == null || nickname.isBlank())
                 ? generateDefaultNickname() : nickname;
         this.badge = badge;
+        this.withdrawn = false;
         // createdAt, updatedAt은 Timestamped에서 자동으로 위에 필드 변수에 넣어줄거라, 외부에서 주입받을 필요X
     }
 
@@ -82,7 +87,11 @@ public class Member extends Timestamped {
         this.nickname=nickname;
     }
 
+    public void setName(String name) {this.name=name;}
+
     public void setBadge(Badge badge) {
         this.badge = badge;
     }
+
+    public void setWithdrawn(boolean withdrawn) {this.withdrawn = withdrawn;}
 }

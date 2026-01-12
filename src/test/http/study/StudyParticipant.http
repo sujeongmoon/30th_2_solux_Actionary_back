@@ -26,36 +26,36 @@ Content-Type: application/json
 %}
 
 
-### 스터디 생성 (공개방)
-POST http://localhost:8080/api/studies
-Authorization: {{accessToken}}
-Content-Type: application/json
-
-{
-  "studyName": "정처기",
-  "coverImage": "image_url.jpg",
-  "category": "LICENSE",
-  "description": "정처기따요",
-  "memberLimit": 2,
-  "isPublic": true,
-  "password": null
-}
-
-
-### 스터디 생성 (비공개방)
-POST http://localhost:8080/api/studies
-Authorization: {{accessToken}}
-Content-Type: application/json
-
-{
-  "studyName": "06-12 임용송이 오전 공부반",
-  "coverImage": "image_url.jpg",
-  "category": "TEACHER_EXAM",
-  "description": "눈송이 인증 받아요",
-  "memberLimit": 2,
-  "isPublic": false,
-  "password": "060522"
-}
+#### 스터디 생성 (공개방)
+#POST http://localhost:8080/api/studies
+#Authorization: {{accessToken}}
+#Content-Type: application/json
+#
+#{
+#  "studyName": "정처기",
+#  "coverImage": "image_url.jpg",
+#  "category": "LICENSE",
+#  "description": "정처기따요",
+#  "memberLimit": 2,
+#  "isPublic": true,
+#  "password": null
+#}
+#
+#
+#### 스터디 생성 (비공개방)
+#POST http://localhost:8080/api/studies
+#Authorization: {{accessToken}}
+#Content-Type: application/json
+#
+#{
+#  "studyName": "06-12 임용송이 오전 공부반",
+#  "coverImage": "image_url.jpg",
+#  "category": "TEACHER_EXAM",
+#  "description": "눈송이 인증 받아요",
+#  "memberLimit": 2,
+#  "isPublic": false,
+#  "password": "060522"
+#}
 
 
 ### 스터디 접속(공개방)
