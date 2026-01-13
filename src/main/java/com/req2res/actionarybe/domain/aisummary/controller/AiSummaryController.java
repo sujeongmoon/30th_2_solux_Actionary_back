@@ -39,7 +39,8 @@ public class AiSummaryController {
     // 1. 파일 업로드 요약
     @Operation(
             summary = "파일 요약",
-            description = "PDF/문서 파일을 업로드하여 AI 요약을 수행합니다. 비동기 처리 시 202 상태로 jobId를 반환합니다."
+            description = "PDF/문서 파일을 업로드하여 AI 요약을 수행합니다. 비동기 처리 시 202 상태로 jobId를 반환합니다.언어는 ko,en 중에 " +
+                    "입력하면 되며, 토큰은 600-1000 입력하면 됩니다"
     )
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Response<AiSummaryResponseDataDTO>> summarizeFile(
