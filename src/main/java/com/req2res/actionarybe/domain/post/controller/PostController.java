@@ -97,7 +97,7 @@ public class PostController {
     })
     @PostMapping("")
     public Response<CreatePostResponseDTO> createPost(
-            @Valid @RequestBody CreatePostRequestDTO createPostRequestDTO,
+            @ModelAttribute CreatePostRequestDTO createPostRequestDTO,
             @AuthenticationPrincipal CustomUserDetails userDetails
     ){
         Long member_id = userDetails.getId();

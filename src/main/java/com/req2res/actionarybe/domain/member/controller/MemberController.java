@@ -35,7 +35,7 @@ public class MemberController {
                       "message": "사용자 정보 조회가 완료되었습니다.",
                       "data": {
                         "memberId": 1,
-                        "profileImageUrl": "https://example.com/images/default.png",
+                        "profileImageUrl": "https://actionary-s3-bucket.s3.ap-northeast-2.amazonaws.com/static/badge/badge0.png",
                         "nickname": "솔룩스123",
                         "phoneNumber": "010-1234-5678",
                         "birthday": "1995-10-25"
@@ -116,7 +116,7 @@ public class MemberController {
                       "data": {
                         "memberId": 2,
                         "nickname": "other nickname",
-                        "profileImageUrl": "https://example.com/images/other.png"
+                        "profileImageUrl": "https://actionary-s3-bucket.s3.ap-northeast-2.amazonaws.com/static/badge/badge0.png"
                       }
                     }
                     """))
@@ -247,10 +247,10 @@ public class MemberController {
     @PatchMapping("me/profile")
     public Response<UpdateProfileRequestDTO> profile(
             @AuthenticationPrincipal CustomUserDetails userDetails,
-            @RequestBody @Valid UpdateProfileRequestDTO updateProfileRequestDTO
+            @ModelAttribute UpdateProfileRequestDTO request
     ) {
         Long id=userDetails.getId();
-        memberService.updateProfile(id,updateProfileRequestDTO.getImageUrl());
+        memberService.updateProfile(id,request.getProfileImage());
         return Response.success("프로필 사진 변경에 성공했습니다.",null);
     }
 
@@ -340,67 +340,67 @@ public class MemberController {
                     responseCode = "200",
                     description = "조회 성공",
                     content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
-                    {
-                      "success": true,
-                      "message": "뱃지 조회에 성공했습니다.",
-                      "result": {
-                        "badgeId": 2,
-                        "badgeName": "10p",
-                        "requiredPoint": 10,
-                        "badgeImageUrl": "https://.../images/badge_level_1.png"
-                      }
-                    }
-                    """))
+                {
+                  "success": true,
+                  "message": "뱃지 조회에 성공했습니다.",
+                  "result": {
+                    "badgeId": 2,
+                    "badgeName": "10p",
+                    "requiredPoint": 10,
+                    "badgeImageUrl": "https://actionary-s3-bucket.s3.ap-northeast-2.amazonaws.com/static/badge/badge0.png"
+                  }
+                }
+                """))
             ),
             @ApiResponse(
                     responseCode = "400",
                     description = "잘못된 요청",
                     content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
-                    {
-                      "success": false,
-                      "message": "요청 형식이 올바르지 않습니다."
-                    }
-                    """))
+                {
+                  "success": false,
+                  "message": "요청 형식이 올바르지 않습니다."
+                }
+                """))
             ),
             @ApiResponse(
                     responseCode = "401",
                     description = "로그인 필요",
                     content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
-                    {
-                      "success": false,
-                      "message": "로그인이 필요합니다."
-                    }
-                    """))
+                {
+                  "success": false,
+                  "message": "로그인이 필요합니다."
+                }
+                """))
             ),
             @ApiResponse(
                     responseCode = "403",
                     description = "접근 권한 없음",
                     content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
-                    {
-                      "success": false,
-                      "message": "접근 권한이 없습니다."
-                    }
-                    """))
+                {
+                  "success": false,
+                  "message": "접근 권한이 없습니다."
+                }
+                """))
             ),
             @ApiResponse(
                     responseCode = "404",
                     description = "뱃지 정보 없음",
                     content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
-                    {
-                      "success": false,
-                      "message": "뱃지 정보를 찾을 수 없습니다."
-                    }
-                    """))
+                {
+                  "success": false,
+                  "message": "뱃지 정보를 찾을 수 없습니다."
+                }
+                """))
             ),
             @ApiResponse(
                     responseCode = "500",
                     description = "서버 오류",
                     content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
-                    {
-                      "success": false,
-                      "message": "서버 오류가 발생했습니다."
-                    }
-                    """))
+                {
+                  "success": false,
+                  "message": "서버 오류가 발생했습니다."
+                }
+                """))
             )
     })
     @GetMapping("me/badge")

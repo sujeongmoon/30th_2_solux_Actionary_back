@@ -1,10 +1,12 @@
 package com.req2res.actionarybe.domain.auth.service;
 
 import com.req2res.actionarybe.domain.auth.dto.*;
+import com.req2res.actionarybe.domain.image.service.ImageService;
 import com.req2res.actionarybe.domain.member.entity.Badge;
 import com.req2res.actionarybe.domain.member.entity.Member;
 import com.req2res.actionarybe.domain.member.repository.BadgeRepository;
 import com.req2res.actionarybe.domain.member.repository.MemberRepository;
+import com.req2res.actionarybe.domain.member.service.MemberService;
 import com.req2res.actionarybe.global.Response;
 import com.req2res.actionarybe.global.exception.CustomException;
 import com.req2res.actionarybe.global.exception.ErrorCode;
@@ -28,6 +30,7 @@ public class AuthService {
     private final JwtTokenProvider tokenProvider;
     private final BadgeRepository badgeRepository;
     private final PasswordEncoder passwordEncoder;
+    private final ImageService imageService;
 
     // 회원 탈퇴 (member 남기고, 이름/닉네임 익명화)
     @Transactional
@@ -96,6 +99,12 @@ public class AuthService {
         // 2. 비밀번호 암호화
         String encodedPassword = passwordEncoder.encode(req.getPassword());
 
+        // 3. 사진 이미지 s3 업로드 -> String으로 주소 받기
+        String profileImageUrl = null;
+        if (req.getProfileImage() != null && !req.getProfileImage().isEmpty()) {
+            profileImageUrl = imageService.saveImage(req.getProfileImage());
+        }
+
         // 3. 반환할 객체 만들기
         Member member = Member.builder()
                 .loginId(req.getLoginId())
@@ -104,6 +113,7 @@ public class AuthService {
                 .email(req.getEmail())
                 .name(req.getName())
                 .nickname("action_" + UUID.randomUUID().toString().substring(0, 8))
+                .profileImageUrl(profileImageUrl)
                 .birthday(LocalDate.parse(req.getBirthday())) // 문자열 날짜 파싱
                 .badge(defaultBadge)
                 .build();
