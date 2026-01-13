@@ -15,7 +15,7 @@ public class DailyTodosResponseDTO {
     // 조회한 날짜 (yyyy-MM-dd)
     @Schema(
             description = "조회 날짜",
-            example = "2025-10-31"
+            example = "2026-01-01"
     )
     private String date;
 

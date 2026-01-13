@@ -1,79 +1,78 @@
 @accessToken =
+@host=
+
+## 색상 리스트 = "#D29AFA", "#6BEBFF", "#9AFF5B", "#FFAD36",
+## "#FF8355", "#FCDF2F", "#FF3D2F", "#FF9E97”
+## 색상은 리스트에 있는 것들만 가능합니다!
 
 ### 투두 카테고리 생성
-POST http://localhost:8080/api/todo-categories
+POST {{host}}/api/todo-categories
 Authorization: Bearer {{accessToken}}
 Content-Type: application/json
 
 {
   "name": "운동",
-  "color": "#FF8355"
+  "color": "#D29AFA"
 }
 
 ### 카테고리 삭제
-DELETE http://localhost:8080/api/todo-categories/1
+DELETE {{host}}/api/todo-categories/1
 Authorization: Bearer {{accessToken}}
 
 ### 카테고리 목록 조회
-GET http://localhost:8080/api/todo-categories
+GET {{host}}/api/todo-categories
 Authorization: Bearer {{accessToken}}
 
 ### 카테고리 수정 (이름만 수정)
-PATCH http://localhost:8080/api/todo-categories/1
+PATCH {{host}}/api/todo-categories/1
 Content-Type: application/json
 Authorization: Bearer {{accessToken}}
 
 {
   "name": "운동",
-  "color": "#FCDF2F"
+  "color": "#D29AFA"
 
 }
 
 ### 카테고리 수정 (색상만 수정)
-PATCH http://localhost:8080/api/todo-categories/1
+PATCH {{host}}/api/todo-categories/1
 Content-Type: application/json
 Authorization: Bearer {{accessToken}}
 
 {
-  "color": "#00C2FF"
+  "color": "#6BEBFF"
 }
 
-### 카테고리 수정 (400) 둘 다 비어있음
-PATCH http://localhost:8080/api/todo-categories/1
-Content-Type: application/json
-Authorization: Bearer {{accessToken}}
 
-{
-}
 ###투두 생성 API
-POST http://localhost:8080/api/todos
+POST {{host}}/api/todos
 Authorization: Bearer {{accessToken}}
 Content-Type: application/json
 
 {
   "title": "운동 30분 하기",
-  "date": "2025-11-19",
+  "date": "2026-01-01",
   "categoryId": 1
 }
 
 
 ### 특정 날짜 투두 목록 조회 (카테고리 없음)
-GET http://localhost:8080/api/todos?date=2025-11-19
+GET {{host}}/api/todos?date=2026-01-01
 Authorization: Bearer {{accessToken}}
 
 ### 특정 날짜 투두 목록 조회 (카테고리 포함)
-GET http://localhost:8080/api/todos?date=2025-10-31&categoryId=3
+GET {{host}}/api/todos?date=2026-01-01&categoryId=1
 Authorization: Bearer {{accessToken}}
 
 ###투두 삭제 API
-DELETE http://localhost:8080/api/todos/1
+DELETE {{host}}/api/todos/1
 Authorization: Bearer {{accessToken}}
 Content-Type: application/json
 
 {}
 
 ### 투두 수정 (제목 + 카테고리 변경)
-PATCH http://localhost:8080/api/todos/1
+PATCH {{host}}/api/todos/1
 Authorization: Bearer {{accessToken}}
 Content-Type: application/json
 
@@ -83,7 +82,7 @@ Content-Type: application/json
 }
 
 ### 투두 수정 (제목만 변경)
-PATCH http://localhost:8080/api/todos/1
+PATCH {{host}}/api/todos/1
 Authorization: Bearer {{accessToken}}
 Content-Type: application/json
 
@@ -91,17 +90,11 @@ Content-Type: application/json
   "title": "운영체제 과제하기 (제목만 수정)"
 }
 
-### 투두 수정 (body 비었을 때 → 400 기대)
-PATCH http://localhost:8080/api/todos/101
-Authorization: Bearer {{accessToken}}
-Content-Type: application/json
-
-{}
 
 ###---------투두 상태 변화 API------------
 
 ### 투두 상태 DONE 으로 변경
-PATCH http://localhost:8080/api/todos/1/status
+PATCH {{host}}/api/todos/1/status
 Authorization: Bearer {{accessToken}}
 Content-Type: application/json
 
@@ -110,7 +103,7 @@ Content-Type: application/json
 }
 
 ### 투두 상태 FAILED 로 변경
-PATCH http://localhost:8080/api/todos/1/status
+PATCH {{host}}/api/todos/1/status
 Authorization: Bearer {{accessToken}}
 Content-Type: application/json
 
@@ -118,11 +111,3 @@ Content-Type: application/json
   "status": "FAILED"
 }
 
-### 잘못된 status 값 (400 Bad Request 기대)
-PATCH http://localhost:8080/api/todos/1/status
-Authorization: Bearer {{accessToken}}
-Content-Type: application/json
-
-{
-  "status": "PENDING"
-}

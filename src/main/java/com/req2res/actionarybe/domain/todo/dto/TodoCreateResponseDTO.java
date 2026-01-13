@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
 public class TodoCreateResponseDTO {
 
     // 투두 고유 ID
-    @Schema(description = "투두 ID", example = "10")
+    @Schema(description = "투두 ID", example = "1")
     private Long todoId;
 
     // 할 일 내용
@@ -24,7 +24,7 @@ public class TodoCreateResponseDTO {
     private String title;
 
     // 투두 날짜 (yyyy-MM-dd)
-    @Schema(description = "투두 날짜", example = "2025-10-31")
+    @Schema(description = "투두 날짜", example = "2026-01-01")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate date;
 

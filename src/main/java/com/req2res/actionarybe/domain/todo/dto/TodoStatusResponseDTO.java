@@ -12,7 +12,7 @@ import lombok.Getter;
 public class TodoStatusResponseDTO {
 
     // 투두 고유 ID
-    @Schema(description = "투두 ID", example = "10")
+    @Schema(description = "투두 ID", example = "1")
     private Long todoId;
 
     // 변경된 투두 상태 (DONE / FAILED)

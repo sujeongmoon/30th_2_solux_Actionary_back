@@ -26,7 +26,7 @@ public class TodoCreateRequestDTO {
     // 투두 날짜 (yyyy-MM-dd)
     @Schema(
             description = "투두 날짜",
-            example = "2025-10-31"
+            example = "2026-01-01"
     )
     @NotNull(message = "날짜를 입력해주세요.")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
