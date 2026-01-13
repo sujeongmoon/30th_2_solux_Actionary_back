@@ -1,0 +1,15 @@
+services:
+  janus-gateway:
+    network_mode: "host"
+
+  actionary-be:
+    image: ${DOCKER_USERNAME}/${DOCKER_REPO}:latest
+    container_name: actionary_webserver
+    depends_on:
+      - actionary-db
+    ports:
+      - "8080:8080"
+    env_file:
+      - .env
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod

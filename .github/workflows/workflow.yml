@@ -41,3 +41,37 @@ jobs:
           docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
           docker build --platform linux/amd64 -t ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_REPO }} .
           docker push ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_REPO }}
+
+
+      #EC2
+      - name: Create EC2 app directory
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_KEY }}
+          script: mkdir -p /home/ubuntu/actionary
+
+      - name: Copy Docker files to EC2
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_KEY }}
+
+          source: "docker-compose.yml,docker-compose-prod.yml"
+          target: "/home/ubuntu/actionary"
+
+      - name: Run Docker Compose on EC2
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_KEY }}
+          command_timeout: 30m
+          script: |
+            cd /home/ubuntu/actionary
+            echo "${{ secrets.ENV_PROD }}" > .env
+            sudo docker compose pull
+            sudo docker compose -f docker-compose.yml -f docker-compose-prod.yml up -d
+            sudo docker image prune -f

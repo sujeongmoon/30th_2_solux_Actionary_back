@@ -1,5 +1,5 @@
 services:
-  db:
+  actionary-db:
     image: mysql:8.0
     container_name: actionary_db
     restart: no
@@ -24,6 +24,7 @@ services:
       - "8000:8000"
       - "7088:7088"
       - "7089:7089"
+      - "10000-10020:10000-10020/udp"
     volumes:
       - "./janus/janus.jcfg:/usr/local/etc/janus/janus.jcfg"
       - "./janus/janus.transport.http.jcfg:/usr/local/etc/janus/janus.transport.http.jcfg"
@@ -31,7 +32,7 @@ services:
       JANUS_ADMIN_SECRET: ${JANUS_ADMIN_SECRET}
     restart: always
 
-  redis:
+  actionary-redis:
     image: redis:7.2-alpine
     container_name: actionary_redis
     ports:
