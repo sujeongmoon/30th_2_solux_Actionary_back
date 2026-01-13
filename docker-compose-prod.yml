@@ -9,6 +9,8 @@ services:
   actionary-be:
     image: ${DOCKER_USERNAME}/${DOCKER_REPO}:latest
     container_name: actionary_webserver
+    extra_hosts:
+      - ${JANUS_INTERNAL_HOST}
     depends_on:
       - actionary-db
     ports:

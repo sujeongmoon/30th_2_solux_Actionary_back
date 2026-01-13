@@ -76,6 +76,7 @@ public class StudyService {
 		try {
 			janusClient.createStudyRoom(study.getId());
 		} catch (Exception e) {
+            studyRepository.delete(study);
 			throw new CustomException(ErrorCode.STUDY_CREATE_ERROR);
 		}
 
