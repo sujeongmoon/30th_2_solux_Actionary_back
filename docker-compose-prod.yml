@@ -1,6 +1,10 @@
 services:
   janus-gateway:
     network_mode: "host"
+    volumes:
+      - "./janus/janus.jcfg:/usr/local/etc/janus/janus.jcfg"
+      - "./janus/janus.transport.http.jcfg:/usr/local/etc/janus/janus.transport.http.jcfg"
+    restart: always
 
   actionary-be:
     image: ${DOCKER_USERNAME}/${DOCKER_REPO}:latest
