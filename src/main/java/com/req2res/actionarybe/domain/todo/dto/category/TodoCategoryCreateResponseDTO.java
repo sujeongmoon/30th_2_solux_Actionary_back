@@ -20,7 +20,8 @@ public class TodoCategoryCreateResponseDTO {
     private String name;
 
     // 카테고리 색상 (HEX)
-    @Schema(description = "카테고리 색상 (HEX 코드)", example = "#FF5733")
+    @Schema(description = "카테고리 색상 (HEX 코드),색상은 \\\\\\\"#D29AFA\\\\\\\", \\\\\\\"#6BEBFF\\\\\\\", \" +\n" +
+            "                    \"\\\\\\\"#9AFF5B\\\\\\\", \\\\\\\"#FFAD36\\\\\\\",\\\\\\\"#FF8355\\\\\\\", \\\\\\\"#FCDF2F\\\\\\\", \\\\\\\"#FF3D2F\\\\\\\", \\\\\\\"#FF9E97\\\\\\\"중에만 가능합니다.\"", example = "#D29AFA")
     private String color;
 
     // 카테고리 생성 시각

@@ -29,7 +29,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @RequestMapping("/api/todo-categories")
 @Validated
-@SecurityRequirement(name = "bearerAuth")
+@SecurityRequirement(name = "Bearer Token")
 public class TodoCategoryController {
 
     private final MemberRepository memberRepository;
@@ -38,7 +38,8 @@ public class TodoCategoryController {
     // 1. 카테고리 생성 API
     @Operation(
             summary = "투두 카테고리 생성",
-            description = "로그인한 사용자가 새로운 투두 카테고리를 생성합니다."
+            description = "로그인한 사용자가 새로운 투두 카테고리를 생성합니다.색상은 \\\"#D29AFA\\\", \\\"#6BEBFF\\\", " +
+                    "\\\"#9AFF5B\\\", \\\"#FFAD36\\\",\\\"#FF8355\\\", \\\"#FCDF2F\\\", \\\"#FF3D2F\\\", \\\"#FF9E97\\\"중에만 가능합니다."
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "카테고리 생성 성공"),
@@ -68,7 +69,8 @@ public class TodoCategoryController {
     // 2. 카테고리 수정 API
     @Operation(
             summary = "투두 카테고리 수정",
-            description = "카테고리 이름 또는 색상을 수정합니다."
+            description = "카테고리 이름 또는 색상을 수정합니다.색상은 \\\"#D29AFA\\\", \\\"#6BEBFF\\\", " +
+                    "\\\"#9AFF5B\\\", \\\"#FFAD36\\\",\\\"#FF8355\\\", \\\"#FCDF2F\\\", \\\"#FF3D2F\\\", \\\"#FF9E97\\\"중에만 가능합니다."
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "카테고리 수정 성공"),
@@ -157,3 +159,4 @@ public class TodoCategoryController {
         return ResponseEntity.ok(Response.success("카테고리 목록 조회 성공", data));
     }
 }
+

@@ -21,10 +21,10 @@ public class TodoCategoryCreateRequestDTO {
     private String name;
 
     // 카테고리 색상
-    // HEX 색상 코드 형식
     @Schema(
-            description = "카테고리 색상 (HEX 코드)",
-            example = "#FF5733"
+            description = "카테고리 색상 (HEX 코드),색상은 \\\\\\\"#D29AFA\\\\\\\", \\\\\\\"#6BEBFF\\\\\\\", \" +\n" +
+                    "                    \"\\\\\\\"#9AFF5B\\\\\\\", \\\\\\\"#FFAD36\\\\\\\",\\\\\\\"#FF8355\\\\\\\", \\\\\\\"#FCDF2F\\\\\\\", \\\\\\\"#FF3D2F\\\\\\\", \\\\\\\"#FF9E97\\\\\\\"중에만 가능합니다.\"",
+            example = "#D29AFA"
     )
     @NotBlank(message = "카테고리 색상은 필수입니다.")
     private String color;
