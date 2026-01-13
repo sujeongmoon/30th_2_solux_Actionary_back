@@ -28,7 +28,7 @@ import java.time.LocalDate;
 @RestController
 @RequestMapping("/api/todos")
 @RequiredArgsConstructor
-@SecurityRequirement(name = "bearerAuth")
+@SecurityRequirement(name = "Bearer Token")
 public class TodoController {
 
     private final TodoService todoService;
@@ -80,12 +80,12 @@ public class TodoController {
             @Parameter(hidden = true)
             @AuthenticationPrincipal UserDetails userDetails,
 
-            @Parameter(description = "조회 날짜 (yyyy-MM-dd)", example = "2025-10-31", required = true)
+            @Parameter(description = "조회 날짜 (yyyy-MM-dd)", example = "2026-01-01", required = true)
             @RequestParam
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
             LocalDate date,
 
-            @Parameter(description = "카테고리 ID (선택)", example = "3")
+            @Parameter(description = "카테고리 ID (선택)", example = "1")
             @RequestParam(required = false)
             Long categoryId
     ) {
@@ -117,7 +117,7 @@ public class TodoController {
     })
     @PatchMapping("/{todoId}")
     public ResponseEntity<Response<TodoResponseDTO>> updateTodo(
-            @Parameter(description = "수정할 투두 ID", example = "10")
+            @Parameter(description = "수정할 투두 ID", example = "1")
             @PathVariable Long todoId,
 
             @Parameter(description = "투두 수정 요청 정보 (title, categoryId 중 변경할 값만 전달)")
@@ -156,7 +156,7 @@ public class TodoController {
             @Parameter(hidden = true)
             @AuthenticationPrincipal UserDetails userDetails,
 
-            @Parameter(description = "상태를 변경할 투두 ID", example = "10")
+            @Parameter(description = "상태를 변경할 투두 ID", example = "1")
             @PathVariable Long todoId,
 
             @Parameter(description = "상태 변경 요청 정보 (DONE 또는 FAILED)", required = true)
@@ -195,7 +195,7 @@ public class TodoController {
             @Parameter(hidden = true)
             @AuthenticationPrincipal UserDetails userDetails,
 
-            @Parameter(description = "삭제할 투두 ID", example = "10")
+            @Parameter(description = "삭제할 투두 ID", example = "1")
             @PathVariable Long todoId
     ) {
         String loginId = userDetails.getUsername();
@@ -212,3 +212,4 @@ public class TodoController {
         );
     }
 }
+

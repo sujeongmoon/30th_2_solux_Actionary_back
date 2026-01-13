@@ -20,7 +20,7 @@ public class TodoCategoryListItemDTO {
     private String name;
 
     // 카테고리 색상 (HEX)
-    @Schema(description = "카테고리 색상 (HEX 코드)", example = "#4CAF50")
+    @Schema(description = "카테고리 색상 (HEX 코드)", example = "#D29AFA")
     private String color;
 
     // 카테고리 생성 시각
