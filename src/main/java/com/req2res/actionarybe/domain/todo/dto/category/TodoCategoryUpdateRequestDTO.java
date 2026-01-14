@@ -19,8 +19,9 @@ public class TodoCategoryUpdateRequestDTO {
 
     // 수정할 카테고리 색상 (선택)
     @Schema(
-            description = "카테고리 색상 (HEX 코드, 선택)",
-            example = "#2196F3"
+            description = "카테고리 색상 (HEX 코드, 선택),색상은 \\\\\\\"#D29AFA\\\\\\\", \\\\\\\"#6BEBFF\\\\\\\", \" +\n" +
+                    "                    \"\\\\\\\"#9AFF5B\\\\\\\", \\\\\\\"#FFAD36\\\\\\\",\\\\\\\"#FF8355\\\\\\\", \\\\\\\"#FCDF2F\\\\\\\", \\\\\\\"#FF3D2F\\\\\\\", \\\\\\\"#FF9E97\\\\\\\"중에만 가능합니다.\"",
+            example = "#6BEBFF"
     )
     private String color;
 }

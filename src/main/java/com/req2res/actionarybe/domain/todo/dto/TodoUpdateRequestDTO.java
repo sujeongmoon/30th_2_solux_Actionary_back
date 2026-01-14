@@ -20,7 +20,7 @@ public class TodoUpdateRequestDTO {
     // 수정할 카테고리 ID (선택)
     @Schema(
             description = "수정할 카테고리 ID (선택)",
-            example = "2",
+            example = "1",
             nullable = true
     )
     private Long categoryId;
