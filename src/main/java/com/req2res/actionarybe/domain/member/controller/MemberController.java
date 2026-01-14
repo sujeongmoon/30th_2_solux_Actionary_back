@@ -10,10 +10,13 @@ import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequiredArgsConstructor
@@ -244,13 +247,16 @@ public class MemberController {
                     """))
             )
     })
-    @PatchMapping("me/profile")
-    public Response<UpdateProfileRequestDTO> profile(
+    @PatchMapping(
+            value = "me/profile",
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE
+    )
+    public Response<?> profile(
             @AuthenticationPrincipal CustomUserDetails userDetails,
-            @ModelAttribute UpdateProfileRequestDTO request
+            @RequestPart(value = "profileImage", required = false) MultipartFile profileImage
     ) {
         Long id=userDetails.getId();
-        memberService.updateProfile(id,request.getProfileImage());
+        memberService.updateProfile(id, profileImage);
         return Response.success("프로필 사진 변경에 성공했습니다.",null);
     }
 
