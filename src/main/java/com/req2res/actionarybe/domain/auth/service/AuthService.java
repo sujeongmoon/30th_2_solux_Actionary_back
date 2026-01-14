@@ -1,10 +1,12 @@
 package com.req2res.actionarybe.domain.auth.service;
 
 import com.req2res.actionarybe.domain.auth.dto.*;
+import com.req2res.actionarybe.domain.image.service.ImageService;
 import com.req2res.actionarybe.domain.member.entity.Badge;
 import com.req2res.actionarybe.domain.member.entity.Member;
 import com.req2res.actionarybe.domain.member.repository.BadgeRepository;
 import com.req2res.actionarybe.domain.member.repository.MemberRepository;
+import com.req2res.actionarybe.domain.member.service.MemberService;
 import com.req2res.actionarybe.global.Response;
 import com.req2res.actionarybe.global.exception.CustomException;
 import com.req2res.actionarybe.global.exception.ErrorCode;
@@ -16,6 +18,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
 import java.util.UUID;
@@ -28,6 +31,7 @@ public class AuthService {
     private final JwtTokenProvider tokenProvider;
     private final BadgeRepository badgeRepository;
     private final PasswordEncoder passwordEncoder;
+    private final ImageService imageService;
 
     // 회원 탈퇴 (member 남기고, 이름/닉네임 익명화)
     @Transactional
@@ -78,7 +82,7 @@ public class AuthService {
     }
 
     // 회원가입
-    public SignupResponseDTO signup(SignupRequestDTO req) {
+    public SignupResponseDTO signup(SignupRequestDTO req, MultipartFile profileImage) {
         // id = 1 → 0P 기본 뱃지
         Badge defaultBadge = badgeRepository.findById(1L)
                 .orElseThrow(() -> new CustomException(ErrorCode.BADGE_NOT_FOUND));
@@ -96,6 +100,12 @@ public class AuthService {
         // 2. 비밀번호 암호화
         String encodedPassword = passwordEncoder.encode(req.getPassword());
 
+        // 3. 사진 이미지 s3 업로드 -> String으로 주소 받기
+        String profileImageUrl = null;
+        if (profileImage != null && !profileImage.isEmpty()) {
+            profileImageUrl = imageService.saveImage(profileImage);
+        }
+
         // 3. 반환할 객체 만들기
         Member member = Member.builder()
                 .loginId(req.getLoginId())
@@ -104,6 +114,7 @@ public class AuthService {
                 .email(req.getEmail())
                 .name(req.getName())
                 .nickname("action_" + UUID.randomUUID().toString().substring(0, 8))
+                .profileImageUrl(profileImageUrl)
                 .birthday(LocalDate.parse(req.getBirthday())) // 문자열 날짜 파싱
                 .badge(defaultBadge)
                 .build();

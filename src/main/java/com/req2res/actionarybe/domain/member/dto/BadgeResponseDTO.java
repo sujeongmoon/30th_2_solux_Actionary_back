@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 @AllArgsConstructor
 public class BadgeResponseDTO {
     private Long id;
+    private Long memberId;
     private String name;
     private Long requiredPoint;
     private String imageUrl;

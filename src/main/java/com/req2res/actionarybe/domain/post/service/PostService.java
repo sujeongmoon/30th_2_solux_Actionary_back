@@ -1,5 +1,6 @@
 package com.req2res.actionarybe.domain.post.service;
 
+import com.req2res.actionarybe.domain.image.service.ImageService;
 import com.req2res.actionarybe.domain.member.entity.Member;
 import com.req2res.actionarybe.domain.member.repository.MemberRepository;
 import com.req2res.actionarybe.domain.post.dto.*;
@@ -13,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -22,10 +24,11 @@ public class PostService {
 
     private final PostRepository postRepository;
     private final MemberRepository memberRepository;
+    private final ImageService imageService;
 
     // 게시글 생성
     @Transactional
-    public CreatePostResponseDTO createPost(CreatePostRequestDTO request, Long memberId) {
+    public CreatePostResponseDTO createPost(CreatePostRequestDTO request, Long memberId, List<MultipartFile> images) {
 
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
@@ -45,9 +48,17 @@ public class PostService {
                 request.getContent().getText()
         );
 
-        int order = 0;
-        for (String imageUrl : request.getContent().getImageUrls()) {
-            post.addImage(new PostImage(post, imageUrl, order++));
+        // 이미지가 있을 때만 처리 (S3 업로드)
+        if (images != null && !images.isEmpty()) {
+            int order = 0;
+            for (MultipartFile imageFile : images) {
+
+                // image없으면 image 저장없음
+                if (imageFile.isEmpty()) continue;
+
+                String imageUrl = imageService.saveImage(imageFile);
+                post.addImage(new PostImage(post, imageUrl, order++));
+            }
         }
 
         postRepository.save(post);
