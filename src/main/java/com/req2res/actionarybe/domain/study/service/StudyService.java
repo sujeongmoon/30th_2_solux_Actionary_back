@@ -92,7 +92,7 @@ public class StudyService {
 		}
 
 		if (studyParticipantRepository.countByStudyAndIsActiveTrue(study) != 0) {
-			throw new CustomException(ErrorCode.STUDY_NOT_MATCH_MEMBER);
+			throw new CustomException(ErrorCode.STUDY_HAVE_USER);
 		}
 
         imageService.deleteImage(study.getCoverImage());
