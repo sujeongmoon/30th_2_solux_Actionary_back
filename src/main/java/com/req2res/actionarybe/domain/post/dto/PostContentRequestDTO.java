@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -16,14 +17,15 @@ public class PostContentRequestDTO {
             description = "게시글 본문 내용",
             example = "자료구조 스터디\n완료"
     )
-    @NotBlank
+    @NotBlank(message = "게시글 텍스트 작성은 필수입니다.")
     private String text;
 
-    @Schema(
-            description = "게시글에 포함된 이미지 URL 목록",
-            example = "[\"https://storage.com/aaa.jpg\", \"https://storage.com/bbb.jpg\"]"
-    )
-    @NotBlank
-    private List<String> imageUrls;
+//    @Schema(
+//            description = "게시글에 업로드할 이미지 파일 목록",
+//            type = "array",
+//            format = "binary"
+//    )
+//    private List<MultipartFile> images;
+
 }
 

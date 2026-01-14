@@ -1,5 +1,6 @@
 package com.req2res.actionarybe.domain.member.service;
 
+import com.req2res.actionarybe.domain.image.service.ImageService;
 import com.req2res.actionarybe.domain.member.dto.*;
 import com.req2res.actionarybe.domain.member.entity.Badge;
 import jakarta.transaction.Transactional;
@@ -11,6 +12,7 @@ import com.req2res.actionarybe.global.exception.CustomException;
 import com.req2res.actionarybe.global.exception.ErrorCode;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Optional;
 
@@ -19,8 +21,9 @@ import java.util.Optional;
 public class MemberService {
 
 	private final MemberRepository memberRepository;
+    private final ImageService imageService;
 
-	public Member findMemberByLoginId(String loginId) {
+    public Member findMemberByLoginId(String loginId) {
 		return memberRepository.findByLoginId(loginId)
 			.orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
 	}
@@ -51,15 +54,17 @@ public class MemberService {
 
     // 프로필 사진 변경
     @Transactional
-    public UpdateProfileRequestDTO updateProfile(Long id, String imageUrl){
+    public void updateProfile(Long id, MultipartFile profileImage){
         Member member=memberRepository.findById(id)
                 .orElseThrow(()->new CustomException(ErrorCode.MEMBER_NOT_FOUND));
 
-        member.setProfileImageUrl(imageUrl);
+        if (profileImage == null || profileImage.isEmpty()) {
+            throw new CustomException(ErrorCode.INVALID_FILE);
+        }
+        // S3 업로드 → URL 생성
+        String imageUrl = imageService.saveImage(profileImage);
 
-        return new UpdateProfileRequestDTO(
-                member.getProfileImageUrl() // @Transactional: '메서드' 단위 -> 위에서 set한 현재값 바로 반영됨 (이전값 반영 걱정X)
-        );
+        member.setProfileImageUrl(imageUrl);
     }
 
     // 닉네임 변경
@@ -77,14 +82,15 @@ public class MemberService {
 
     // 회원 뱃지 정보 조회
     @Transactional
-    public BadgeResponseDTO badge(Long id){
-        Member member = memberRepository.findById(id)
+    public BadgeResponseDTO badge(Long memberId){
+        Member member = memberRepository.findById(memberId)
                 .orElseThrow(()->new CustomException(ErrorCode.MEMBER_NOT_FOUND));
         Badge badge = Optional.ofNullable(member.getBadge())
                 .orElseThrow(()->new CustomException(ErrorCode.BADGE_NOT_ASSIGNED));
 
         return new BadgeResponseDTO(
                 badge.getId(),
+                memberId,
                 badge.getName(),
                 badge.getRequiredPoint(),
                 badge.getImageUrl()
