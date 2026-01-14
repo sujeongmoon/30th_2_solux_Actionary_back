@@ -351,6 +351,7 @@ public class MemberController {
                   "message": "뱃지 조회에 성공했습니다.",
                   "result": {
                     "badgeId": 2,
+                    "memberId":1,
                     "badgeName": "10p",
                     "requiredPoint": 10,
                     "badgeImageUrl": "https://actionary-s3-bucket.s3.ap-northeast-2.amazonaws.com/static/badge/badge0.png"
@@ -409,12 +410,11 @@ public class MemberController {
                 """))
             )
     })
-    @GetMapping("me/badge")
+    @GetMapping("{memberId}/badge")
     public Response<BadgeResponseDTO> badge(
-            @AuthenticationPrincipal CustomUserDetails userDetails
+            @PathVariable("memberId") Long memberId
     ){
-        Long id=userDetails.getId();
-        BadgeResponseDTO result = memberService.badge(id);
+        BadgeResponseDTO result = memberService.badge(memberId);
         return Response.success("뱃지 정보 조회에 성공했습니다.",result);
     }
 }

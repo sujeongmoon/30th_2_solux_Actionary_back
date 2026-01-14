@@ -82,14 +82,15 @@ public class MemberService {
 
     // 회원 뱃지 정보 조회
     @Transactional
-    public BadgeResponseDTO badge(Long id){
-        Member member = memberRepository.findById(id)
+    public BadgeResponseDTO badge(Long memberId){
+        Member member = memberRepository.findById(memberId)
                 .orElseThrow(()->new CustomException(ErrorCode.MEMBER_NOT_FOUND));
         Badge badge = Optional.ofNullable(member.getBadge())
                 .orElseThrow(()->new CustomException(ErrorCode.BADGE_NOT_ASSIGNED));
 
         return new BadgeResponseDTO(
                 badge.getId(),
+                memberId,
                 badge.getName(),
                 badge.getRequiredPoint(),
                 badge.getImageUrl()

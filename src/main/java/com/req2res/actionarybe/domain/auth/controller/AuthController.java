@@ -24,7 +24,6 @@ import org.springframework.web.multipart.MultipartFile;
 @RequiredArgsConstructor
 public class AuthController {
 
-    private final JwtTokenProvider tokenProvider;
     private final AuthService authService;
 
     // ===================== 회원가입 =====================
