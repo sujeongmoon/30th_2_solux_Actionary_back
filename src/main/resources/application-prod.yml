@@ -52,7 +52,7 @@ spring:
         auto: false
 
 janus:
-  base-url: http://${EC2_HOST}:8088/janus
+  base-url: http://${JANUS_INTERNAL_HOST}:8088/janus
 
 app:
   default:
