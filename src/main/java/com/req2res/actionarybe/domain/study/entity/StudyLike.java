@@ -36,4 +36,12 @@ public class StudyLike extends Timestamped {
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "user_id", nullable = false)
 	private Member member;
+
+
+    public void confirmStudy(Study study) {
+        this.study = study;
+        if (!study.getStudyLikes().contains(this)) {
+            study.getStudyLikes().add(this);
+        }
+    }
 }
