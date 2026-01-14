@@ -24,7 +24,7 @@ services:
       - "8000:8000"
       - "7088:7088"
       - "7089:7089"
-      - "10000-10020:10000-10020/udp"
+      - "10000-10500:10000-10500/udp"
     volumes:
       - "./janus/janus.jcfg:/usr/local/etc/janus/janus.jcfg"
       - "./janus/janus.transport.http.jcfg:/usr/local/etc/janus/janus.transport.http.jcfg"
