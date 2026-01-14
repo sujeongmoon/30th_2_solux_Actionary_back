@@ -3,6 +3,7 @@ package com.req2res.actionarybe.domain.auth.dto;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import org.springframework.web.multipart.MultipartFile;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
@@ -12,9 +13,8 @@ import lombok.Setter;
 @Builder
 public class SignupRequestDTO {
 
-    @NotBlank
-    @Schema(example = "https://example.com/images/profile.png")
-    private String profileImageUrl;
+//    @Schema(description = "프로필 이미지 파일", type = "string", format = "binary")
+//    private MultipartFile profileImage;
 
     @NotBlank
     @Schema(example = "user1234")
