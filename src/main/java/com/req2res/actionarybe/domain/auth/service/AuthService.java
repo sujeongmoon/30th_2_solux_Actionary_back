@@ -18,6 +18,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
 import java.util.UUID;
@@ -81,7 +82,7 @@ public class AuthService {
     }
 
     // 회원가입
-    public SignupResponseDTO signup(SignupRequestDTO req) {
+    public SignupResponseDTO signup(SignupRequestDTO req, MultipartFile profileImage) {
         // id = 1 → 0P 기본 뱃지
         Badge defaultBadge = badgeRepository.findById(1L)
                 .orElseThrow(() -> new CustomException(ErrorCode.BADGE_NOT_FOUND));
@@ -101,9 +102,12 @@ public class AuthService {
 
         // 3. 사진 이미지 s3 업로드 -> String으로 주소 받기
         String profileImageUrl = null;
-        if (req.getProfileImage() != null && !req.getProfileImage().isEmpty()) {
-            profileImageUrl = imageService.saveImage(req.getProfileImage());
+        if (profileImage != null && !profileImage.isEmpty()) {
+            System.out.println("안 - profileImage: "+profileImage);
+            profileImageUrl = imageService.saveImage(profileImage);
         }
+        System.out.println("profileImageUrl: "+profileImageUrl);
+        System.out.println("밖 - profileImage: "+profileImage);
 
         // 3. 반환할 객체 만들기
         Member member = Member.builder()

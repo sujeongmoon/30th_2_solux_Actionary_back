@@ -6,15 +6,18 @@ import com.req2res.actionarybe.domain.auth.dto.*;
 import com.req2res.actionarybe.global.security.CustomUserDetails;
 import com.req2res.actionarybe.global.security.JwtTokenProvider;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -73,11 +76,17 @@ public class AuthController {
                     """))
             )
     })
-    @PostMapping("/signup")
+    @PostMapping(
+            value = "/signup",
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE
+    )
     public ResponseEntity<Response<SignupResponseDTO>> signup(
-             @ModelAttribute SignupRequestDTO req
-    ){
-        SignupResponseDTO result = authService.signup(req);
+            @RequestPart(value = "profileImage", required = false) MultipartFile profileImage,
+            @RequestPart(value = "signupInfo")
+            @Parameter(content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE))
+            @Valid SignupRequestDTO req
+    ) {
+        SignupResponseDTO result = authService.signup(req, profileImage);
         return ResponseEntity.ok(Response.success("회원가입에 성공하였습니다.", result));
     }
 

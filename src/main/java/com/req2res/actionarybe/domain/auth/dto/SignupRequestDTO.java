@@ -13,8 +13,8 @@ import lombok.Setter;
 @Builder
 public class SignupRequestDTO {
 
-    @Schema(description = "프로필 이미지 파일", type = "string", format = "binary")
-    private MultipartFile profileImage;
+//    @Schema(description = "프로필 이미지 파일", type = "string", format = "binary")
+//    private MultipartFile profileImage;
 
     @NotBlank
     @Schema(example = "user1234")
