@@ -1,5 +1,6 @@
 package com.req2res.actionarybe.domain.study.entity;
 
+import jakarta.persistence.*;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -7,22 +8,15 @@ import com.req2res.actionarybe.domain.member.entity.Member;
 import com.req2res.actionarybe.domain.study.dto.StudyRequestDto;
 import com.req2res.actionarybe.global.Timestamped;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Entity
@@ -61,6 +55,9 @@ public class Study extends Timestamped {
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "creator_user_id")
 	private Member creator;
+
+    @OneToMany(mappedBy = "study", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<StudyLike> studyLikes = new ArrayList<>();
 
 	public void updateStudy(@Valid StudyRequestDto request, Member member, String coverImageUrl) {
 

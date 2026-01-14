@@ -18,6 +18,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 @Getter
 @Entity
@@ -38,7 +40,8 @@ public class StudyParticipant extends Timestamped {
 	private LocalDateTime lastStateChangedAt;
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "study_id", nullable = false)
+	@JoinColumn(name = "study_id", nullable = true)
+    @OnDelete(action = OnDeleteAction.SET_NULL)
 	private Study study;
 
 	@ManyToOne(fetch = FetchType.LAZY)
