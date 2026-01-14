@@ -1,7 +1,9 @@
 package com.req2res.actionarybe.domain.point.service;
 //포인트 적립 Service
 
+import com.req2res.actionarybe.domain.member.entity.Badge;
 import com.req2res.actionarybe.domain.member.entity.Member;
+import com.req2res.actionarybe.domain.member.repository.BadgeRepository;
 import com.req2res.actionarybe.domain.member.repository.MemberRepository;
 import com.req2res.actionarybe.domain.notification.service.NotificationService;
 import com.req2res.actionarybe.domain.point.dto.*;
@@ -34,6 +36,8 @@ public class PointService {
     private final TodoRepository todoRepository;
     private final StudyTimeRepository studyTimeRepository;
     private final StudyTimeManualRepository studyTimeManualRepository;
+    private final BadgeRepository badgeRepository;
+
 
     // 1. 공부시간 포인트 적립 API
     @Transactional
@@ -88,6 +92,9 @@ public class PointService {
 
         // 7) 여기부터는 영속 상태 → save 호출 필요 없음 (dirty checking)
         userPoint.addPoint(earnedPoint, now);
+
+        updateBadgeIfCrossedThreshold(member, userPoint.getTotalPoint());
+
 
         // 8) point_history 기록 저장
         PointHistory history = PointHistory.builder()
@@ -154,6 +161,8 @@ public class PointService {
         // 포인트 반영
         userPoint.addPoint(earnedPoint, now);
 
+        updateBadgeIfCrossedThreshold(member, userPoint.getTotalPoint());
+
         // point_history 저장 (studyRoomId 포함!)
         PointHistory history = PointHistory.builder()
                 .member(member)
@@ -177,6 +186,7 @@ public class PointService {
         );
     }
 
+    // 3. to-do 완료시 포인트 적립 API
     @Transactional
     public TodoCompletionPointResponseDTO earnTodoCompletionPoint(
             Long loginMemberId,
@@ -246,6 +256,8 @@ public class PointService {
         LocalDateTime now = LocalDateTime.now();
         userPoint.addPoint(earnedPoint, now);
 
+        updateBadgeIfCrossedThreshold(member, userPoint.getTotalPoint());
+
         // 7) point_history 저장 (todoId 포함)
         PointHistory history = PointHistory.builder()
                 .member(member)
@@ -268,6 +280,42 @@ public class PointService {
                 limit,
                 userPoint.getTotalPoint()
         );
+    }
+
+    //뱃지 업데이트 메소드
+    private void updateBadgeIfCrossedThreshold(Member member, long totalPoint) {
+
+        // 이미 최고면 패스
+        if (member.getBadge() != null && member.getBadge().getId() >= 8L) {
+            return;
+        }
+
+        Badge current = member.getBadge();
+        if (current == null) return;
+
+        while (true) {
+            // 다음 기준점 뱃지 찾기 (현재 requiredPoint보다 큰 것 중 가장 작은 것)
+            Badge next = badgeRepository
+                    .findTopByRequiredPointGreaterThanOrderByRequiredPointAsc(current.getRequiredPoint())
+                    .orElse(null);
+
+            // 더 이상 다음 뱃지 없음 or 이미 최고
+            if (next == null || next.getId() > 8L) {
+                break;
+            }
+
+            // 이번 totalPoint가 다음 뱃지 기준점을 넘었으면 승급하고 계속 검사
+            if (totalPoint >= next.getRequiredPoint()) {
+                member.setBadge(next);
+                current = next;
+
+                // 8번이면 종료
+                if (current.getId() >= 8L) break;
+            } else {
+                // 아직 기준점 못 넘었으면 종료
+                break;
+            }
+        }
     }
 
 
