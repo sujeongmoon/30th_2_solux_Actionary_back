@@ -1,4 +1,10 @@
 services:
+
+  actionary-db:
+    restart: always
+    volumes:
+      -  "./mysql_data:/var/lib/mysql"
+
   janus-gateway:
     network_mode: "host"
     volumes:
@@ -9,6 +15,7 @@ services:
   actionary-be:
     image: ${DOCKER_USERNAME}/${DOCKER_REPO}:latest
     container_name: actionary_webserver
+    restart: always
     extra_hosts:
       - ${JANUS_INTERNAL_HOST}
     depends_on:
