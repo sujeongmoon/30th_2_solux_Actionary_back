@@ -130,9 +130,12 @@ public class StudyInteractionService {
 				.study(study)
 				.member(member)
 				.build();
+            studyLike.confirmStudy(study);
 			studyLikeRepository.save(studyLike);
+
 		} else {
 			StudyLike studyLike = studyLikeRepository.findByStudyAndMember(study, member);
+            study.getStudyLikes().remove(studyLike);
 			studyLikeRepository.delete(studyLike);
 		}
 
