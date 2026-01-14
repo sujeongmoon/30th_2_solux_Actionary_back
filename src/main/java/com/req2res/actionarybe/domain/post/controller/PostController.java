@@ -15,8 +15,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.MediaType;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -95,13 +99,14 @@ public class PostController {
                     """))
             )
     })
-    @PostMapping("")
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public Response<CreatePostResponseDTO> createPost(
-            @ModelAttribute CreatePostRequestDTO createPostRequestDTO,
+            @RequestPart("images") List<MultipartFile> images,
+            @RequestPart("post") CreatePostRequestDTO createPostRequestDTO,
             @AuthenticationPrincipal CustomUserDetails userDetails
-    ){
+    ) {
         Long member_id = userDetails.getId();
-        CreatePostResponseDTO result = postService.createPost(createPostRequestDTO, member_id);
+        CreatePostResponseDTO result = postService.createPost(createPostRequestDTO, member_id, images);
         return Response.success("게시글 생성 성공",result);
     }
 

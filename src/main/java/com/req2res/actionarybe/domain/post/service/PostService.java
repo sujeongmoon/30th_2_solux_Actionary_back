@@ -28,7 +28,7 @@ public class PostService {
 
     // 게시글 생성
     @Transactional
-    public CreatePostResponseDTO createPost(CreatePostRequestDTO request, Long memberId) {
+    public CreatePostResponseDTO createPost(CreatePostRequestDTO request, Long memberId, List<MultipartFile> images) {
 
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
@@ -49,9 +49,9 @@ public class PostService {
         );
 
         // 이미지가 있을 때만 처리 (S3 업로드)
-        if (request.getContent().getImages() != null && !request.getContent().getImages().isEmpty()) {
+        if (images != null && !images.isEmpty()) {
             int order = 0;
-            for (MultipartFile imageFile : request.getContent().getImages()) {
+            for (MultipartFile imageFile : images) {
 
                 // image없으면 image 저장없음
                 if (imageFile.isEmpty()) continue;
