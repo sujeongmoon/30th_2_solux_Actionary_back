@@ -103,11 +103,8 @@ public class AuthService {
         // 3. 사진 이미지 s3 업로드 -> String으로 주소 받기
         String profileImageUrl = null;
         if (profileImage != null && !profileImage.isEmpty()) {
-            System.out.println("안 - profileImage: "+profileImage);
             profileImageUrl = imageService.saveImage(profileImage);
         }
-        System.out.println("profileImageUrl: "+profileImageUrl);
-        System.out.println("밖 - profileImage: "+profileImage);
 
         // 3. 반환할 객체 만들기
         Member member = Member.builder()
