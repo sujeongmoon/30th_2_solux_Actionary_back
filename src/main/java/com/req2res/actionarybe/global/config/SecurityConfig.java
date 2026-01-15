@@ -65,7 +65,10 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(List.of("http://13.209.205.33:5173")); // 프론트 주소
+        config.setAllowedOrigins(List.of(
+                "http://13.209.205.33:5173",
+                "http://localhost:5173"
+        )); // 프론트 주소
         config.setAllowedMethods(List.of("*"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true);
