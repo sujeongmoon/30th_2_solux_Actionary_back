@@ -15,7 +15,7 @@ spring:
       fail-on-unknown-properties: true
   sql:
     init:
-      mode: always
+      mode: never # data.sql 서버 -> 실행X
   data:
     redis:
       host: actionary-redis

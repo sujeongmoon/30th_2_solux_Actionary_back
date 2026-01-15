@@ -17,6 +17,11 @@ import com.req2res.actionarybe.global.security.JwtAuthenticationFilter;
 import com.req2res.actionarybe.global.security.JwtTokenProvider;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.List;
 
 @Configuration
 @EnableMethodSecurity
@@ -56,6 +61,19 @@ public class SecurityConfig {
 				UsernamePasswordAuthenticationFilter.class);
 		return http.build();
 	}
+
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration config = new CorsConfiguration();
+        config.setAllowedOrigins(List.of("http://13.209.205.33:5173")); // 프론트 주소
+        config.setAllowedMethods(List.of("*"));
+        config.setAllowedHeaders(List.of("*"));
+        config.setAllowCredentials(true);
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", config);
+        return source;
+    }
 
 	@Bean
 	public PasswordEncoder passwordEncoder() {
