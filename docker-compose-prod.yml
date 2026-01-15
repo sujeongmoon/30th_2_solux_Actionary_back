@@ -3,7 +3,7 @@ services:
   actionary-db:
     restart: always
     volumes:
-      -  "./mysql_data:/var/lib/mysql"
+      - "./mysql_data:/var/lib/mysql"
 
   janus-gateway:
     network_mode: "host"
@@ -17,7 +17,7 @@ services:
     container_name: actionary_webserver
     restart: always
     extra_hosts:
-      - ${JANUS_INTERNAL_HOST}
+      - "host.docker.internal:host-gateway"
     depends_on:
       - actionary-db
     ports:
