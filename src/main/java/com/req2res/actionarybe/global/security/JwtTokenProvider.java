@@ -22,7 +22,7 @@ public class JwtTokenProvider {
     public JwtTokenProvider(
             CustomMemberDetailsService userDetailsService,
             @Value("${jwt.secret:local-demo-secret-change-me-12345678901234567890}") String secret,
-            @Value("${jwt.access-token-expiration-ms:10800000}") long accessMs
+            @Value("${jwt.access-token-expiration-ms:30000}") long accessMs
     ) {
         this.userDetailsService = userDetailsService;
         this.secretKey = Keys.hmacShaKeyFor(secret.getBytes());
