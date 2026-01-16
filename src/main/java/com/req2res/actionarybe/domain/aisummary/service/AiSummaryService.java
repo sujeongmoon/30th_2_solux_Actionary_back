@@ -364,76 +364,232 @@ public class AiSummaryService {
         }
     }
 
+    // OpenAI API를 호출하여 텍스트 요약 요청 (incomplete/추출실패 시 1회 재시도 포함)
+    private String callOpenAi(String inputText, String language, int maxOutputTokens) {
+        if (inputText == null || inputText.isBlank()) {
+            throw new RuntimeException("요약할 입력 텍스트가 비어있습니다.");
+        }
+
+        String lang = (language == null || language.isBlank()) ? "ko" : language;
+
+        // 600 유지하되, "목표"는 낮춰서 끊김 방지
+        int targetTokens = Math.max(200, Math.min(maxOutputTokens, maxOutputTokens - 100));
+
+        Map<String, Object> body = Map.of(
+                "model", model,
+                "instructions", buildInstructions(lang, targetTokens),
+                "input", inputText,
+                "max_output_tokens", maxOutputTokens,
+                // reasoning 토큰을 줄여서 실제 text가 나오게
+                "reasoning", Map.of("effort", "minimal"),
+                // 안전한 text 설정만
+                "text", Map.of("format", Map.of("type", "text"))
+        );
+
+        Map<String, Object> res;
+        try {
+            log.info("OpenAI request start. model={}, lang={}, maxOutputTokens={}, inputChars={}",
+                    model, lang, maxOutputTokens, inputText.length());
+
+            res = openAiWebClient.post()
+                    .uri("/responses")
+                    .bodyValue(body)
+                    .retrieve()
+                    .bodyToMono(new ParameterizedTypeReference<Map<String, Object>>() {})
+                    .block();
+
+        } catch (WebClientResponseException.BadRequest e) {
+            log.error("OpenAI 400 BadRequest. body={}", e.getResponseBodyAsString(), e);
+            throw e;
+        } catch (WebClientResponseException.TooManyRequests e) {
+            log.error("OpenAI 429 TooManyRequests. body={}", e.getResponseBodyAsString(), e);
+            throw e;
+        } catch (WebClientResponseException e) {
+            log.error("OpenAI error status={}, body={}", e.getStatusCode(), e.getResponseBodyAsString(), e);
+            throw e;
+        }
+
+        String summary = extractSummaryText(res);
+        if (summary != null && !summary.isBlank() && !looksTruncated(summary)) {
+            return summary.trim();
+        }
+
+
+        // 1회 재시도: 더 짧게 + reasoning 더 강하게 줄이기
+        if (shouldRetry(res)) {
+            int retryTarget = Math.max(120, targetTokens / 2);
+
+            Map<String, Object> retryBody = Map.of(
+                    "model", model,
+                    "instructions", buildRetryInstructions(lang, retryTarget),
+                    "input", inputText,
+                    "max_output_tokens", maxOutputTokens,
+                    "reasoning", Map.of("effort", "minimal"),
+                    "text", Map.of("format", Map.of("type", "text"))
+            );
+
+            try {
+                log.info("OpenAI retry start. model={}, retryTargetTokens={}, maxOutputTokens={}, inputChars={}",
+                        model, retryTarget, maxOutputTokens, inputText.length());
+
+                Map<String, Object> retryRes = openAiWebClient.post()
+                        .uri("/responses")
+                        .bodyValue(retryBody)
+                        .retrieve()
+                        .bodyToMono(new ParameterizedTypeReference<Map<String, Object>>() {})
+                        .block();
+
+                String retrySummary = extractSummaryText(retryRes);
+                if (retrySummary != null && !retrySummary.isBlank() && !looksTruncated(retrySummary)) {
+                    return retrySummary.trim();
+                }
+
+                log.error("OpenAI retry response still has no extractable text. res={}", retryRes);
+
+            } catch (WebClientResponseException e) {
+                log.error("OpenAI retry error status={}, body={}", e.getStatusCode(), e.getResponseBodyAsString(), e);
+                throw e;
+            }
+        }
+
+        log.error("OpenAI response has no extractable text. res={}", res);
+        throw new RuntimeException("OpenAI 응답에서 요약 텍스트를 찾지 못했습니다.");
+    }
+
+    // instructions 생성
+    private String buildInstructions(String language, int targetTokens) {
+        return """
+        너는 문서를 요약하는 도우미야.
+        출력 언어는 %s.
+        반드시 요약 텍스트만 출력해.
+
+        규칙:
+        - 전체 8~12문장 이내
+        - 문장이 중간에 끊기면 안 됨. 길면 핵심만 남기고 과감히 생략해.
+        """.formatted(language);
+    }
+
+
+    // 재시도용 instructions (더 짧게 강제)
+    private String buildRetryInstructions(String language, int retryTargetTokens) {
+        return """
+        너는 문서를 요약하는 도우미야.
+        출력 언어는 %s.
+        반드시 요약 텍스트만 출력해.
+
+        규칙:
+        - 전체 5~7문장 이내
+        - 중간에 끊기면 안 됨. 중요한 내용만 남겨.
+        """.formatted(language);
+    }
+
+    // 재시도 필요 조건 판단: incomplete(max_output_tokens) 또는 텍스트 추출 실패
+    @SuppressWarnings("unchecked")
+    private boolean shouldRetry(Map<String, Object> res) {
+        if (res == null) return false;
+
+        Object status = res.get("status");
+        if ("incomplete".equals(status)) {
+            Object details = res.get("incomplete_details");
+            if (details instanceof Map<?, ?> m) {
+                Object reason = m.get("reason");
+                if ("max_output_tokens".equals(reason)) return true;
+            }
+            // incomplete 자체면 재시도 가치 있음
+            return true;
+        }
+
+        // output이 reasoning만 오는 경우도 재시도 대상 (텍스트가 없다는 의미)
+        Object output = res.get("output");
+        if (output instanceof java.util.List<?> list && !list.isEmpty()) {
+            boolean hasAnyText = list.stream()
+                    .filter(o -> o instanceof Map<?, ?>)
+                    .map(o -> (Map<?, ?>) o)
+                    .anyMatch(this::containsAnyText);
+            return !hasAnyText;
+        }
+
+        return false;
+    }
+
+    private boolean containsAnyText(Map<?, ?> item) {
+        Object content = item.get("content");
+        if (content instanceof java.util.List<?> cList) {
+            for (Object c : cList) {
+                if (!(c instanceof Map<?, ?> cm)) continue;
+                Object text = cm.get("text");
+                if (text instanceof String s && !s.isBlank()) return true;
+                if (text instanceof Map<?, ?> tm) {
+                    Object value = tm.get("value");
+                    if (value instanceof String s2 && !s2.isBlank()) return true;
+                }
+            }
+        }
+        Object text = item.get("text");
+        return (text instanceof String s && !s.isBlank());
+    }
+
     // OpenAI Responses API 응답에서 요약 텍스트만 안전하게 추출
     @SuppressWarnings("unchecked")
     private String extractSummaryText(Map<String, Object> res) {
+        if (res == null) return null;
 
         // 1) output_text 필드가 바로 있는 경우
         Object outputText = res.get("output_text");
         if (outputText instanceof String s && !s.isBlank()) return s.trim();
 
-        // 2) output -> content -> text 구조 탐색
+        // 2) Responses API 정석: output[].content[].type=output_text, text=...
         Object output = res.get("output");
         if (output instanceof java.util.List<?> outList) {
+            StringBuilder sb = new StringBuilder();
+
             for (Object item : outList) {
                 if (!(item instanceof Map<?, ?> m)) continue;
 
+                // output item이 message가 아닐 수도 있음 (reasoning 등)
                 Object content = m.get("content");
-                if (content instanceof java.util.List<?> cList) {
-                    for (Object c : cList) {
-                        if (!(c instanceof Map<?, ?> cm)) continue;
+                if (!(content instanceof java.util.List<?> cList)) continue;
 
-                        Object text = cm.get("text");
-                        if (text instanceof String s && !s.isBlank()) return s.trim();
+                for (Object c : cList) {
+                    if (!(c instanceof Map<?, ?> cm)) continue;
 
-                        // { text: { value: "..." } } 형태 대비
-                        if (text instanceof Map<?, ?> tm) {
-                            Object value = tm.get("value");
-                            if (value instanceof String s2 && !s2.isBlank()) return s2.trim();
-                        }
+                    // content.type 확인 (output_text 우선)
+                    Object type = cm.get("type");
+                    Object text = cm.get("text");
+
+                    String extracted = null;
+
+                    if (text instanceof String s && !s.isBlank()) extracted = s.trim();
+                    else if (text instanceof Map<?, ?> tm) {
+                        Object value = tm.get("value");
+                        if (value instanceof String s2 && !s2.isBlank()) extracted = s2.trim();
+                    }
+
+                    if (extracted != null) {
+                        // type이 없거나(output_text 아닐 수도) 텍스트가 있으면 일단 누적
+                        // (실제 응답 구조 변형에도 최대한 안전하게)
+                        if (sb.length() > 0) sb.append("\n");
+                        sb.append(extracted);
                     }
                 }
+            }
 
-                // 3) item 자체에 text가 있는 구조 대비
+            String joined = sb.toString().trim();
+            if (!joined.isBlank()) return joined;
+        }
+
+        // 3) item 자체에 text가 있는 구조 대비 (fallback)
+        if (output instanceof java.util.List<?> outList2) {
+            for (Object item : outList2) {
+                if (!(item instanceof Map<?, ?> m)) continue;
                 Object text = m.get("text");
                 if (text instanceof String s && !s.isBlank()) return s.trim();
             }
         }
 
-        // 추출 실패 시 null 반환 (호출부에서 에러 처리)
         return null;
     }
 
-    // OpenAI API를 호출하여 텍스트 요약 요청
-    private String callOpenAi(String inputText, String language, int maxOutputTokens) {
-        Map<String, Object> body = Map.of(
-                "model", model,
-                "instructions", "너는 문서를 요약하는 도우미야. 출력 언어는 " + language
-                        + "로. 요약만 출력해. 최대 " + maxOutputTokens + " 토큰 이내.",
-                "input", inputText,
-                "max_output_tokens", maxOutputTokens,
-                "text", Map.of(
-                        "format", Map.of("type", "text")
-                )
-        );
-
-        Map<String, Object> res = openAiWebClient.post()
-                .uri("/responses")
-                .bodyValue(body)
-                .retrieve()
-                .bodyToMono(new ParameterizedTypeReference<Map<String, Object>>() {})
-                .block();
-
-        String summary = extractSummaryText(res);
-
-        // 요약 텍스트가 없으면 에러 처리
-        if (summary == null || summary.isBlank()) {
-            log.error("OpenAI response has no extractable text. res={}", res);
-            throw new RuntimeException("OpenAI 응답에서 요약 텍스트를 찾지 못했습니다.");
-        }
-
-        return summary;
-    }
 
     // PDF 처리 중 발생하는 예외를 표현하기 위한 커스텀 런타임 예외
     private static class UnsupportedPdfException extends RuntimeException {
@@ -489,5 +645,24 @@ public class AiSummaryService {
         }
     }
 
+    // 요약본 끊긴걸 감지하는 함수
+    private boolean looksTruncated(String s) {
+        if (s == null) return true;
+        String t = s.trim();
+        if (t.isEmpty()) return true;
+
+
+        // 문장 종결로 끝나지 않으면 끊김 가능성이 큼
+        char last = t.charAt(t.length() - 1);
+
+        // 일반 문장부호
+        if (last == '.' || last == '!' || last == '?' || last == '”' || last == '"' || last == '’' || last == '\'') {
+            return false;
+        }
+
+        // 한국어 종결 어미로 끝나는지(완전 정확하진 않지만 실전에서 꽤 먹힘)
+        return !(t.endsWith("다") || t.endsWith("요") || t.endsWith("니다") || t.endsWith("음"));
+    }
 
 }
+
