@@ -21,7 +21,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
-import java.util.Random;
 import java.util.UUID;
 
 @Service
@@ -82,21 +81,6 @@ public class AuthService {
         );
     }
 
-    public String generateNickname() {
-        String chars = "abcdefghijklmnopqrstuvwxyz0123456789";
-        Random random = new Random();
-        StringBuilder suffix = new StringBuilder();
-
-        // 3~4자리 랜덤 생성 (길이 6~7자 맞추기 위함)
-        int length = 4;
-
-        for (int i = 0; i < length; i++) {
-            suffix.append(chars.charAt(random.nextInt(chars.length())));
-        }
-
-        return "user" + suffix;  // 예: user2k1, user9ab3
-    }
-
     // 회원가입
     public SignupResponseDTO signup(SignupRequestDTO req, MultipartFile profileImage) {
         // id = 1 → 0P 기본 뱃지
@@ -129,7 +113,7 @@ public class AuthService {
                 .phoneNumber(req.getPhoneNumber())
                 .email(req.getEmail())
                 .name(req.getName())
-                .nickname(generateNickname())
+                .nickname("action_" + UUID.randomUUID().toString().substring(0, 8))
                 .profileImageUrl(profileImageUrl)
                 .birthday(LocalDate.parse(req.getBirthday())) // 문자열 날짜 파싱
                 .badge(defaultBadge)
