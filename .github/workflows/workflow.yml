@@ -80,6 +80,7 @@ jobs:
           script: |
             cd /home/ubuntu/actionary
             echo "${{ secrets.ENV_PROD }}" > .env
-            sudo docker compose pull
-            sudo docker compose -f docker-compose.yml -f docker-compose-prod.yml up -d --force-recreate
+            sudo docker compose -f docker-compose.yml -f docker-compose-prod.yml down
+            docker compose -f docker-compose.yml -f docker-compose-prod.yml pull
+            docker compose -f docker-compose.yml -f docker-compose-prod.yml up -d
             sudo docker image prune -f
