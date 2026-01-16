@@ -53,6 +53,12 @@ public class AiSummaryService {
 
     // 1. 파일 요약 API
     public AiSummaryResponseDataDTO summarizeFile(MultipartFile file, String language, Integer maxTokens, Long userIdOrNull) {
+        // PDF만 허용 (png/jpg 등은 400)
+        if (!isPdf(file)) {
+            throw new CustomException(ErrorCode.BAD_REQUEST, "PDF 파일만 업로드할 수 있습니다.");
+        }
+
+
         if (file == null || file.isEmpty()) {
             throw new CustomException(ErrorCode.BAD_REQUEST, "file은 필수입니다.");
         }
