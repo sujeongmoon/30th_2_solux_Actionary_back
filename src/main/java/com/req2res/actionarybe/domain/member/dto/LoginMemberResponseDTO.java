@@ -8,7 +8,7 @@ import java.time.LocalDate;
 @Getter
 @AllArgsConstructor
 public class LoginMemberResponseDTO {
-    Long id;
+    Long memberId;
     String profileImageUrl;
     String nickname;
     String phoneNumber;
