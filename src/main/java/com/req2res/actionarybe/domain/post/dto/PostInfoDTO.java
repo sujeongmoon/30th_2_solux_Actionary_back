@@ -8,10 +8,10 @@ import java.time.LocalDateTime;
 @Getter
 @AllArgsConstructor
 public class PostInfoDTO {
-    private Long postId;
+    private Long id;
     private String type;
     private String title;
-    private String textContent;
-    private int commentCount;
+    private String text;
+    private int commentsCount;
     private LocalDateTime createdAt;
 }
