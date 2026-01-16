@@ -6,8 +6,8 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public class PageInfoDTO {
-    private int pageNum;
-    private int pageSize;
+    private int page;
+    private int size;
     private Long totalElements;
     private int totalPages;
 }

@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 @Getter
 @AllArgsConstructor
 public class CreatePostResponseDTO {
-    private Long id;
+    private Long postId;
     private String title;
     private String nickname;
     private LocalDateTime createdAt;

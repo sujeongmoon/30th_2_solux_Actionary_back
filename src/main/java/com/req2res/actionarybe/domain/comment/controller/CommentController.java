@@ -178,7 +178,7 @@ public class CommentController {
             )
     })
     @GetMapping("/{postId}/comments")
-    public Response<GetCommentResponseDTO> getLatestPosts(
+    public Response<GetCommentResponseDTO> getLatestComments(
             @RequestParam(defaultValue = "0", required = false) int page,
             @PathVariable("postId") Long postId
     ) {
