@@ -15,7 +15,7 @@ spring:
       fail-on-unknown-properties: true
   sql:
     init:
-      mode: always  # data.sql 기본값 -> 실행X
+      mode: always  # data.sql 기본값 -> 실행O (배포 시 never로 덮음)
   data:
     redis:
       host: localhost
