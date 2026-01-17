@@ -132,8 +132,6 @@ public class NotificationService {
         create(req);
     }
 
-
-    //-------------------------------------------------
     // 2. 알림 조회 API
     @Transactional(readOnly = true)
     public List<NotificationGetResponseDTO> getMyNotifications(Long memberId, Integer limit) {
@@ -157,4 +155,23 @@ public class NotificationService {
                 .map(NotificationGetResponseDTO::from)
                 .toList();
     }
+
+    // 3.알림 읽음 처리 API
+    @Transactional
+    public NotificationGetResponseDTO markAsRead(Long memberId, Long notificationId) {
+
+        Notification notification = notificationRepository.findById(notificationId)
+                .orElseThrow(() -> new CustomException(ErrorCode.NOTIFICATION_NOT_FOUND));
+
+        // 내 알림인지 검증
+        if (!notification.getReceiver().getId().equals(memberId)) {
+            throw new CustomException(ErrorCode.NOTIFICATION_FORBIDDEN);
+        }
+
+        // 멱등 처리
+        notification.markAsRead();
+
+        return NotificationGetResponseDTO.from(notification);
+    }
+
 }

@@ -4,6 +4,7 @@ import com.req2res.actionarybe.global.Timestamped;
 import com.req2res.actionarybe.domain.member.entity.Member;
 import jakarta.persistence.*;
 import lombok.*;
+import java.time.LocalDateTime;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -53,4 +54,13 @@ public class Notification extends Timestamped {
                 .readAt(null)
                 .build();
     }
+
+    public void markAsRead() {
+        if (Boolean.TRUE.equals(this.isRead)) {
+            return; // 멱등성
+        }
+        this.isRead = true;
+        this.readAt = LocalDateTime.now();
+    }
+
 }

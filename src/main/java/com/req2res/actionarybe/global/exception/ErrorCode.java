@@ -58,6 +58,10 @@ public enum ErrorCode {
 	STUDY_PARTICIPATION_TIME_NOT_ENOUGH(HttpStatus.BAD_REQUEST, "참여 시간은 30분 이상이어야 포인트가 적립됩니다."),
 	TODO_POINT_ALREADY_EARNED(HttpStatus.CONFLICT, "이미 해당 투두 완료 포인트를 적립했습니다."),
 
+	// notification
+	NOTIFICATION_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 알림을 찾을 수 없습니다."),
+	NOTIFICATION_FORBIDDEN(HttpStatus.FORBIDDEN, "내 알림만 읽음 처리할 수 있습니다."),
+
 	//search
 	SEARCH_NOT_FOUND(HttpStatus.NOT_FOUND, "검색 결과를 찾을 수 없습니다."),
 

@@ -195,4 +195,34 @@ public class NotificationController {
         return ResponseEntity.ok(Response.success("", data));
     }
 
+    // 3. 알림 읽음 처리 API
+    @Operation(
+            summary = "알림 단건 읽음 처리 API",
+            description = """
+                알림을 클릭했을 때 해당 알림의 isRead를 true로 변경합니다.
+                내 알림만 읽음 처리 가능하며, 이미 읽음인 경우에도 200 OK로 응답합니다.
+                """
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "알림 읽음 처리 성공"),
+            @ApiResponse(responseCode = "401", description = "인증 실패(토큰 없음/만료)", content = @Content),
+            @ApiResponse(responseCode = "403", description = "내 알림이 아님", content = @Content),
+            @ApiResponse(responseCode = "404", description = "알림 없음", content = @Content),
+            @ApiResponse(responseCode = "500", description = "서버 오류", content = @Content)
+    })
+    @PatchMapping("/{notificationId}/read")
+    public ResponseEntity<Response<NotificationGetResponseDTO>> readNotification(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @PathVariable Long notificationId
+    ) {
+        String loginId = userDetails.getUsername();
+
+        Member member = memberRepository.findByLoginId(loginId)
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND));
+
+        NotificationGetResponseDTO data = notificationService.markAsRead(member.getId(), notificationId);
+
+        return ResponseEntity.ok(Response.success("알림을 읽음 처리했습니다.", data));
+    }
+
 }
