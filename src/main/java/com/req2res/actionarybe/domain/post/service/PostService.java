@@ -120,7 +120,7 @@ public class PostService {
 
     // 게시글 수정
     @Transactional
-    public UpdatePostResponseDTO updatePost(Long post_id, UpdatePostRequestDTO request) {
+    public UpdatePostResponseDTO updatePost(Long post_id, List<MultipartFile> images, UpdatePostRequestDTO request) {
         Post post=postRepository.findById(post_id)
                 .orElseThrow(()->new CustomException(ErrorCode.POST_NOT_FOUND));
 
@@ -130,7 +130,7 @@ public class PostService {
             post.setTitle(request.getTitle());
         if(request.getText()!=null)
             post.setText(request.getText());
-        if(request.getImageUrls()!=null){
+        if(images!=null){
             updatePostImages(request, post);
         }
 

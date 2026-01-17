@@ -249,39 +249,10 @@ public class PostController {
     @PatchMapping("/{post_id}")
     public Response<UpdatePostResponseDTO> updatePost(
             @PathVariable("post_id") Long postId,
-            @io.swagger.v3.oas.annotations.parameters.RequestBody(
-                    description = "게시글 수정 요청 예시 (전체 수정 / 일부 수정)",
-                    content = @Content(mediaType = "application/json", examples = {
-                            @ExampleObject(
-                                    name = "전체 수정",
-                                    value = """
-                                    {
-                                      "type": "인증",
-                                      "title": "수정된 스터디1",
-                                      "text": "ERD 설계는 정말 중요합니다.",
-                                      "imageUrls": [
-                                        "https://storage.com/ccc.jpg",
-                                        "https://storage.com/ddd.jpg"
-                                      ]
-                                    }
-                                    """
-                            ),
-                            @ExampleObject(
-                                    name = "일부 수정",
-                                    value = """
-                                    {
-                                      "title": "수정된 스터디2",
-                                      "imageUrls": [
-                                        "https://storage.com/ddd.jpg"
-                                      ]
-                                    }
-                                    """
-                            )
-                    })
-            )
-            @Valid @RequestBody UpdatePostRequestDTO request
+            @RequestPart(value = "images", required = false) List<MultipartFile> images,
+            @RequestPart(value = "post", required = false) UpdatePostRequestDTO updatePostRequestDTO
     ){
-        UpdatePostResponseDTO result = postService.updatePost(postId, request);
+        UpdatePostResponseDTO result = postService.updatePost(postId, images, updatePostRequestDTO);
         return Response.success("게시글 수정 성공", result);
     }
 
