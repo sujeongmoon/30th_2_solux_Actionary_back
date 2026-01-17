@@ -124,6 +124,10 @@ public class PostService {
         Post post=postRepository.findById(post_id)
                 .orElseThrow(()->new CustomException(ErrorCode.POST_NOT_FOUND));
 
+        if(images == null && request == null){
+            throw new CustomException(ErrorCode.EMPTY_UPDATE_REQUEST);
+        }
+
         if(request.getType()!=null)
             post.setType(Post.Type.valueOf(request.getType())); // request의 type는 String이라, Post의 Type 자료형인 Post.Type(Enum) 타입 변환 필요
         if(request.getTitle()!=null)
