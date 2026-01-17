@@ -101,7 +101,7 @@ public class PostController {
     })
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public Response<CreatePostResponseDTO> createPost(
-            @RequestPart("images") List<MultipartFile> images,
+            @RequestPart(value = "images", required = false) List<MultipartFile> images,
             @RequestPart("post") CreatePostRequestDTO createPostRequestDTO,
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
