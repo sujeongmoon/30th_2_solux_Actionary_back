@@ -10,8 +10,12 @@ import java.time.LocalDate;
 
 @Entity
 @Table(name = "member",
-        indexes = { @Index(name="idx_member_login_id", columnList="loginId", unique = true),
-                @Index(name="idx_member_email", columnList="email", unique = true) })
+        uniqueConstraints = {
+                @UniqueConstraint(name = "uk_member_login_id", columnNames = "loginId"),
+                @UniqueConstraint(name = "uk_member_email", columnNames = "email"),
+                @UniqueConstraint(name = "uk_member_nickname", columnNames = "nickname")
+        }
+)
 @EntityListeners(AuditingEntityListener.class)
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -20,19 +24,19 @@ public class Member extends Timestamped {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable=false, unique=true, length=20)
+    @Column(nullable=false, length=20)
     private String loginId;
 
     @Column(nullable=false)
     private String password;  // BCrypt hash
 
-    @Column(nullable=false, unique=true, length=50)
+    @Column(nullable=false, length=50)
     private String email;
 
     @Column(nullable=false, length=20)
     private String name;
 
-    @Column(unique = true, length=20)
+    @Column(length=20)
     private String nickname;
 
     @Column(nullable=false)

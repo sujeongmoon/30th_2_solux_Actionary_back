@@ -94,6 +94,7 @@ public enum ErrorCode {
 	POST_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 게시물입니다."),
     INVALID_FONT_TYPE(HttpStatus.BAD_REQUEST, "font 값이 올바르지 않습니다."),
     INVALID_POST_TYPE(HttpStatus.BAD_REQUEST, "게시글 type이 올바르지 않습니다."),
+    EMPTY_UPDATE_REQUEST(HttpStatus.BAD_REQUEST, "수정할 데이터가 없습니다."),
 
 	// post comment
 	POST_COMMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 댓글입니다.");

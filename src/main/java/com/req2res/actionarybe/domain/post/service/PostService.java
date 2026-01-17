@@ -105,33 +105,40 @@ public class PostService {
 
     // 게시글 images 수정 (전체 삭제 -> '전체 image' 다시 설정)
     @Transactional
-    public void updatePostImages(UpdatePostRequestDTO request, Post post) {
+    public void updatePostImages(List<MultipartFile> images, Post post) {
         post.getImages().clear(); // 해당 게시글의 이미지 url 모두 삭제
 
-        int i=0;
-        for(String img : request.getImageUrls()){
-            post.addImage(new PostImage(
-                    post,
-                    img,
-                    i++
-            ));
+        int order = 0;
+        for (MultipartFile imageFile : images) {
+
+            // image없으면 image 저장없음
+            if (imageFile.isEmpty()) continue;
+
+            String imageUrl = imageService.saveImage(imageFile);
+            post.addImage(new PostImage(post, imageUrl, order++));
         }
     }
 
     // 게시글 수정
     @Transactional
-    public UpdatePostResponseDTO updatePost(Long post_id, UpdatePostRequestDTO request) {
+    public UpdatePostResponseDTO updatePost(Long post_id, List<MultipartFile> images, UpdatePostRequestDTO request) {
         Post post=postRepository.findById(post_id)
                 .orElseThrow(()->new CustomException(ErrorCode.POST_NOT_FOUND));
 
-        if(request.getType()!=null)
-            post.setType(Post.Type.valueOf(request.getType())); // request의 type는 String이라, Post의 Type 자료형인 Post.Type(Enum) 타입 변환 필요
-        if(request.getTitle()!=null)
-            post.setTitle(request.getTitle());
-        if(request.getText()!=null)
-            post.setText(request.getText());
-        if(request.getImageUrls()!=null){
-            updatePostImages(request, post);
+        if(images == null && request == null){
+            throw new CustomException(ErrorCode.EMPTY_UPDATE_REQUEST);
+        }
+
+        if(images!=null){
+            updatePostImages(images, post);
+        }
+        if(request != null){
+            if(request.getType()!=null)
+                post.setType(Post.Type.valueOf(request.getType())); // request의 type는 String이라, Post의 Type 자료형인 Post.Type(Enum) 타입 변환 필요
+            if(request.getTitle()!=null)
+                post.setTitle(request.getTitle());
+            if(request.getText()!=null)
+                post.setText(request.getText());
         }
 
         return new UpdatePostResponseDTO(
