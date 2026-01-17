@@ -128,14 +128,16 @@ public class PostService {
             throw new CustomException(ErrorCode.EMPTY_UPDATE_REQUEST);
         }
 
-        if(request.getType()!=null)
-            post.setType(Post.Type.valueOf(request.getType())); // request의 type는 String이라, Post의 Type 자료형인 Post.Type(Enum) 타입 변환 필요
-        if(request.getTitle()!=null)
-            post.setTitle(request.getTitle());
-        if(request.getText()!=null)
-            post.setText(request.getText());
         if(images!=null){
             updatePostImages(request, post);
+        }
+        if(request != null){
+            if(request.getType()!=null)
+                post.setType(Post.Type.valueOf(request.getType())); // request의 type는 String이라, Post의 Type 자료형인 Post.Type(Enum) 타입 변환 필요
+            if(request.getTitle()!=null)
+                post.setTitle(request.getTitle());
+            if(request.getText()!=null)
+                post.setText(request.getText());
         }
 
         return new UpdatePostResponseDTO(
