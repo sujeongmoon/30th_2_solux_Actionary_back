@@ -19,13 +19,5 @@ public class PostContentRequestDTO {
     )
     @NotBlank(message = "게시글 텍스트 작성은 필수입니다.")
     private String text;
-
-//    @Schema(
-//            description = "게시글에 업로드할 이미지 파일 목록",
-//            type = "array",
-//            format = "binary"
-//    )
-//    private List<MultipartFile> images;
-
 }
 

@@ -18,10 +18,4 @@ public class UpdatePostRequestDTO {
 
     @Schema(example = "ERD 설계는 정말 중요합니다.")
     private String text;
-
-    @Schema(
-            description = "게시글에 포함된 이미지 URL 목록",
-            example = "[\"https://storage.com/ccc.jpg\", \"https://storage.com/ddd.jpg\"]"
-    )
-    private List<String> imageUrls;
 }

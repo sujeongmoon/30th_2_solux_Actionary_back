@@ -105,16 +105,17 @@ public class PostService {
 
     // 게시글 images 수정 (전체 삭제 -> '전체 image' 다시 설정)
     @Transactional
-    public void updatePostImages(UpdatePostRequestDTO request, Post post) {
+    public void updatePostImages(List<MultipartFile> images, Post post) {
         post.getImages().clear(); // 해당 게시글의 이미지 url 모두 삭제
 
-        int i=0;
-        for(String img : request.getImageUrls()){
-            post.addImage(new PostImage(
-                    post,
-                    img,
-                    i++
-            ));
+        int order = 0;
+        for (MultipartFile imageFile : images) {
+
+            // image없으면 image 저장없음
+            if (imageFile.isEmpty()) continue;
+
+            String imageUrl = imageService.saveImage(imageFile);
+            post.addImage(new PostImage(post, imageUrl, order++));
         }
     }
 
@@ -129,7 +130,7 @@ public class PostService {
         }
 
         if(images!=null){
-            updatePostImages(request, post);
+            updatePostImages(images, post);
         }
         if(request != null){
             if(request.getType()!=null)
