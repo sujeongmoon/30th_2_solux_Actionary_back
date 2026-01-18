@@ -5,9 +5,6 @@ import com.req2res.actionarybe.domain.comment.entity.Comment;
 import com.req2res.actionarybe.domain.comment.repository.CommentRepository;
 import com.req2res.actionarybe.domain.member.entity.Member;
 import com.req2res.actionarybe.domain.member.repository.MemberRepository;
-import com.req2res.actionarybe.domain.notification.dto.NotificationCreateRequestDTO;
-import com.req2res.actionarybe.domain.notification.entity.NotificationType;
-import com.req2res.actionarybe.domain.notification.repository.NotificationRepository;
 import com.req2res.actionarybe.domain.notification.service.NotificationService;
 import com.req2res.actionarybe.domain.post.dto.PageInfoDTO;
 import com.req2res.actionarybe.domain.post.entity.Post;
@@ -38,15 +35,11 @@ public class CommentService {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(()->new CustomException(ErrorCode.MEMBER_NOT_FOUND));
 
-        // 본인 게시글에 댓글 생성 알림
-        NotificationCreateRequestDTO commentNoti = NotificationCreateRequestDTO.of(
-                memberId,
-                NotificationType.COMMENT,
-                "게시글에 답글이 달렸습니다.",
-                request.getContent(),
-                "/api/post/"+postId
-        );
-        notificationService.create(commentNoti);
+        // 본인 게시글에 댓글 생성 알림 (단, 본인이 본인 게시글에 단 댓글은 제외)
+        System.out.println("/////"+post.getMember().getId()+"/////"+(memberId)+"/////");
+        if(!(post.getMember().getId().equals(memberId))){
+            notificationService.notifyComment(post.getMember().getId(),postId,member.getNickname());
+        }
 
         // 게시글 댓글 생성
         Comment comment = new Comment(
