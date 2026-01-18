@@ -5,8 +5,6 @@ import com.req2res.actionarybe.domain.comment.entity.Comment;
 import com.req2res.actionarybe.domain.comment.repository.CommentRepository;
 import com.req2res.actionarybe.domain.member.entity.Member;
 import com.req2res.actionarybe.domain.member.repository.MemberRepository;
-import com.req2res.actionarybe.domain.notification.dto.NotificationCreateRequestDTO;
-import com.req2res.actionarybe.domain.notification.entity.NotificationType;
 import com.req2res.actionarybe.domain.notification.service.NotificationService;
 import com.req2res.actionarybe.domain.post.dto.PageInfoDTO;
 import com.req2res.actionarybe.domain.post.entity.Post;
