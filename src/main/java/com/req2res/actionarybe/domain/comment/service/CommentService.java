@@ -38,7 +38,8 @@ public class CommentService {
                 .orElseThrow(()->new CustomException(ErrorCode.MEMBER_NOT_FOUND));
 
         // 본인 게시글에 댓글 생성 알림 (단, 본인이 본인 게시글에 단 댓글은 제외)
-        if(!post.getMember().getId().equals(memberId)){
+        System.out.println("/////"+post.getMember().getId()+"/////"+(memberId)+"/////");
+        if(!(post.getMember().getId().equals(memberId))){
             NotificationCreateRequestDTO commentNoti = NotificationCreateRequestDTO.of(
                     post.getMember().getId(),
                     NotificationType.COMMENT,
