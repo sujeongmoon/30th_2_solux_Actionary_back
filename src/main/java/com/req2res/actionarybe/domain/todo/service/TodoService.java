@@ -78,10 +78,6 @@ public class TodoService {
             todos = todoRepository.findAllByUserIdAndDate(userId, date);
         }
 
-        if (todos.isEmpty()) {
-            throw new CustomException(ErrorCode.NOT_FOUND, "해당 날짜에 투두가 아예 없습니다.");
-        }
-
         List<TodoResponseDTO> todoDtos = todos.stream()
                 .map(TodoResponseDTO::from)
                 .toList();
