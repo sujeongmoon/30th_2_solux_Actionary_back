@@ -27,27 +27,16 @@ public class DailyStudySummaryScheduler {
     public void sendDailyStudySummary() {
         System.out.println("[Scheduler] fired");
 
-        var today = java.time.LocalDate.now();
-        var start = today.atStartOfDay();
-        var end = today.atTime(java.time.LocalTime.MAX);
-
-        // 자동
-        List<Long> autoUserIds = studyTimeRepository.findDistinctUserIdsStudiedToday(start, end, Type.STUDY);
-
-        // 수동
-        List<Long> manualUserIds = studyTimeManualRepository.findDistinctUserIdsByManualDate(today);
-
-        List<Long> userIds = java.util.stream.Stream.concat(autoUserIds.stream(), manualUserIds.stream())
-                .distinct()
-                .toList();
-        studyTimeManualRepository.findAll().forEach(x -> System.out.println("[DB] " + x.getId() + " " + x.getUserId() + " " + x.getManualDate()));
-
+        List<Long> userIds = studyService.findUsersStudiedToday();
+        System.out.println("[Scheduler] userIds=" + userIds);
 
         for (Long userId : userIds) {
             String summaryText = studyService.buildTodaySummaryText(userId);
+            System.out.println("[Scheduler] notify userId=" + userId + " text=" + summaryText);
             notificationService.notifyDailyStudySummary(userId, summaryText);
         }
     }
+
 
 
 
