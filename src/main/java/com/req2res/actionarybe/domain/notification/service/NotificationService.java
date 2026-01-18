@@ -37,12 +37,17 @@ public class NotificationService {
         Member receiver = memberRepository.findById(request.getReceiverId())
                 .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
 
+        // 정책: COMMENT만 link 허용, 나머지는 link = null
+        String link = (request.getType() == NotificationType.COMMENT)
+                ? request.getLink()
+                : null;
+
         Notification notification = Notification.create(
                 receiver,
                 request.getType(),
                 request.getTitle(),
                 request.getContent(),
-                request.getLink()
+                link
         );
 
         Notification saved = notificationRepository.save(notification);
@@ -57,7 +62,7 @@ public class NotificationService {
                 NotificationType.TODO_ALL_DONE,
                 "오늘의 투두를 모두 완료했어요 🎉",
                 "오늘(" + date + ")의 투두를 전부 완료했습니다!",
-                "/todos?date=" + date
+                null
         );
         create(req);
     }
@@ -77,7 +82,7 @@ public class NotificationService {
                 NotificationType.POINT,
                 "포인트가 적립되었습니다.",
                 reason + "로 " + point + "P가 적립되었어요.",
-                "/mypage/points"
+                null
         );
         create(req);
     }
@@ -121,14 +126,12 @@ public class NotificationService {
                 NotificationType.DAILY_STUDY_SUMMARY,
                 "오늘 공부량 리포트",
                 summaryText,
-                "/study/report"
+                null
         );
 
         create(req);
     }
 
-
-    //-------------------------------------------------
     // 2. 알림 조회 API
     @Transactional(readOnly = true)
     public List<NotificationGetResponseDTO> getMyNotifications(Long memberId, Integer limit) {
@@ -152,4 +155,23 @@ public class NotificationService {
                 .map(NotificationGetResponseDTO::from)
                 .toList();
     }
+
+    // 3.알림 읽음 처리 API
+    @Transactional
+    public NotificationGetResponseDTO markAsRead(Long memberId, Long notificationId) {
+
+        Notification notification = notificationRepository.findById(notificationId)
+                .orElseThrow(() -> new CustomException(ErrorCode.NOTIFICATION_NOT_FOUND));
+
+        // 내 알림인지 검증
+        if (!notification.getReceiver().getId().equals(memberId)) {
+            throw new CustomException(ErrorCode.NOTIFICATION_FORBIDDEN);
+        }
+
+        // 멱등 처리
+        notification.markAsRead();
+
+        return NotificationGetResponseDTO.from(notification);
+    }
+
 }
