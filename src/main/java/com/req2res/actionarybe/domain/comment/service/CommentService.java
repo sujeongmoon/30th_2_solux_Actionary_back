@@ -38,14 +38,16 @@ public class CommentService {
                 .orElseThrow(()->new CustomException(ErrorCode.MEMBER_NOT_FOUND));
 
         // 본인 게시글에 댓글 생성 알림
-        NotificationCreateRequestDTO commentNoti = NotificationCreateRequestDTO.of(
-                post.getMember().getId(),
-                NotificationType.COMMENT,
-                "게시글에 답글이 달렸습니다.",
-                request.getContent(),
-                "/api/post/"+postId
-        );
-        notificationService.create(commentNoti);
+        if(!post.getMember().getId().equals(memberId)){
+            NotificationCreateRequestDTO commentNoti = NotificationCreateRequestDTO.of(
+                    post.getMember().getId(),
+                    NotificationType.COMMENT,
+                    "게시글에 답글이 달렸습니다.",
+                    request.getContent(),
+                    "/api/post/"+postId
+            );
+            notificationService.create(commentNoti);
+        }
 
         // 게시글 댓글 생성
         Comment comment = new Comment(
