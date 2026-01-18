@@ -7,7 +7,6 @@ import com.req2res.actionarybe.domain.member.entity.Member;
 import com.req2res.actionarybe.domain.member.repository.MemberRepository;
 import com.req2res.actionarybe.domain.notification.dto.NotificationCreateRequestDTO;
 import com.req2res.actionarybe.domain.notification.entity.NotificationType;
-import com.req2res.actionarybe.domain.notification.repository.NotificationRepository;
 import com.req2res.actionarybe.domain.notification.service.NotificationService;
 import com.req2res.actionarybe.domain.post.dto.PageInfoDTO;
 import com.req2res.actionarybe.domain.post.entity.Post;
@@ -40,7 +39,7 @@ public class CommentService {
 
         // 본인 게시글에 댓글 생성 알림
         NotificationCreateRequestDTO commentNoti = NotificationCreateRequestDTO.of(
-                memberId,
+                post.getMember().getId(),
                 NotificationType.COMMENT,
                 "게시글에 답글이 달렸습니다.",
                 request.getContent(),
