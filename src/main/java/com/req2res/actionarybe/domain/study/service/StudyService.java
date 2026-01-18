@@ -1,5 +1,8 @@
 package com.req2res.actionarybe.domain.study.service;
 
+import com.req2res.actionarybe.domain.studyTime.entity.Type;
+import com.req2res.actionarybe.domain.studyTime.repository.StudyTimeManualRepository;
+import com.req2res.actionarybe.domain.studyTime.repository.StudyTimeRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -30,6 +33,12 @@ import com.req2res.actionarybe.global.exception.ErrorCode;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.List;
+import java.util.stream.Stream;
+
 @Service
 @RequiredArgsConstructor
 public class StudyService {
@@ -38,6 +47,8 @@ public class StudyService {
 	private final StudyRepository studyRepository;
 	private final StudyParticipantRepository studyParticipantRepository;
 	private final StudyLikeRepository studyLikeRepository;
+	private final StudyTimeRepository studyTimeRepository;
+	private final StudyTimeManualRepository studyTimeManualRepository;
 
 	private final ImageService imageService;
 
@@ -172,5 +183,51 @@ public class StudyService {
 			.totalElements(studyPage.getTotalElements())
 			.totalPages(studyPage.getTotalPages())
 			.build();
+	}
+
+	public List<Long> findUsersStudiedToday() {
+		LocalDate today = LocalDate.now();
+		LocalDateTime start = today.atStartOfDay();
+		LocalDateTime end = today.atTime(LocalTime.MAX);
+
+		List<Long> autoUserIds = studyTimeRepository.findDistinctUserIdsStudiedToday(
+				start, end, Type.STUDY
+		);
+
+		List<Long> manualUserIds = studyTimeManualRepository.findDistinctUserIdsByManualDate(today);
+
+		return Stream.concat(autoUserIds.stream(), manualUserIds.stream())
+				.distinct()
+				.toList();
+	}
+
+	public int getTodayTotalStudySeconds(Long userId) {
+		LocalDate today = LocalDate.now();
+		LocalDateTime start = today.atStartOfDay();
+		LocalDateTime end = today.atTime(LocalTime.MAX);
+
+		int autoSeconds = studyTimeRepository.sumStudySecondsTodayByUserId(
+				userId, start, end, Type.STUDY
+		);
+
+		int manualSeconds = studyTimeManualRepository.sumManualStudySecondsByUserIdAndDate(userId, today);
+
+		return autoSeconds + manualSeconds;
+	}
+
+	public String buildTodaySummaryText(Long userId) {
+		int totalSeconds = getTodayTotalStudySeconds(userId);
+
+		if (totalSeconds <= 0) {
+			return "오늘 총 0분 공부했어요 👏";
+		}
+
+		int hours = totalSeconds / 3600;
+		int minutes = (totalSeconds % 3600) / 60;
+
+		if (hours == 0) {
+			return "오늘 총 " + minutes + "분 공부했어요 👏";
+		}
+		return "오늘 총 " + hours + "시간 " + minutes + "분 공부했어요 👏";
 	}
 }
