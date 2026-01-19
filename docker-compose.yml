@@ -1,8 +1,13 @@
+# 로컬, 배포환경에서 사용하는 docker-compose.yml
+# 로컬 환경에서는 .env에서 환경변수 주입, 배포 환경에서는 github repository secrets에서 환경변수 주입
 services:
+  # 도커에서 mysql 8.0이미지를 사용
   actionary-db:
     image: mysql:8.0
     container_name: actionary_db
     restart: no
+    # 3333포트를 도커 컨테이너의 3306 포트와 맵핑
+    # 로컬환경에서 springboot는 도커 컨테이너에서 실행되고있지 않기 때문에, springboot 서버에서 db에 연결할 때에는 3333포트를 사용해야 함
     ports:
       - "3333:3306"
     environment:
@@ -12,19 +17,22 @@ services:
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
       TZ: "Asia/Seoul"
 
+  # 도커에서 webRTC 기능을 위한 janus 이미지를 사용
+  # janus.jcfg, janus.transport.http.jsfg 파일 통해 janus 설정
+  #
   janus-gateway:
     image: "canyan/janus-gateway:latest"
     platform: linux/amd64
     container_name: actionary_janus_gateway
     command: [ "/usr/local/bin/janus", "-F", "/usr/local/etc/janus" ]
     ports:
-      - "8088:8088"
-      - "8089:8089"
-      - "8889:8889"
-      - "8000:8000"
-      - "7088:7088"
-      - "7089:7089"
-      - "10000-10500:10000-10500/udp"
+      - "8088:8088" # Janus REST API (HTTP)
+      - "8089:8089" # Janus REST API (HTTPS)
+      - "8889:8889" # 웹소켓
+      - "8000:8000" # HTTP 서버
+      - "7088:7088" # Admin API (HTTP)
+      - "7089:7089" # Admin API (HTTPS)
+      - "10000-10500:10000-10500/udp" # UDP포트 (janus.jcfg의 rtp_port_range 설정과 일치)
     volumes:
       - "./janus/janus.jcfg:/usr/local/etc/janus/janus.jcfg"
       - "./janus/janus.transport.http.jcfg:/usr/local/etc/janus/janus.transport.http.jcfg"
@@ -32,9 +40,11 @@ services:
       JANUS_ADMIN_SECRET: ${JANUS_ADMIN_SECRET}
     restart: always
 
+  # 도커에서 캐시, 채팅을 위한 redis 이미지 사용
   actionary-redis:
     image: redis:7.2-alpine
     container_name: actionary_redis
+    #로컬환경에서 springboot는 도커 컨테이너에서 실행되고있지 않기 때문에, springboot 서버에서 redis에 연결할 때에는 6377포트를 사용해야 함
     ports:
       - "6377:6379"
     restart: always
