@@ -1,3 +1,6 @@
+# 배포환경용 application-prod.yml
+# 배포 환경에서는 docker-compose-prod.yml의 설정에 따라 해당 application-prod.yml 설정이 적용됨
+
 spring:
   application:
     name: actionarybe
@@ -7,6 +10,9 @@ spring:
       max-request-size: 200MB
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
+    # 배포 환경에서는 springboot webserver도 docker 컨테이너로 띄워지기 때문에, db와 동일한 도커 네트워크 내에 있게 됨
+    # 따라서 localhost 대신 actionary-db라는 명칭과 3333 포트가 아닌 3306 포트에 연결해 사용 가능함
+    # 해당 파일에서 주입받는 환경변수는 로컬 파일의 .env가 아니라 github repository secrets의 ENV_PROD 변수를 통해, workflow.yml에서 만든 .env에서의 환경변수
     url: jdbc:mysql://actionary-db:3306/actionary_db
     username: ${MYSQL_USER}
     password: ${MYSQL_PASSWORD}
@@ -19,12 +25,13 @@ spring:
   data:
     redis:
       host: actionary-redis
+      # 배포 환경에서는 springboot webserver가 도커 환경 내에 있으므로, 로컬처럼 6377포트가 아닌 원래 레디스 전용 포트인 6379로 연결해야 함
       port: 6379
       timeout: 2000
 
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: update # 배포환경에서는 create-drop으로 db를 날렸다가 재시작하지 않고, 동일 db를 계속 재사용할 수 있는 update로 지정 (ddl이 변경되었을 때에도 기존 db내용을 유지, 새로운 부분만 업데이트)
     defer-datasource-initialization: true  # JPA 이후 data.sql 실행
     properties:
       hibernate:
@@ -52,6 +59,7 @@ spring:
         auto: false
 
 janus:
+  # 환경변수가 host.docker.internal 주입받고 있음
   base-url: http://${JANUS_INTERNAL_HOST}:8088/janus
 
 app:
