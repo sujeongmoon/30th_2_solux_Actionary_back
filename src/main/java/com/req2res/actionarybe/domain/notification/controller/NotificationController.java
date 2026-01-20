@@ -116,7 +116,6 @@ public class NotificationController {
             summary = "알림 목록 조회 API",
             description = """
                     내 알림 목록을 최신순(createdAt DESC)으로 조회합니다.
-                    limit 파라미터가 있으면 최근 N개만 조회합니다.
                     """
     )
     @ApiResponses(value = {
@@ -171,29 +170,25 @@ public class NotificationController {
                             """))
             )
     })
+
     // 2. 알림 조회 API
     @GetMapping
     public ResponseEntity<Response<List<NotificationGetResponseDTO>>> getMyNotifications(
-            @AuthenticationPrincipal UserDetails userDetails,
-
-            @Parameter(
-                    name = "limit",
-                    description = "가져올 최대 개수(선택, 미지정 시 전체). 예: 20",
-                    example = "20"
-            )
-            @RequestParam(required = false) Integer limit
+            @AuthenticationPrincipal UserDetails userDetails
     ) {
         String loginId = userDetails.getUsername();
 
         Member member = memberRepository.findByLoginId(loginId)
-            .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND));
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND));
 
         Long userId = member.getId();
 
-        List<NotificationGetResponseDTO> data = notificationService.getMyNotifications(userId, limit);
+        List<NotificationGetResponseDTO> data =
+                notificationService.getMyNotifications(userId);
 
         return ResponseEntity.ok(Response.success("", data));
     }
+
 
     // 3. 알림 읽음 처리 API
     @Operation(
