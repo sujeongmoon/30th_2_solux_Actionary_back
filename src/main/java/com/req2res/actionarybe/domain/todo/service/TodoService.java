@@ -156,34 +156,9 @@ public class TodoService {
         // 5) 상태 변경
         todo.setStatus(newStatus);
 
-        // 6) DONE으로 바뀐 경우: 하루 투두 모두 완료했는지 확인
-        if (newStatus == Todo.Status.DONE) {
-            checkAllTodosDoneAndNotify(todo);
-        }
-
         return TodoStatusResponseDTO.from(todo);
     }
 
-    /**
-     * 하루 동안의 투두가 모두 DONE인지 확인하고,
-     * 모두 달성 시 알림 생성 메서드를 호출할 자리.
-     */
-    private void checkAllTodosDoneAndNotify(Todo updatedTodo) {
-
-        Long userId = updatedTodo.getUserId();
-        LocalDate targetDate = updatedTodo.getDate();
-
-        // 날짜 그대로 사용 (LocalDate로 저장되어 있으니까!)
-        List<Todo> todosOfDay =
-                todoRepository.findAllByUserIdAndDate(userId, targetDate);
-
-        boolean allDone = todosOfDay.stream()
-                .allMatch(todo -> todo.getStatus() == Todo.Status.DONE);
-
-        if (allDone) {
-            notificationService.notifyTodoAllDone(userId, targetDate);
-        }
-    }
 
     //5. 투두 삭제 API
     //Hard delete 기법 사용

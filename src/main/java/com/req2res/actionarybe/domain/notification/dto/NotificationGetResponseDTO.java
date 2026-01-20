@@ -15,7 +15,7 @@ public class NotificationGetResponseDTO {
     @Schema(description = "알림 ID", example = "131")
     private Long notificationId;
 
-    @Schema(description = "알림 유형", example = "COMMENT", allowableValues = {"COMMENT","POINT","TODO_ALL_DONE","DAILY_STUDY_SUMMARY"})
+    @Schema(description = "알림 유형", example = "COMMENT", allowableValues = {"COMMENT","POINT","DAILY_STUDY_SUMMARY"})
     private NotificationType type;
 
     @Schema(description = "제목", example = "내 게시글에 댓글이 달렸습니다.")
