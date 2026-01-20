@@ -14,4 +14,8 @@ public class TodoCompletionPointRequestDTO {
     @Schema(description = "완료한 투두 ID", example = "55", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull(message = "todoId는 필수입니다.")
     private Long todoId;
+
+    public TodoCompletionPointRequestDTO(Long todoId) {
+        this.todoId = todoId;
+    }
 }
