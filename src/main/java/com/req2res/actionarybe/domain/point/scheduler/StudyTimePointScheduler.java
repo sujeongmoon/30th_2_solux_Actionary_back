@@ -21,7 +21,7 @@ public class StudyTimePointScheduler {
     private final MemberRepository memberRepository;
 
     // 매일 00:00 실행
-    //테스트용으로 1분마다 실행
+    // 테스트용으로 1분마다 실행
     @Scheduled(cron = "0 * * * * *")
     public void earnDailyStudyTimePoints() {
 
