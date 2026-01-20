@@ -121,27 +121,16 @@ public class NotificationService {
 
     // 2. 알림 조회 API
     @Transactional(readOnly = true)
-    public List<NotificationGetResponseDTO> getMyNotifications(Long memberId, Integer limit) {
+    public List<NotificationGetResponseDTO> getMyNotifications(Long memberId) {
 
-        List<Notification> notifications;
-
-        if (limit == null) {
-            notifications = notificationRepository.findByReceiverIdOrderByCreatedAtDesc(memberId);
-        } else {
-            // limit이 0 이하이면 빈 리스트 반환
-            if (limit <= 0) {
-                return List.of();
-            }
-            notifications = notificationRepository.findByReceiverIdOrderByCreatedAtDesc(
-                    memberId,
-                    PageRequest.of(0, limit)
-            );
-        }
+        List<Notification> notifications =
+                notificationRepository.findByReceiverIdOrderByCreatedAtDesc(memberId);
 
         return notifications.stream()
                 .map(NotificationGetResponseDTO::from)
                 .toList();
     }
+
 
     // 3.알림 읽음 처리 API
     @Transactional
