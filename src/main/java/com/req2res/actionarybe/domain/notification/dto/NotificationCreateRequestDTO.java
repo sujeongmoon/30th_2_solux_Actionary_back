@@ -22,7 +22,7 @@ public class NotificationCreateRequestDTO {
     @Schema(
             description = "알림 유형",
             example = "COMMENT",
-            allowableValues = {"COMMENT","POINT","TODO_ALL_DONE","DAILY_STUDY_SUMMARY"}
+            allowableValues = {"COMMENT","POINT","DAILY_STUDY_SUMMARY"}
     )
     @NotNull(message = "type은 필수입니다.")
     private NotificationType type;

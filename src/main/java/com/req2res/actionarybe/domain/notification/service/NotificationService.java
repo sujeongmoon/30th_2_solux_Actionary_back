@@ -54,20 +54,7 @@ public class NotificationService {
         return NotificationCreateResponseDTO.from(saved);
     }
 
-    // 1-2. 투두 모두 완료했을 때
-    @Transactional
-    public void notifyTodoAllDone(Long userId, LocalDate date) {
-        NotificationCreateRequestDTO req = NotificationCreateRequestDTO.of(
-                userId,
-                NotificationType.TODO_ALL_DONE,
-                "오늘의 투두를 모두 완료했어요 🎉",
-                "오늘(" + date + ")의 투두를 전부 완료했습니다!",
-                null
-        );
-        create(req);
-    }
-
-    // 1-3. 포인트 적립 시
+    // 1-2. 포인트 적립 시
     @Transactional
     public void notifyPoint(Long userId, int point, PointSource source) {
 
@@ -87,7 +74,7 @@ public class NotificationService {
         create(req);
     }
 
-    // 1-4. 내 게시물에 댓글 달렸을 때
+    // 1-3. 내 게시물에 댓글 달렸을 때
     @Transactional
     public void notifyComment(Long receiverId, Long postId, String commenterName) {
         NotificationCreateRequestDTO req = NotificationCreateRequestDTO.of(
@@ -100,7 +87,7 @@ public class NotificationService {
         create(req);
     }
 
-    // 1-5. 오늘 공부량 리포트 (하루 1번만 생성)
+    // 1-4. 오늘 공부량 리포트 (하루 1번만 생성)
     @Transactional
     public void notifyDailyStudySummary(Long userId, String summaryText) {
 
