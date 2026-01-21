@@ -32,6 +32,7 @@ import com.req2res.actionarybe.domain.study.entity.StudyParticipant;
 import com.req2res.actionarybe.domain.study.repository.StudyParticipantRepository;
 import com.req2res.actionarybe.domain.study.repository.StudyRepository;
 import com.req2res.actionarybe.domain.studyTime.dto.StudyTimeTypeRequestDto;
+import com.req2res.actionarybe.domain.studyTime.entity.Type;
 import com.req2res.actionarybe.domain.studyTime.service.StudyTimeService;
 import com.req2res.actionarybe.global.event.Event;
 import com.req2res.actionarybe.global.event.EventType;
@@ -64,7 +65,12 @@ public class StudyParticipantService {
 		}
 
 		if (studyParticipantRepository.existsByStudy_IdAndMember_IdAndIsActiveTrue(studyId, member.getId())) {
-			throw new CustomException(ErrorCode.STUDY_PARTICIPANT_ALREADY_JOINED);
+
+			StudyParticipant previousStudyParticipant = studyParticipantRepository.findByStudyAndMemberAndIsActiveTrue(
+					study, member)
+				.orElseThrow(() -> new CustomException(ErrorCode.STUDY_PARTICIPANT_NOT_JOINED));
+			updateStateParticipantStudy(previousStudyParticipant, Type.STUDY);
+
 		}
 
 		if (!study.getIsPublic()) {
@@ -110,7 +116,12 @@ public class StudyParticipantService {
 		}
 
 		if (studyParticipantRepository.existsByStudy_IdAndMember_IdAndIsActiveTrue(studyId, member.getId())) {
-			throw new CustomException(ErrorCode.STUDY_PARTICIPANT_ALREADY_JOINED);
+
+			StudyParticipant previousStudyParticipant = studyParticipantRepository.findByStudyAndMemberAndIsActiveTrue(
+					study, member)
+				.orElseThrow(() -> new CustomException(ErrorCode.STUDY_PARTICIPANT_NOT_JOINED));
+			updateStateParticipantStudy(previousStudyParticipant, Type.STUDY);
+
 		}
 
 		if (study.getIsPublic()) {
@@ -215,9 +226,7 @@ public class StudyParticipantService {
 				study, member)
 			.orElseThrow(() -> new CustomException(ErrorCode.STUDY_PARTICIPANT_NOT_JOINED));
 
-		studyTimeService.createStudyTime(request.getType(), studyParticipant);
-
-		studyParticipant.updateIsActiveFalse(studyParticipant);
+		updateStateParticipantStudy(studyParticipant, request.getType());
 
 		// 말풍선삭제
 		String redisKey = "study:" + studyId + ":nowState";
@@ -275,4 +284,10 @@ public class StudyParticipantService {
 		);
 
 	}
+
+	private void updateStateParticipantStudy(StudyParticipant studyParticipant, Type type) {
+		studyTimeService.createStudyTime(Type.STUDY, studyParticipant);
+		studyParticipant.updateIsActiveFalse(studyParticipant);
+	}
+
 }
