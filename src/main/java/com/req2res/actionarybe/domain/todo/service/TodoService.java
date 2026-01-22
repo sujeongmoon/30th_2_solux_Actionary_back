@@ -2,6 +2,8 @@ package com.req2res.actionarybe.domain.todo.service;
 
 
 import com.req2res.actionarybe.domain.notification.service.NotificationService;
+import com.req2res.actionarybe.domain.point.dto.TodoCompletionPointRequestDTO;
+import com.req2res.actionarybe.domain.point.service.PointService;
 import com.req2res.actionarybe.domain.todo.dto.*;
 import com.req2res.actionarybe.domain.todo.entity.Todo;
 import com.req2res.actionarybe.domain.todo.repository.TodoCategoryRepository;
@@ -9,12 +11,14 @@ import com.req2res.actionarybe.domain.todo.repository.TodoRepository;
 import com.req2res.actionarybe.global.exception.CustomException;
 import com.req2res.actionarybe.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -22,8 +26,7 @@ public class TodoService {
 
     private final TodoRepository todoRepository;
     private final TodoCategoryRepository todoCategoryRepository;
-    private final NotificationService notificationService;
-
+    private final PointService pointService;
 
     //1. 투두 생성 API
     public TodoCreateResponseDTO createTodo(Long userId, TodoCreateRequestDTO request) {
@@ -78,10 +81,6 @@ public class TodoService {
             todos = todoRepository.findAllByUserIdAndDate(userId, date);
         }
 
-        if (todos.isEmpty()) {
-            throw new CustomException(ErrorCode.NOT_FOUND, "해당 날짜에 투두가 아예 없습니다.");
-        }
-
         List<TodoResponseDTO> todoDtos = todos.stream()
                 .map(TodoResponseDTO::from)
                 .toList();
@@ -120,12 +119,13 @@ public class TodoService {
     }
 
     //4. 투두 달성/실패 처리 API
-    public TodoStatusResponseDTO updateTodoStatus(Long userId, Long todoId,
-                                                  TodoStatusUpdateRequestDTO request) {
-
+    public TodoStatusResponseDTO updateTodoStatus(
+            Long userId,
+            Long todoId,
+            TodoStatusUpdateRequestDTO request
+    ) {
         String statusStr = request.getStatus();
 
-        // 1) status 값 검증 (DONE / FAILED 만 허용)
         if (statusStr == null || statusStr.isBlank()) {
             throw new CustomException(ErrorCode.TODO_INVALID_STATUS);
         }
@@ -137,57 +137,44 @@ public class TodoService {
             throw new CustomException(ErrorCode.TODO_INVALID_STATUS);
         }
 
-        //status=PENDING으로 설정했을 때의 예외처리
         if (newStatus == Todo.Status.PENDING) {
-            throw new CustomException(ErrorCode.BAD_REQUEST,
-                    "PENDING으로 변경할 수 없습니다.");
+            throw new CustomException(ErrorCode.BAD_REQUEST, "PENDING으로 변경할 수 없습니다.");
         }
 
-        // 2) 투두 조회 (없으면 404)
         Todo todo = todoRepository.findById(todoId)
                 .orElseThrow(() -> new CustomException(ErrorCode.TODO_NOT_FOUND));
 
-        // 3) 사용자 검증
         if (!todo.getUserId().equals(userId)) {
-             throw new CustomException(ErrorCode.FORBIDDEN, "본인의 투두만 상태를 변경할 수 있습니다.");
+            throw new CustomException(ErrorCode.FORBIDDEN, "본인의 투두만 상태를 변경할 수 있습니다.");
         }
 
-        // 4) 이미 같은 상태라면 409 Conflict
         if (todo.getStatus() == newStatus) {
             throw new CustomException(ErrorCode.TODO_STATUS_CONFLICT);
         }
 
-        // 5) 상태 변경
+        // 1) 투두 상태 변경
         todo.setStatus(newStatus);
 
-        // 6) DONE으로 바뀐 경우: 하루 투두 모두 완료했는지 확인
-        if (newStatus == Todo.Status.DONE) {
-            checkAllTodosDoneAndNotify(todo);
+        // 2) DONE으로 바뀌는 순간에만 포인트 적립 시도
+        // (FAILED로 바뀌는 건 포인트 적립 X)
+        if ("DONE".equals(request.getStatus())) {
+            try {
+                pointService.earnTodoCompletionPointNewTx(
+                        userId,
+                        new TodoCompletionPointRequestDTO(todoId)
+                );
+            } catch (CustomException e) {
+                if (e.getErrorCode() == ErrorCode.TODO_POINT_ALREADY_EARNED) {
+                    log.info("[To-do] Point already earned for todoId={}", todoId);
+                } else {
+                    log.warn("[To-do] Point earn failed. todoId={}, code={}", todoId, e.getErrorCode());
+                }
+            }
         }
 
         return TodoStatusResponseDTO.from(todo);
     }
 
-    /**
-     * 하루 동안의 투두가 모두 DONE인지 확인하고,
-     * 모두 달성 시 알림 생성 메서드를 호출할 자리.
-     */
-    private void checkAllTodosDoneAndNotify(Todo updatedTodo) {
-
-        Long userId = updatedTodo.getUserId();
-        LocalDate targetDate = updatedTodo.getDate();
-
-        // 날짜 그대로 사용 (LocalDate로 저장되어 있으니까!)
-        List<Todo> todosOfDay =
-                todoRepository.findAllByUserIdAndDate(userId, targetDate);
-
-        boolean allDone = todosOfDay.stream()
-                .allMatch(todo -> todo.getStatus() == Todo.Status.DONE);
-
-        if (allDone) {
-            notificationService.notifyTodoAllDone(userId, targetDate);
-        }
-    }
 
     //5. 투두 삭제 API
     //Hard delete 기법 사용

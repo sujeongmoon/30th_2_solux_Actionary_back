@@ -43,4 +43,34 @@ public interface StudyTimeRepository extends JpaRepository<StudyTime, Long> {
 		  AND st.createdAt BETWEEN :start AND :end
 		""")
 	List<StudyTime> findStudyTimeByMember(Member member, Type type, LocalDateTime start, LocalDateTime end);
+
+	// 오늘 공부한 유저 목록 (자동 기록)
+	@Query("""
+    select distinct st.studyParticipant.member.id
+    from StudyTime st
+    where st.createdAt between :start and :end
+      and st.type = :studyType
+""")
+	List<Long> findDistinctUserIdsStudiedToday(
+			@Param("start") LocalDateTime start,
+			@Param("end") LocalDateTime end,
+			@Param("studyType") Type studyType
+	);
+
+
+	// 유저별 오늘 공부시간 합계(초) (자동 기록)
+	@Query("""
+    select coalesce(sum(st.durationSecond), 0)
+    from StudyTime st
+    where st.studyParticipant.member.id = :userId
+      and st.createdAt between :start and :end
+      and st.type = :studyType
+""")
+	int sumStudySecondsTodayByUserId(
+			@Param("userId") Long userId,
+			@Param("start") LocalDateTime start,
+			@Param("end") LocalDateTime end,
+			@Param("studyType") Type studyType
+	);
+
 }

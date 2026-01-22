@@ -76,6 +76,10 @@ public class StudyTimeService {
 				study, member)
 			.orElseThrow(() -> new CustomException(ErrorCode.STUDY_PARTICIPANT_NOT_JOINED));
 
+		if (studyParticipant.getIsActive().equals(false)) {
+			throw new CustomException(ErrorCode.STUDY_PARTICIPANT_NOT_JOINED);
+		}
+
 		Type nowType = request.getType();
 
 		StudyTime studyTime = createStudyTime(nowType, studyParticipant);

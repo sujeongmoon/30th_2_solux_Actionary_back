@@ -31,4 +31,24 @@ public interface StudyTimeManualRepository extends JpaRepository<StudyTimeManual
 		      and sm.manualDate between :startDate and :endDate
 		""")
 	long sumTodaySeconds(Long userId, LocalDate startDate, LocalDate endDate);
+
+	// 오늘 수동 등록한 유저 목록
+	@Query("""
+        select distinct stm.userId
+        from StudyTimeManual stm
+        where stm.manualDate = :date
+    """)
+	List<Long> findDistinctUserIdsByManualDate(@Param("date") LocalDate date);
+
+	// 오늘 수동 등록 공부시간 합계(초)
+	@Query("""
+        select coalesce(sum(stm.durationSecond), 0)
+        from StudyTimeManual stm
+        where stm.userId = :userId
+          and stm.manualDate = :date
+    """)
+	int sumManualStudySecondsByUserIdAndDate(
+			@Param("userId") Long userId,
+			@Param("date") LocalDate date
+	);
 }
