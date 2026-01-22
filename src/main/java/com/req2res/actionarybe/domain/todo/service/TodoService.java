@@ -28,8 +28,6 @@ public class TodoService {
     private final TodoCategoryRepository todoCategoryRepository;
     private final PointService pointService;
 
-
-
     //1. 투두 생성 API
     public TodoCreateResponseDTO createTodo(Long userId, TodoCreateRequestDTO request) {
 
@@ -159,24 +157,17 @@ public class TodoService {
 
         // 2) DONE으로 바뀌는 순간에만 포인트 적립 시도
         // (FAILED로 바뀌는 건 포인트 적립 X)
-        if (newStatus == Todo.Status.DONE) {
+        if ("DONE".equals(request.getStatus())) {
             try {
-                TodoCompletionPointRequestDTO pointReq =
-                        new TodoCompletionPointRequestDTO(todo.getId());
-
-                // 같은 트랜잭션에서 수행됨
-                pointService.earnTodoCompletionPoint(userId, pointReq);
-
+                pointService.earnTodoCompletionPointNewTx(
+                        userId,
+                        new TodoCompletionPointRequestDTO(todoId)
+                );
             } catch (CustomException e) {
-
-                // 정상 스킵 케이스는 "투두 DONE은 유지"
-                // 1) 이미 이 to-do로 포인트 받음 (409)
-                // 2) 오늘 한도 초과 -> PointService는 0P로 정상 응답해서 여기로 안 옴
                 if (e.getErrorCode() == ErrorCode.TODO_POINT_ALREADY_EARNED) {
-                    log.info("[To-do] Point already earned for todoId={}", todo.getId());
+                    log.info("[To-do] Point already earned for todoId={}", todoId);
                 } else {
-                    //그 외는 진짜 실패 → 롤백시키는 게 안전
-                    throw e;
+                    log.warn("[To-do] Point earn failed. todoId={}, code={}", todoId, e.getErrorCode());
                 }
             }
         }
