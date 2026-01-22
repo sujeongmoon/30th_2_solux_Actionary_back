@@ -31,4 +31,21 @@ public interface TodoRepository extends JpaRepository<Todo, Long> {
     boolean existsByCategoryIdAndStatuses(@Param("userId") Long userId,
                                           @Param("categoryId") Long categoryId,
                                           @Param("statuses") Collection<Todo.Status> statuses);
+
+    //status=DONE인 상태인 투두 개수 세는 메소드
+    @Query("""
+        select t.date as date, count(t) as doneCount
+        from Todo t
+        where t.userId = :userId
+          and t.status = :status
+          and t.date between :startDate and :endDate
+        group by t.date
+        order by t.date asc
+    """)
+    List<TodoDoneCountByDate> countDoneTodosByDateInMonth(
+            @Param("userId") Long userId,
+            @Param("status") Todo.Status status,
+            @Param("startDate") LocalDate startDate,
+            @Param("endDate") LocalDate endDate
+    );
 }
