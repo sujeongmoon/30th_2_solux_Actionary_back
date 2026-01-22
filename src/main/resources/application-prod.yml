@@ -59,8 +59,8 @@ spring:
         auto: false
 
 janus:
-  # 환경변수가 host.docker.internal 주입받고 있음
-  base-url: http://${JANUS_INTERNAL_HOST}:8088/janus/
+  # 환경변수가 172.17.0.1 주입받고 있음
+  base-url: http://${JANUS_INTERNAL_HOST}:8088/janus
 
 app:
   default:
