@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Entity
 @Table(name = "post")
@@ -46,6 +47,16 @@ public class Post extends Timestamped {
     private List<PostImage> images = new ArrayList<>();
     public void addImage(PostImage image) {
         images.add(image);
+    }
+    public void removeImage(String delImageUrl) {
+        // 객체화된 PostImage의 집합에서 url과 맞는 객체 선택
+        Optional<PostImage> delPostImage = images.stream()
+                .filter(img -> img.getImageUrl().equals(delImageUrl))
+                .findFirst();
+        // 만일 url과 맞는 객체가 존재한다면 images에서 삭제
+        if(delPostImage.isPresent()){
+            images.remove(delPostImage.get());
+        }
     }
 
 
