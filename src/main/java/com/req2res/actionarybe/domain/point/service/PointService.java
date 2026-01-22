@@ -20,6 +20,7 @@ import com.req2res.actionarybe.global.exception.CustomException;
 import com.req2res.actionarybe.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
@@ -184,6 +185,19 @@ public class PointService {
                 PointSource.STUDY_PARTICIPATION,
                 userPoint.getTotalPoint()
         );
+    }
+
+
+    /**
+     * To-do 상태 변경 트랜잭션과 분리하기 위한 래퍼
+     * - 포인트 적립 실패/중복이 나도 to-do 상태 변경은 커밋되게 함
+     */
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public TodoCompletionPointResponseDTO earnTodoCompletionPointNewTx(
+            Long loginMemberId,
+            TodoCompletionPointRequestDTO request
+    ) {
+        return earnTodoCompletionPoint(loginMemberId, request);
     }
 
     // 3. to-do 완료시 포인트 적립 API
