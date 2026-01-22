@@ -58,7 +58,7 @@ spring:
 
 janus:
   # 로컬 환경에서는 localhost로 접속하지만 배포 환경에서는 host.docker.internal 사용
-  base-url: http://localhost:8088/janus
+  base-url: http://localhost:8088/janus/
 
 app:
   default:
