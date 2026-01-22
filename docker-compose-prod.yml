@@ -46,8 +46,30 @@ services:
       actionary-db:
         condition: service_started
 
-    ports:
-      - "8080:8080"
-
+      # 리버스 프록시를 사용하므로 8080을 외부로 열지 않고 Nginx만 접근하게 함
+    #    ports:
+    #      - "8080:8080"
+    networks:
+      - app-network
     env_file:
       - .env
+
+  nginx:
+    image: nginx:latest
+    container_name: actionary_nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/conf.d:/etc/nginx/conf.d
+      - ./nginx/html:/usr/share/nginx/html
+      - ./frontend/dist:/usr/share/nginx/html
+      - /etc/letsencrypt:/etc/letsencrypt:ro
+    depends_on:
+      - actionary-be
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
