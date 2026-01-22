@@ -67,6 +67,7 @@ public enum ErrorCode {
 
     // image
     INVALID_FILE(HttpStatus.BAD_REQUEST, "업로드할 파일이 없거나 형식이 올바르지 않습니다."),
+    DEL_IMAGE_NOT_IN_S3(HttpStatus.NOT_FOUND, "삭제할 파일이 존재하지 않습니다"),
 
     //user
 	EMAIL_DUPLICATED(HttpStatus.CONFLICT, "중복된 이메일입니다"),

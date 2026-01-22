@@ -249,10 +249,10 @@ public class PostController {
     @PatchMapping("/{post_id}")
     public Response<UpdatePostResponseDTO> updatePost(
             @PathVariable("post_id") Long postId,
-            @RequestPart(value = "images", required = false) List<MultipartFile> images,
-            @RequestPart(value = "post", required = false) UpdatePostRequestDTO updatePostRequestDTO
+            @RequestPart(value = "images", required = false) UpdateImageRequestDTO images,
+            @RequestPart(value = "post", required = false) UpdatePostRequestDTO posts
     ){
-        UpdatePostResponseDTO result = postService.updatePost(postId, images, updatePostRequestDTO);
+        UpdatePostResponseDTO result = postService.updatePost(postId, images, posts);
         return Response.success("게시글 수정 성공", result);
     }
 

@@ -6,6 +6,7 @@ import com.req2res.actionarybe.domain.member.repository.MemberRepository;
 import com.req2res.actionarybe.domain.post.dto.*;
 import com.req2res.actionarybe.domain.post.entity.Post;
 import com.req2res.actionarybe.domain.post.entity.PostImage;
+import com.req2res.actionarybe.domain.post.repository.PostImageRepository;
 import com.req2res.actionarybe.domain.post.repository.PostRepository;
 import com.req2res.actionarybe.global.exception.CustomException;
 import com.req2res.actionarybe.global.exception.ErrorCode;
@@ -17,12 +18,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class PostService {
 
     private final PostRepository postRepository;
+    private final PostImageRepository postImageRepository;
     private final MemberRepository memberRepository;
     private final ImageService imageService;
 
@@ -103,42 +106,67 @@ public class PostService {
         );
     }
 
-    // 게시글 images 수정 (전체 삭제 -> '전체 image' 다시 설정)
-    @Transactional
-    public void updatePostImages(List<MultipartFile> images, Post post) {
-        post.getImages().clear(); // 해당 게시글의 이미지 url 모두 삭제
+    // 삭제할 사진이 s3에 존재 유무 확인
+    public boolean isDelImageInS3(String delImageUrl){
+        Optional<PostImage> opt = Optional.ofNullable(postImageRepository.findByImageUrl(delImageUrl));
 
-        int order = 0;
-        for (MultipartFile imageFile : images) {
+        if(opt.isPresent()) return true;
+        else return false;
+    }
+
+    // 이미지 추가
+    @Transactional
+    public void addPostImages(List<MultipartFile> addImages, Post post) {
+        int order = post.getImages().stream()
+                .map(PostImage::getImageOrder) // PostImage 타입에서 imageOrder 필드만 가져온다.
+                .max(Integer::compare) // order들 중 제일 큰 수를 고른다.
+                .orElse(0); // 마지막으로 저장한 postImages의 order값
+        for (MultipartFile imageFile : addImages) {
 
             // image없으면 image 저장없음
             if (imageFile.isEmpty()) continue;
 
             String imageUrl = imageService.saveImage(imageFile);
-            post.addImage(new PostImage(post, imageUrl, order++));
+            post.addImage(new PostImage(post, imageUrl, ++order));
+        }
+    }
+
+    // 이미지 삭제
+    @Transactional
+    public void delPostImages(String[] delImages, Post post) {
+        // 이미지 삭제
+        for(String imageUrl : delImages){
+            if(isDelImageInS3(imageUrl)){
+                imageService.deleteImage(imageUrl);
+                post.removeImage(imageUrl);
+            }else{
+                throw new CustomException(ErrorCode.DEL_IMAGE_NOT_IN_S3);
+            }
         }
     }
 
     // 게시글 수정
     @Transactional
-    public UpdatePostResponseDTO updatePost(Long post_id, List<MultipartFile> images, UpdatePostRequestDTO request) {
+    public UpdatePostResponseDTO updatePost(Long post_id, UpdateImageRequestDTO imagesDTO, UpdatePostRequestDTO postDTO) {
         Post post=postRepository.findById(post_id)
                 .orElseThrow(()->new CustomException(ErrorCode.POST_NOT_FOUND));
+        System.out.println("@^%#"+imagesDTO+"@&%#%@&");
 
-        if(images == null && request == null){
+        if(imagesDTO == null && post == null){
             throw new CustomException(ErrorCode.EMPTY_UPDATE_REQUEST);
         }
 
-        if(images!=null){
-            updatePostImages(images, post);
+        if(imagesDTO != null){
+            if(imagesDTO.getDelImages()!=null) delPostImages(imagesDTO.getDelImages(), post);
+            if(imagesDTO.getAddImages()!=null) addPostImages(imagesDTO.getAddImages(), post);
         }
-        if(request != null){
-            if(request.getType()!=null)
-                post.setType(Post.Type.valueOf(request.getType())); // request의 type는 String이라, Post의 Type 자료형인 Post.Type(Enum) 타입 변환 필요
-            if(request.getTitle()!=null)
-                post.setTitle(request.getTitle());
-            if(request.getText()!=null)
-                post.setText(request.getText());
+        if(postDTO != null){
+            if(postDTO.getType()!=null)
+                post.setType(Post.Type.valueOf(postDTO.getType())); // request의 type는 String이라, Post의 Type 자료형인 Post.Type(Enum) 타입 변환 필요
+            if(postDTO.getTitle()!=null)
+                post.setTitle(postDTO.getTitle());
+            if(postDTO.getText()!=null)
+                post.setText(postDTO.getText());
         }
 
         return new UpdatePostResponseDTO(
