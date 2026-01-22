@@ -8,6 +8,12 @@ services:
     restart: always
     volumes:
       - "./mysql_data:/var/lib/mysql"
+    networks:
+      - app-network
+
+  actionary-redis:
+    networks:
+      - app-network
 
   janus-gateway:
     # 기존 로컬환경에서는 포트를 지정해 사용했지만, 리눅스를 사용하는 EC2환경에서는 network_mode를 host로 설정해 포트범위에 제약을 두지 않음
