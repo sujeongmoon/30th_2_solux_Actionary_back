@@ -45,7 +45,7 @@ public class JanusClient {
 			.transaction(generateTx())
 			.build();
 
-		return postRequest(request, "/" + sessionId)
+		return postRequest(request, String.valueOf(sessionId))
 			.getData().getId();
 	}
 
@@ -61,7 +61,7 @@ public class JanusClient {
 			.body(body)
 			.build();
 
-		postRequest(request, "/" + sessionId + "/" + handleId);
+		postRequest(request, sessionId + "/" + handleId);
 	}
 
 	private JanusResponse<JanusResponse.Data> postRequest(Object body, String uri) {
