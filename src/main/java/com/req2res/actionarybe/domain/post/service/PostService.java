@@ -116,23 +116,26 @@ public class PostService {
 
     // 이미지 추가
     @Transactional
-    public void addPostImages(UpdateImageRequestDTO images, Post post) {
-        int order = 0;
-        for (MultipartFile imageFile : images.getAddImages()) {
+    public void addPostImages(List<MultipartFile> addImages, Post post) {
+        int order = post.getImages().stream()
+                .map(PostImage::getImageOrder) // PostImage 타입에서 imageOrder 필드만 가져온다.
+                .max(Integer::compare) // order들 중 제일 큰 수를 고른다.
+                .orElse(0); // 마지막으로 저장한 postImages의 order값
+        for (MultipartFile imageFile : addImages) {
 
             // image없으면 image 저장없음
             if (imageFile.isEmpty()) continue;
 
             String imageUrl = imageService.saveImage(imageFile);
-            post.addImage(new PostImage(post, imageUrl, order++));
+            post.addImage(new PostImage(post, imageUrl, ++order));
         }
     }
 
     // 이미지 삭제
     @Transactional
-    public void delPostImages(UpdateImageRequestDTO images, Post post) {
+    public void delPostImages(String[] delImages, Post post) {
         // 이미지 삭제
-        for(String imageUrl : images.getDelImages()){
+        for(String imageUrl : delImages){
             if(isDelImageInS3(imageUrl)){
                 imageService.deleteImage(imageUrl);
                 post.removeImage(imageUrl);
@@ -147,14 +150,15 @@ public class PostService {
     public UpdatePostResponseDTO updatePost(Long post_id, UpdateImageRequestDTO imagesDTO, UpdatePostRequestDTO postDTO) {
         Post post=postRepository.findById(post_id)
                 .orElseThrow(()->new CustomException(ErrorCode.POST_NOT_FOUND));
+        System.out.println("@^%#"+imagesDTO+"@&%#%@&");
 
         if(imagesDTO == null && post == null){
             throw new CustomException(ErrorCode.EMPTY_UPDATE_REQUEST);
         }
 
-        if(imagesDTO!=null){
-            if(imagesDTO.getAddImages()!=null) addPostImages(imagesDTO, post);
-            if(imagesDTO.getDelImages()!=null) delPostImages(imagesDTO, post);
+        if(imagesDTO != null){
+            if(imagesDTO.getDelImages()!=null) delPostImages(imagesDTO.getDelImages(), post);
+            if(imagesDTO.getAddImages()!=null) addPostImages(imagesDTO.getAddImages(), post);
         }
         if(postDTO != null){
             if(postDTO.getType()!=null)
