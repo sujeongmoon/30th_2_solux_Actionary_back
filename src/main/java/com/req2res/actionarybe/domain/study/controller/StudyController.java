@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
@@ -16,6 +17,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.req2res.actionarybe.domain.member.entity.Member;
 import com.req2res.actionarybe.domain.member.service.MemberService;
+import com.req2res.actionarybe.domain.study.dto.JanusSessionRequestDto;
+import com.req2res.actionarybe.domain.study.dto.JanusSessionResponseDto;
 import com.req2res.actionarybe.domain.study.dto.StudyDetailResponseDto;
 import com.req2res.actionarybe.domain.study.dto.StudyListResponseDto;
 import com.req2res.actionarybe.domain.study.dto.StudyRequestDto;
@@ -75,6 +78,49 @@ public class StudyController {
 		Member member = memberService.findMemberByLoginId(userDetails.getUsername());
 		StudyResponseDto response = studyService.createStudy(member, request, coverImage);
 		return Response.success("스터디가 생성되었습니다.", response);
+	}
+
+	@Operation(summary = "Janus Session 재발급 API", description = "새로운 Janus Session을 발급하는 기능입니다.")
+	@ApiResponses(value = {
+		@ApiResponse(
+			responseCode = "200",
+			description = "스터디 생성 완료",
+			content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
+				{
+					"code": 200,
+					"message": "스터디가 생성되었습니다."
+				}
+				"""))
+		),
+		@ApiResponse(
+			responseCode = "404",
+			description = "janusSession을 만들고자 하는 스터디가 없는 경우",
+			content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
+				{
+					"code": 404,
+					"message": "존재하지 않는 스터디입니다."
+				}
+				"""))
+		),
+		@ApiResponse(
+			responseCode = "502",
+			description = "야누스와 통신 실패",
+			content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
+				{
+					"code": 502,
+					"message": "Janus 서버와 통신에 실패했습니다."
+				}
+				"""))
+		)
+	})
+	@PostMapping("/janus")
+	public Response<JanusSessionResponseDto> createStudyJanusRoom(
+		@AuthenticationPrincipal UserDetails userDetails,
+		@RequestBody @Valid JanusSessionRequestDto request
+	) {
+		Member member = memberService.findMemberByLoginId(userDetails.getUsername());
+		JanusSessionResponseDto response = studyService.createJanusRoomId(request);
+		return Response.success("janus 세션 발급이 완료됐습니다.", response);
 	}
 
 	@Operation(summary = "스터디 삭제 API", description = "스터디를 삭제하는 기능입니다.")

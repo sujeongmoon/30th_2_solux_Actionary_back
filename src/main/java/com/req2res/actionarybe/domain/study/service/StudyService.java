@@ -1,8 +1,11 @@
 package com.req2res.actionarybe.domain.study.service;
 
-import com.req2res.actionarybe.domain.studyTime.entity.Type;
-import com.req2res.actionarybe.domain.studyTime.repository.StudyTimeManualRepository;
-import com.req2res.actionarybe.domain.studyTime.repository.StudyTimeRepository;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.List;
+import java.util.stream.Stream;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -16,6 +19,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.req2res.actionarybe.domain.image.service.ImageService;
 import com.req2res.actionarybe.domain.member.entity.Member;
+import com.req2res.actionarybe.domain.study.dto.JanusSessionRequestDto;
+import com.req2res.actionarybe.domain.study.dto.JanusSessionResponseDto;
 import com.req2res.actionarybe.domain.study.dto.StudyDetailResponseDto;
 import com.req2res.actionarybe.domain.study.dto.StudyListResponseDto;
 import com.req2res.actionarybe.domain.study.dto.StudyRequestDto;
@@ -26,18 +31,15 @@ import com.req2res.actionarybe.domain.study.entity.Study;
 import com.req2res.actionarybe.domain.study.repository.StudyLikeRepository;
 import com.req2res.actionarybe.domain.study.repository.StudyParticipantRepository;
 import com.req2res.actionarybe.domain.study.repository.StudyRepository;
+import com.req2res.actionarybe.domain.studyTime.entity.Type;
+import com.req2res.actionarybe.domain.studyTime.repository.StudyTimeManualRepository;
+import com.req2res.actionarybe.domain.studyTime.repository.StudyTimeRepository;
 import com.req2res.actionarybe.global.config.JanusClient;
 import com.req2res.actionarybe.global.exception.CustomException;
 import com.req2res.actionarybe.global.exception.ErrorCode;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.util.List;
-import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -52,8 +54,8 @@ public class StudyService {
 
 	private final ImageService imageService;
 
-    @Value("${app.default.cover-image}")
-    private String defaultCoverUrl;
+	@Value("${app.default.cover-image}")
+	private String defaultCoverUrl;
 
 	public StudyResponseDto createStudy(Member member, @Valid StudyRequestDto request, MultipartFile coverImage) {
 
@@ -87,11 +89,27 @@ public class StudyService {
 		try {
 			janusClient.createStudyRoom(study.getId());
 		} catch (Exception e) {
-            studyRepository.delete(study);
+			studyRepository.delete(study);
 			throw new CustomException(ErrorCode.STUDY_CREATE_ERROR);
 		}
 
 		return StudyResponseDto.from(study);
+	}
+
+	public JanusSessionResponseDto createJanusRoomId(JanusSessionRequestDto request) {
+
+		Study study = studyRepository.findById(request.getStudyId()).
+			orElseThrow(() -> new CustomException(ErrorCode.STUDY_NOT_FIND));
+
+		try {
+			janusClient.createStudyRoom(study.getId());
+		} catch (Exception e) {
+			throw new CustomException(ErrorCode.STUDY_CREATE_ERROR);
+		}
+
+		return JanusSessionResponseDto.builder()
+			.studyId(request.getStudyId())
+			.build();
 	}
 
 	public void deleteStudy(Member member, Long studyId) {
@@ -106,7 +124,7 @@ public class StudyService {
 			throw new CustomException(ErrorCode.STUDY_HAVE_USER);
 		}
 
-        imageService.deleteImage(study.getCoverImage());
+		imageService.deleteImage(study.getCoverImage());
 
 		studyRepository.delete(study);
 	}
@@ -191,14 +209,14 @@ public class StudyService {
 		LocalDateTime end = today.atTime(LocalTime.MAX);
 
 		List<Long> autoUserIds = studyTimeRepository.findDistinctUserIdsStudiedToday(
-				start, end, Type.STUDY
+			start, end, Type.STUDY
 		);
 
 		List<Long> manualUserIds = studyTimeManualRepository.findDistinctUserIdsByManualDate(today);
 
 		return Stream.concat(autoUserIds.stream(), manualUserIds.stream())
-				.distinct()
-				.toList();
+			.distinct()
+			.toList();
 	}
 
 	public int getTodayTotalStudySeconds(Long userId) {
@@ -207,7 +225,7 @@ public class StudyService {
 		LocalDateTime end = today.atTime(LocalTime.MAX);
 
 		int autoSeconds = studyTimeRepository.sumStudySecondsTodayByUserId(
-				userId, start, end, Type.STUDY
+			userId, start, end, Type.STUDY
 		);
 
 		int manualSeconds = studyTimeManualRepository.sumManualStudySecondsByUserIdAndDate(userId, today);
