@@ -78,6 +78,7 @@ public class StudyService {
 			.coverImage(coverImageUrl)
 			.category(request.getCategory())
 			.description(request.getDescription())
+			.longDescription(request.getLongDescription())
 			.memberLimit(request.getMemberLimit())
 			.isPublic(request.getIsPublic())
 			.password(encodedPassword)

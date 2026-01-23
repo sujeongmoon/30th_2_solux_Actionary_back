@@ -32,6 +32,9 @@ public class StudyResponseDto {
 	@Schema(description = "스터디 간단 소개글", example = "눈송이 인증 받아요")
 	private String description;
 
+	@Schema(description = "스터디 안내", example = "숙명여대생 인증 받습니다! 눈송이들만 모여있는 방이니 다른 분들은 출입 자제해 주세요. 많관부 많관부 ~")
+	private String longDescription;
+
 	@Schema(description = "스터디 인원제한", example = "15")
 	private int memberLimit;
 
@@ -50,6 +53,7 @@ public class StudyResponseDto {
 			.category(study.getCategory())
 			.categoryLabel(study.getCategory().getLabel())
 			.description(study.getDescription())
+			.longDescription(study.getLongDescription())
 			.memberLimit(study.getMemberLimit())
 			.isPublic(study.getIsPublic())
 			.creatorUserId(study.getCreator().getId())
