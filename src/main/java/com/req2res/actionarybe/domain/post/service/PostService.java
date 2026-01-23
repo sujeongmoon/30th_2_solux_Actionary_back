@@ -97,7 +97,7 @@ public class PostService {
 
         // 서버 꺼졌다가 켜져도, .getImages()하면 SQL 쿼리 날림 (@OneToMany(fetch = FetchType.LAZY이기에)
         List<String> images=post.getImages().stream()
-                .map(postImage->postImage.getImageUrl()).toList();
+                .map(PostImage::getImageUrl).toList();
 
         return new GetPostResponseDTO(
                 postInfo,
@@ -110,8 +110,7 @@ public class PostService {
     public boolean isDelImageInS3(String delImageUrl){
         Optional<PostImage> opt = Optional.ofNullable(postImageRepository.findByImageUrl(delImageUrl));
 
-        if(opt.isPresent()) return true;
-        else return false;
+        return opt.isPresent();
     }
 
     // 이미지 추가
