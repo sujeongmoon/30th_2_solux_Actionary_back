@@ -36,9 +36,9 @@ public class TodoCalendarService {
         LocalDate startDate = yearMonth.atDay(1);
         LocalDate endDate = yearMonth.atEndOfMonth();
 
-        // DONE 상태만 집계
+        // 날짜별 DONE 개수 + 전체 개수 함께 집계
         List<TodoDoneCountByDate> result =
-                todoRepository.countDoneTodosByDateInMonth(
+                todoRepository.countTodoSummaryByDateInMonth(
                         userId,
                         Todo.Status.DONE,
                         startDate,
@@ -49,7 +49,8 @@ public class TodoCalendarService {
         return result.stream()
                 .map(r -> new TodoCalendarDoneSummaryDTO(
                         r.getDate(),
-                        r.getDoneCount()
+                        r.getDoneCount(),
+                        r.getTotalTodoCount()
                 ))
                 .toList();
     }

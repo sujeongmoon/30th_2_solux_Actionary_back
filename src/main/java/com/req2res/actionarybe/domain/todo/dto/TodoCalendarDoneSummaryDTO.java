@@ -8,11 +8,11 @@ import java.time.LocalDate;
 
 @Getter
 @AllArgsConstructor
-@Schema(description = "캘린더 월별 DONE 투두 날짜별 집계 DTO")
+@Schema(description = "캘린더 월별 투두 날짜별 집계 DTO (DONE + TOTAL)")
 public class TodoCalendarDoneSummaryDTO {
 
     @Schema(
-            description = "투두 완료(DONE) 날짜",
+            description = "투두 날짜",
             example = "2026-01-21"
     )
     private LocalDate date;
@@ -22,4 +22,10 @@ public class TodoCalendarDoneSummaryDTO {
             example = "2"
     )
     private long doneCount;
+
+    @Schema(
+            description = "해당 날짜의 전체 투두 개수 (상태 무관, DONE 포함)",
+            example = "5"
+    )
+    private long totalTodoCount;
 }
