@@ -10,7 +10,6 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -249,10 +248,11 @@ public class PostController {
     @PatchMapping("/{post_id}")
     public Response<UpdatePostResponseDTO> updatePost(
             @PathVariable("post_id") Long postId,
-            @RequestPart(value = "images", required = false) UpdateImageRequestDTO images,
+            @RequestPart(value = "addImages", required = false) List<MultipartFile> addImages,
+            @RequestPart(value = "delImages", required = false) DeleteImagesRequestDTO delImages,
             @RequestPart(value = "post", required = false) UpdatePostRequestDTO posts
     ){
-        UpdatePostResponseDTO result = postService.updatePost(postId, images, posts);
+        UpdatePostResponseDTO result = postService.updatePost(postId, addImages, delImages, posts);
         return Response.success("게시글 수정 성공", result);
     }
 
