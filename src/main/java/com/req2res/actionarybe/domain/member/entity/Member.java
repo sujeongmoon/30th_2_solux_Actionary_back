@@ -71,7 +71,7 @@ public class Member extends Timestamped {
         this.phoneNumber = phoneNumber;
         this.birthday = birthday;
         this.profileImageUrl = (profileImageUrl == null || profileImageUrl.isBlank())
-                ? "https://actionary-s3-bucket.s3.ap-northeast-2.amazonaws.com/static/default_profile/default_profile2.png" : profileImageUrl;
+                ? "s3://actionary-s3-bucket-v2/static/default_profile/default_profile2.png" : profileImageUrl;
         this.nickname = (nickname == null || nickname.isBlank())
                 ? generateDefaultNickname() : nickname;
         this.badge = badge;
