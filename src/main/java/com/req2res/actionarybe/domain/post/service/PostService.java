@@ -133,10 +133,12 @@ public class PostService {
 
     // 이미지 삭제
     @Transactional
-    public void delPostImages(String[] delImages, Post post) {
+    public void delPostImages(List<String> delImages, Post post) {
         // 이미지 삭제
         for(String imageUrl : delImages){
+            System.out.println("@%#@"+isDelImageInS3(imageUrl)+"@%#@");
             if(isDelImageInS3(imageUrl)){
+                System.out.println("I'm in");
                 imageService.deleteImage(imageUrl);
                 post.removeImage(imageUrl);
             }else{
@@ -147,19 +149,17 @@ public class PostService {
 
     // 게시글 수정
     @Transactional
-    public UpdatePostResponseDTO updatePost(Long post_id, UpdateImageRequestDTO imagesDTO, UpdatePostRequestDTO postDTO) {
+    public UpdatePostResponseDTO updatePost(Long post_id, List<MultipartFile> addImages, DeleteImagesRequestDTO delImagesDTO, UpdatePostRequestDTO postDTO) {
         Post post=postRepository.findById(post_id)
                 .orElseThrow(()->new CustomException(ErrorCode.POST_NOT_FOUND));
-        System.out.println("@^%#"+imagesDTO+"@&%#%@&");
 
-        if(imagesDTO == null && post == null){
+        if(addImages == null && postDTO == null && delImagesDTO == null){
             throw new CustomException(ErrorCode.EMPTY_UPDATE_REQUEST);
         }
 
-        if(imagesDTO != null){
-            if(imagesDTO.getDelImages()!=null) delPostImages(imagesDTO.getDelImages(), post);
-            if(imagesDTO.getAddImages()!=null) addPostImages(imagesDTO.getAddImages(), post);
-        }
+        if(delImagesDTO!=null) delPostImages(delImagesDTO.getImageUrl(), post);
+        if(addImages!=null) addPostImages(addImages, post);
+
         if(postDTO != null){
             if(postDTO.getType()!=null)
                 post.setType(Post.Type.valueOf(postDTO.getType())); // request의 type는 String이라, Post의 Type 자료형인 Post.Type(Enum) 타입 변환 필요
