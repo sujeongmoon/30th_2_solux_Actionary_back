@@ -9,4 +9,5 @@ public class OtherMemberResponseDTO {
     private Long memberId;
     private String nickname;
     private String profileImageUrl;
+    private Boolean withdraw;
 }

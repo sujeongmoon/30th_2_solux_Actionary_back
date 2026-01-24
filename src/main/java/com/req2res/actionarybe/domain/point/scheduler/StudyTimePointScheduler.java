@@ -2,6 +2,7 @@ package com.req2res.actionarybe.domain.point.scheduler;
 
 import com.req2res.actionarybe.domain.member.entity.Member;
 import com.req2res.actionarybe.domain.member.repository.MemberRepository;
+import com.req2res.actionarybe.domain.point.dto.StudyTimePointResponseDTO;
 import com.req2res.actionarybe.domain.point.service.PointService;
 import com.req2res.actionarybe.global.exception.CustomException;
 import com.req2res.actionarybe.global.exception.ErrorCode;
@@ -20,10 +21,14 @@ public class StudyTimePointScheduler {
     private final PointService pointService;
     private final MemberRepository memberRepository;
 
-    // 매일 00:00 실행
-    // 테스트용으로 1분마다 실행
-    @Scheduled(cron = "0 * * * * *")
-    public void earnDailyStudyTimePoints() {
+    // 운영용 트리거
+    @Scheduled(cron = "0 1 0 * * *", zone = "Asia/Seoul")
+    public void scheduledJob() {
+        runDailyJob();
+    }
+
+    // 실제 비즈니스 로직 (테스트 가능)
+    public void runDailyJob() {
 
         log.info("[Scheduler] Daily study-time point job started");
 
@@ -34,18 +39,28 @@ public class StudyTimePointScheduler {
                 pointService.earnStudyTimePoint(member.getId());
             } catch (CustomException e) {
 
-                // 정상 스킵 케이스
                 if (e.getErrorCode() == ErrorCode.STUDY_TIME_POINT_ALREADY_EARNED_TODAY ||
                         e.getMessage().contains("공부시간")) {
 
-                    log.info("[Scheduler] skip userId={} reason={}",
-                            member.getId(), e.getErrorCode());
+                    log.info(
+                            "[Scheduler] skip userId={} code={} msg={}",
+                            member.getId(),
+                            e.getErrorCode(),
+                            e.getMessage()
+                    );
                     continue;
                 }
+
+                log.error(
+                        "[Scheduler] fail userId={} code={} msg={}",
+                        member.getId(),
+                        e.getErrorCode(),
+                        e.getMessage(),
+                        e
+                );
             }
         }
 
         log.info("[Scheduler] Daily study-time point job finished");
     }
 }
-

@@ -17,12 +17,14 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -145,7 +147,15 @@ public class TodoCategoryController {
     @GetMapping
     public ResponseEntity<Response<List<TodoCategoryListItemDTO>>> getMyCategories(
             @Parameter(hidden = true)
-            @AuthenticationPrincipal UserDetails userDetails
+            @AuthenticationPrincipal UserDetails userDetails,
+
+            @Parameter(
+                    description = "조회 기준 날짜 (이 날짜 기준 startDate <= date 인 카테고리만 반환). 미입력 시 오늘 날짜 기준",
+                    example = "2026-01-20"
+            )
+            @RequestParam(required = false)
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+            LocalDate date
     ) {
         String loginId = userDetails.getUsername();
 
@@ -154,7 +164,8 @@ public class TodoCategoryController {
 
         Long userId = member.getId();
 
-        List<TodoCategoryListItemDTO> data = todoCategoryService.getCategory(userId);
+        // date가 null이면 서비스에서 today로 처리
+        List<TodoCategoryListItemDTO> data = todoCategoryService.getCategory(userId, date);
 
         return ResponseEntity.ok(Response.success("카테고리 목록 조회 성공", data));
     }

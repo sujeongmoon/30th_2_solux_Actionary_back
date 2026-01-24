@@ -6,14 +6,11 @@ import com.req2res.actionarybe.domain.member.entity.Badge;
 import com.req2res.actionarybe.domain.member.entity.Member;
 import com.req2res.actionarybe.domain.member.repository.BadgeRepository;
 import com.req2res.actionarybe.domain.member.repository.MemberRepository;
-import com.req2res.actionarybe.domain.member.service.MemberService;
-import com.req2res.actionarybe.global.Response;
 import com.req2res.actionarybe.global.exception.CustomException;
 import com.req2res.actionarybe.global.exception.ErrorCode;
 import com.req2res.actionarybe.global.security.JwtTokenProvider;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -22,7 +19,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
 import java.util.Random;
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -45,12 +41,30 @@ public class AuthService {
             throw new CustomException(ErrorCode.WITHDRAWN_MEMBER);
         }
 
-        // 가시적 정보만 (익명)으로 바꿈.
-        member.setNickname("(익명)");
-        member.setName("(익명)");
+        //////// 탈퇴자 익명화 ////////
+        // 사용자와 관련된 정보는 모두 관련성 없는 정보로 채운다 (단, email, nickname, loginId는 UNIQUE이므로, 뒤에 id를 붙인다.)
+        // 또한, 만일 withdrawn이 참이라면, signoutName = "(알 수 없음)"으로 한 후, 이를 nickname 대신 내보낸다.
+        String uniqueKey = "_withdrawn_" + member.getId();
 
-        // 탈퇴했음 표시
         member.setWithdrawn(true);
+        member.setSignoutName("(탈퇴한 사용자)");
+
+        member.setLoginId("login" + uniqueKey);
+        member.setEmail("email" + uniqueKey + "@example.com");
+        member.setNickname("닉네임" + uniqueKey);
+
+        member.setName("탈퇴한 사용자");
+        member.setPhoneNumber("000-0000-0000");
+        member.setBirthday(LocalDate.of(1900, 1, 1));
+
+        member.setProfileImageUrl("https://actionary-s3-bucket-v2.s3.ap-northeast-2.amazonaws.com/static/default_profile/default_profile1.png");
+        member.setBadge(badgeRepository.findById(1L).get());
+    }
+
+    // 탈퇴자면 nickname 대신 signoutName 돌려주는 메서드
+    // 의도: nickname은 UNIQUE이고, signoutName은 아니므로, 모든 탈퇴자를 "(익명)" 하나로 처리할 수 있음
+    public String chooseNickname(Member member){
+        return member.isWithdrawn()? member.getSignoutName() : member.getNickname();
     }
 
     // 로그인

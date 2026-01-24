@@ -1,10 +1,11 @@
 package com.req2res.actionarybe.domain.todo.dto.category;
-// 투두 카테고리 생성 API에서 사용하는 요청 DTO
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import jakarta.validation.constraints.NotNull;
+import java.time.LocalDate;
 
 @Getter
 @NoArgsConstructor
@@ -28,4 +29,13 @@ public class TodoCategoryCreateRequestDTO {
     )
     @NotBlank(message = "카테고리 색상은 필수입니다.")
     private String color;
+
+    //카테고리 적용 날짜
+    @Schema(
+            description = "카테고리가 적용되기 시작하는 날짜 (이 날짜부터 카테고리가 노출됨)",
+            example = "2026-01-20"
+    )
+    @NotNull(message = "카테고리 시작 날짜는 필수입니다.")
+    private LocalDate startDate;
+
 }

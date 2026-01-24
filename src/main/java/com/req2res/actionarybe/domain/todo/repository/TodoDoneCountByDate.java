@@ -5,5 +5,6 @@ import java.time.LocalDate;
 public interface TodoDoneCountByDate {
     LocalDate getDate();
     Long getDoneCount();
+    Long getTotalTodoCount();
 }
 

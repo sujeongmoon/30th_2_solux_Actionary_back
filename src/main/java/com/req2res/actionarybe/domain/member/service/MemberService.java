@@ -1,5 +1,6 @@
 package com.req2res.actionarybe.domain.member.service;
 
+import com.req2res.actionarybe.domain.auth.service.AuthService;
 import com.req2res.actionarybe.domain.image.service.ImageService;
 import com.req2res.actionarybe.domain.member.dto.*;
 import com.req2res.actionarybe.domain.member.entity.Badge;
@@ -21,6 +22,7 @@ import java.util.Optional;
 public class MemberService {
 
 	private final MemberRepository memberRepository;
+    private final AuthService authService;
     private final ImageService imageService;
 
     public Member findMemberByLoginId(String loginId) {
@@ -32,10 +34,11 @@ public class MemberService {
     public LoginMemberResponseDTO getLoginMemberInfo(Long id) {
         Member member = memberRepository.findById(id)
                 .orElseThrow(()->new IllegalArgumentException("해당 회원이 없습니다."));
+
         return new LoginMemberResponseDTO(
                 member.getId(),
                 member.getProfileImageUrl(),
-                member.getNickname(),
+                authService.chooseNickname(member),
                 member.getPhoneNumber(),
                 member.getBirthday()
         );
@@ -45,10 +48,12 @@ public class MemberService {
     public OtherMemberResponseDTO getOtherMemberInfo(Long id) {
         Member member = memberRepository.findById(id)
                 .orElseThrow(()->new CustomException(ErrorCode.MEMBER_NOT_FOUND));
+
         return new OtherMemberResponseDTO(
                 member.getId(),
-                member.getNickname(),
-                member.getProfileImageUrl()
+                authService.chooseNickname(member),
+                member.getProfileImageUrl(),
+                member.isWithdrawn()
         );
     }
 

@@ -14,7 +14,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.req2res.actionarybe.domain.member.entity.Member;
-import com.req2res.actionarybe.domain.member.repository.MemberRepository;
 import com.req2res.actionarybe.domain.study.dto.StudyParticipantNowStateRequestDto;
 import com.req2res.actionarybe.domain.study.dto.StudyParticipantNowStateResponseDto;
 import com.req2res.actionarybe.domain.study.dto.StudyParticipantPrivateRequestDto;
@@ -48,7 +47,6 @@ public class StudyParticipantService {
 
 	private final StudyRepository studyRepository;
 	private final StudyParticipantRepository studyParticipantRepository;
-	private final MemberRepository memberRepository;
 
 	private final StudyTimeService studyTimeService;
 
@@ -226,27 +224,38 @@ public class StudyParticipantService {
 				study, member)
 			.orElseThrow(() -> new CustomException(ErrorCode.STUDY_PARTICIPANT_NOT_JOINED));
 
-		updateStateParticipantStudy(studyParticipant, request.getType());
-
-		// 말풍선삭제
-		String redisKey = "study:" + studyId + ":nowState";
-		redisTemplate.opsForHash().delete(
-			redisKey,
-			studyParticipant.getId().toString()
-		);
-
-		messagingTemplate.convertAndSend(
-			"/topic/studies/" + studyId,
-			Event.builder()
-				.type(EventType.PARTICIPANT_LEFT)
-				.data(ParticipantLeftEvent.builder()
-					.studyId(studyId)
-					.studyParticipantId(studyParticipant.getId())
-					.build())
-				.build()
-		);
+        processParticipantExit(studyId, studyParticipant, request.getType());
 
 	}
+
+    @Transactional
+    public void updateStudyParticipantAuto(Long studyParticipantId) {
+        StudyParticipant studyParticipant = studyParticipantRepository.findById(studyParticipantId)
+                .orElseThrow(() -> new CustomException(ErrorCode.STUDY_PARTICIPANT_NOT_JOINED));
+
+        Long studyId = studyParticipant.getStudy().getId();
+
+        processParticipantExit(studyId, studyParticipant, Type.STUDY);
+    }
+
+    private void processParticipantExit(Long studyId, StudyParticipant studyParticipant, Type type) {
+
+        updateStateParticipantStudy(studyParticipant, type);
+
+        String redisKey = "study:" + studyId + ":nowState";
+        redisTemplate.opsForHash().delete(redisKey, studyParticipant.getId().toString());
+
+        messagingTemplate.convertAndSend(
+                "/topic/studies/" + studyId,
+                Event.builder()
+                        .type(EventType.PARTICIPANT_LEFT)
+                        .data(ParticipantLeftEvent.builder()
+                                .studyId(studyId)
+                                .studyParticipantId(studyParticipant.getId())
+                                .build())
+                        .build()
+        );
+    }
 
 	public void sendChatMessage(Long studyId, ChatMessageRequestEvent request) {
 
@@ -287,7 +296,7 @@ public class StudyParticipantService {
 
 	private void updateStateParticipantStudy(StudyParticipant studyParticipant, Type type) {
 		studyTimeService.createStudyTime(Type.STUDY, studyParticipant);
-		studyParticipant.updateIsActiveFalse(studyParticipant);
+		studyParticipant.updateIsActiveFalse();
 	}
 
 }

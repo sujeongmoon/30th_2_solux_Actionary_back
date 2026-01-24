@@ -12,7 +12,6 @@ import com.req2res.actionarybe.domain.point.entity.PointSource;
 import com.req2res.actionarybe.global.exception.CustomException;
 import com.req2res.actionarybe.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -111,7 +110,7 @@ public class NotificationService {
         NotificationCreateRequestDTO req = NotificationCreateRequestDTO.of(
                 userId,
                 NotificationType.DAILY_STUDY_SUMMARY,
-                "오늘 공부량 리포트",
+                "어제 공부량 리포트",
                 summaryText,
                 null
         );

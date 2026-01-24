@@ -31,7 +31,7 @@ public class DailyStudySummaryScheduler {
         System.out.println("[Scheduler] userIds=" + userIds);
 
         for (Long userId : userIds) {
-            String summaryText = studyService.buildTodaySummaryText(userId);
+            String summaryText = studyService.buildYesterdaySummaryText(userId);
             System.out.println("[Scheduler] notify userId=" + userId + " text=" + summaryText);
             notificationService.notifyDailyStudySummary(userId, summaryText);
         }

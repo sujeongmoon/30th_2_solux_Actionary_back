@@ -1,5 +1,6 @@
 package com.req2res.actionarybe.domain.comment.service;
 
+import com.req2res.actionarybe.domain.auth.service.AuthService;
 import com.req2res.actionarybe.domain.comment.dto.*;
 import com.req2res.actionarybe.domain.comment.entity.Comment;
 import com.req2res.actionarybe.domain.comment.repository.CommentRepository;
@@ -26,6 +27,7 @@ public class CommentService {
     private final PostRepository postRepository;
     private final MemberRepository memberRepository;
     private final NotificationService notificationService;
+    private final AuthService authService;
 
     // 댓글 생성
     @Transactional
@@ -89,7 +91,7 @@ public class CommentService {
                         comment.getIsSecret(),
                         new CommentInfoDTO.AuthorDTO(
                                 comment.getMember().getId(),
-                                comment.getMember().getNickname(),
+                                authService.chooseNickname(comment.getMember()),
                                 comment.getMember().getProfileImageUrl(),
                                 comment.getMember().getBadge().getId()
                         )

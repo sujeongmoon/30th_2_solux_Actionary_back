@@ -18,6 +18,7 @@ import java.time.LocalDate;
 )
 @EntityListeners(AuditingEntityListener.class)
 @Getter
+@Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Member extends Timestamped {
 
@@ -38,6 +39,9 @@ public class Member extends Timestamped {
 
     @Column(length=20)
     private String nickname;
+
+    @Column
+    private String signoutName;
 
     @Column(nullable=false)
     private LocalDate birthday;
@@ -71,9 +75,10 @@ public class Member extends Timestamped {
         this.phoneNumber = phoneNumber;
         this.birthday = birthday;
         this.profileImageUrl = (profileImageUrl == null || profileImageUrl.isBlank())
-                ? "https://actionary-s3-bucket.s3.ap-northeast-2.amazonaws.com/static/default_profile/default_profile2.png" : profileImageUrl;
+                ? "https://actionary-s3-bucket-v2.s3.ap-northeast-2.amazonaws.com/static/default_profile/default_profile2.png" : profileImageUrl;
         this.nickname = (nickname == null || nickname.isBlank())
                 ? generateDefaultNickname() : nickname;
+        this.signoutName = nickname;
         this.badge = badge;
         this.withdrawn = false;
         // createdAt, updatedAt은 Timestamped에서 자동으로 위에 필드 변수에 넣어줄거라, 외부에서 주입받을 필요X
@@ -82,20 +87,4 @@ public class Member extends Timestamped {
     private String generateDefaultNickname() {
         return "user" + System.currentTimeMillis();
     }
-
-    public void setProfileImageUrl(String profileImageUrl) {
-        this.profileImageUrl = profileImageUrl;
-    }
-
-    public void setNickname(String nickname) {
-        this.nickname=nickname;
-    }
-
-    public void setName(String name) {this.name=name;}
-
-    public void setBadge(Badge badge) {
-        this.badge = badge;
-    }
-
-    public void setWithdrawn(boolean withdrawn) {this.withdrawn = withdrawn;}
 }
