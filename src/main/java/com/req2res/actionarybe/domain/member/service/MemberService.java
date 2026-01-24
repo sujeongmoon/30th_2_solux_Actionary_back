@@ -52,7 +52,8 @@ public class MemberService {
         return new OtherMemberResponseDTO(
                 member.getId(),
                 authService.chooseNickname(member),
-                member.getProfileImageUrl()
+                member.getProfileImageUrl(),
+                member.isWithdrawn()
         );
     }
 

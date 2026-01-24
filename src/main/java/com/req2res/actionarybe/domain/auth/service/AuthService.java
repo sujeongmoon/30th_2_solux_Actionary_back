@@ -62,6 +62,7 @@ public class AuthService {
         member.setBirthday(LocalDate.of(1900, 1, 1));
 
         member.setProfileImageUrl("https://actionary-s3-bucket-v2.s3.ap-northeast-2.amazonaws.com/static/default_profile/default_profile1.png");
+        member.setBadge(badgeRepository.findById(1L).get());
     }
 
     // 탈퇴자면 nickname 대신 signoutName 돌려주는 메서드
