@@ -48,7 +48,7 @@ public class StudyParticipant extends Timestamped {
 	@JoinColumn(name = "user_id", nullable = false)
 	private Member member;
 
-	public void updateIsActiveFalse(StudyParticipant studyParticipant) {
+	public void updateIsActiveFalse() {
 		this.isActive = false;
 	}
 
