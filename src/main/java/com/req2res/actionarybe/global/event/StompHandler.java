@@ -18,10 +18,10 @@ public class StompHandler implements ChannelInterceptor {
         StompHeaderAccessor accessor = StompHeaderAccessor.wrap(message);
 
         if (StompCommand.CONNECT.equals(accessor.getCommand())) {
-            String participantId = accessor.getFirstNativeHeader("studyParticipantId");
+            String studyParticipantId = accessor.getFirstNativeHeader("studyParticipantId");
 
-            if (participantId != null) {
-                accessor.getSessionAttributes().put("participantId", participantId);
+            if (studyParticipantId != null) {
+                accessor.getSessionAttributes().put("studyParticipantId", studyParticipantId);
             }
         }
         return message;
