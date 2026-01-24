@@ -1,5 +1,6 @@
 package com.req2res.actionarybe.domain.post.service;
 
+import com.req2res.actionarybe.domain.auth.service.AuthService;
 import com.req2res.actionarybe.domain.image.service.ImageService;
 import com.req2res.actionarybe.domain.member.entity.Member;
 import com.req2res.actionarybe.domain.member.repository.MemberRepository;
@@ -28,6 +29,7 @@ public class PostService {
     private final PostImageRepository postImageRepository;
     private final MemberRepository memberRepository;
     private final ImageService imageService;
+    private final AuthService authService;
 
     // 게시글 생성
     @Transactional
@@ -90,7 +92,7 @@ public class PostService {
 
         PostAuthorDTO postAuthor = new PostAuthorDTO(
                 post.getMember().getId(),
-                post.getMember().getNickname(),
+                authService.chooseNickname(post.getMember()),
                 post.getMember().getProfileImageUrl(),
                 post.getMember().getBadge().getId()
         );
@@ -191,7 +193,7 @@ public class PostService {
                         post.getId(),
                         post.getType().name(),
                         post.getTitle(),
-                        post.getMember().getNickname(),
+                        authService.chooseNickname(post.getMember()),
                         post.getCommentsCount(),
                         post.getCreatedAt()
                 ))

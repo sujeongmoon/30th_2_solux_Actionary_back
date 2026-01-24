@@ -66,7 +66,7 @@ public class AuthService {
 
     // 탈퇴자면 nickname 대신 signoutName 돌려주는 메서드
     // 의도: nickname은 UNIQUE이고, signoutName은 아니므로, 모든 탈퇴자를 "(익명)" 하나로 처리할 수 있음
-    public String choosingNickname(Member member){
+    public String chooseNickname(Member member){
         return member.isWithdrawn()? "(익명)" : member.getNickname();
     }
 
