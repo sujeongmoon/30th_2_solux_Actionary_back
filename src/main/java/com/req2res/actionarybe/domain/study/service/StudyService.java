@@ -220,7 +220,7 @@ public class StudyService {
 			.toList();
 	}
 
-	public int getTodayTotalStudySeconds(Long userId) {
+	public int getYesterdayTotalStudySeconds(Long userId) {
 		LocalDate today = LocalDate.now();
 		LocalDateTime start = today.atStartOfDay();
 		LocalDateTime end = today.atTime(LocalTime.MAX);
@@ -234,19 +234,21 @@ public class StudyService {
 		return autoSeconds + manualSeconds;
 	}
 
-	public String buildTodaySummaryText(Long userId) {
-		int totalSeconds = getTodayTotalStudySeconds(userId);
+	public String buildYesterdaySummaryText(Long userId) {
+		int totalSeconds = getYesterdayTotalStudySeconds(userId);
 
 		if (totalSeconds <= 0) {
-			return "오늘 총 0분 공부했어요 👏";
+			return "어제는 공부 기록이 없었어요 😴";
 		}
 
 		int hours = totalSeconds / 3600;
 		int minutes = (totalSeconds % 3600) / 60;
 
 		if (hours == 0) {
-			return "오늘 총 " + minutes + "분 공부했어요 👏";
+			return "어제 총 " + minutes + "분 공부했어요 👏";
 		}
-		return "오늘 총 " + hours + "시간 " + minutes + "분 공부했어요 👏";
+
+		return "어제 총 " + hours + "시간 " + minutes + "분 공부했어요 👏";
 	}
+
 }
