@@ -144,7 +144,7 @@ public class StudyService {
 		if (coverImage != null && !coverImage.isEmpty()) {
 			coverImageUrl = imageService.saveImage(coverImage);
 		} else {
-			coverImageUrl = member.getProfileImageUrl();
+			coverImageUrl = study.getCoverImage();
 		}
 
 		study.updateStudy(request, member, coverImageUrl);
