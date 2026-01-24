@@ -12,6 +12,8 @@ import com.req2res.actionarybe.global.exception.CustomException;
 import com.req2res.actionarybe.global.exception.ErrorCode;
 
 import lombok.RequiredArgsConstructor;
+
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
 
@@ -29,7 +31,6 @@ public class TodoCategoryService {
     );
 
     private void validatePaletteColor(String color) {
-        if (color == null || color.isBlank()) return; // 색 안 보내면 검증 패스
         String normalized = color.trim().toUpperCase();
 
         // 1) 형식 검증 (# + 6자리 hex)
@@ -46,21 +47,24 @@ public class TodoCategoryService {
 
     //1) 카테고리 생성
     @Transactional
-    public TodoCategoryCreateResponseDTO createCategory(Long userId,
-                                                        TodoCategoryCreateRequestDTO request) {
+    public TodoCategoryCreateResponseDTO createCategory(Long userId, TodoCategoryCreateRequestDTO request) {
 
-
-        // 409: 같은 유저 내 동일 이름 카테고리 존재
         if (todoCategoryRepository.existsByUserIdAndName(userId, request.getName())) {
             throw new CustomException(ErrorCode.TODO_CATEGORY_DUPLICATED);
         }
 
         validatePaletteColor(request.getColor());
 
+        // 날짜 검증
+        if (request.getStartDate() == null) {
+            throw new CustomException(ErrorCode.BAD_REQUEST, "startDate는 필수입니다.");
+        }
+
         TodoCategory category = TodoCategory.builder()
                 .userId(userId)
                 .name(request.getName())
                 .color(request.getColor())
+                .startDate(request.getStartDate())
                 .build();
 
         TodoCategory saved = todoCategoryRepository.save(category);
@@ -69,9 +73,12 @@ public class TodoCategoryService {
                 saved.getId(),
                 saved.getName(),
                 saved.getColor(),
+                saved.getStartDate(),
                 saved.getCreatedAt()
         );
+
     }
+
 
     //2) 카테고리 수정
     @Transactional
@@ -136,19 +143,25 @@ public class TodoCategoryService {
 
     //4) 카테고리 목록 조회
     @Transactional(readOnly = true)
-    public List<TodoCategoryListItemDTO> getCategory(Long userId) {
+    public List<TodoCategoryListItemDTO> getCategory(Long userId, LocalDate date) {
 
-        List<TodoCategory> categories = todoCategoryRepository.findAllByUserIdOrderByCreatedAtAsc(userId);
+        // date가 안 오면 "오늘" 기준으로
+        LocalDate 기준일 = (date != null) ? date : LocalDate.now();
+
+        List<TodoCategory> categories =
+                todoCategoryRepository.findAllByUserIdAndStartDateLessThanEqualOrderByStartDateAsc(userId, 기준일);
 
         return categories.stream()
                 .map(c -> new TodoCategoryListItemDTO(
                         c.getId(),
                         c.getName(),
                         c.getColor(),
+                        c.getStartDate(),
                         c.getCreatedAt()
                 ))
                 .toList();
     }
+
 
 }
 
