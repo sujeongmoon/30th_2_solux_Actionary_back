@@ -1,0 +1,12 @@
+POST http://localhost:8080/api/auth/signup
+Content-Type: application/json
+
+{
+  "profileImageUrl": "https://cdn.example.com/profiles/user456.jpg",
+  "loginId": "soojin_dev",
+  "password": "MySecurePwd#2025",
+  "phoneNumber": "010-2222-3333",
+  "email": "soojin.dev@example.com",
+  "name": "박수진",
+  "birthday": "1995-04-22"
+}

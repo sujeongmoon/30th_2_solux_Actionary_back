@@ -1,0 +1,71 @@
+# 로컬환경용 application.yml
+
+spring:
+  application:
+    name: actionarybe
+  servlet:
+    multipart:
+      max-file-size: 200MB
+      max-request-size: 200MB
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    # 로컬 환경에서는 springboot webserver가 도커 환경 내에 있지 않으므로, mysql과 소통하려면 localhost:3333포트와 소통해야함
+    url: jdbc:mysql://localhost:3333/actionary_db
+    username: ${MYSQL_USER}
+    password: ${MYSQL_PASSWORD}
+  jackson:
+    deserialization:
+      fail-on-unknown-properties: true
+  sql:
+    init:
+      mode: always  # data.sql 기본값 -> 실행O (배포 시 never로 덮음)
+  data:
+    redis:
+      host: localhost
+      # 로컬 환경에서는 springboot webserver가 도커 환경 내에 있지 않으므로, redis와 소통하려면 docker-compose.yml에서 redis를 맵핑해두었던 6377포트와 소통해야함
+      port: 6377
+      timeout: 2000
+
+  jpa:
+    hibernate:
+      ddl-auto: create-drop # 로컬 환경에서는 웹서버를 실행할 때마다 db가 drop되고 create됨
+    defer-datasource-initialization: true  # JPA 이후 data.sql 실행
+    properties:
+      hibernate:
+        # db 로그 설정
+        show_sql: true
+        format_sql: true
+        highlight_sql: true
+        use_sql_comments: true
+
+  jwt:
+    secret: ${JWT_SECRET_KEY}
+    access-token-expiration-ms: 10800000  # 1시간 -> 3시간(임시)
+
+  cloud:
+    aws:
+      s3:
+        bucket: ${S3_BUCKET_NAME}
+        base-url: https://${S3_BUCKET_NAME}.s3.ap-northeast-2.amazonaws.com
+      region:
+        static: ap-northeast-2
+        auto: false
+      credentials:
+        access-key: ${S3_ACCESS_KEY}
+        secret-key: ${S3_SECRET_KEY}
+      stack:
+        auto: false
+
+janus:
+  # 로컬 환경에서는 localhost로 접속하지만 배포 환경에서는 host.docker.internal 사용
+  base-url: http://localhost:8088/janus/
+
+app:
+  default:
+    cover-image: "https://${S3_BUCKET_NAME}.s3.ap-northeast-2.amazonaws.com/static/default_cover/default_cover.png"
+
+openai:
+  api-key: ${OPENAI_API_KEY}
+  base-url: https://api.openai.com/v1
+  model: gpt-5-mini
+

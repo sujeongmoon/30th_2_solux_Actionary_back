@@ -1,0 +1,113 @@
+@accessToken =
+@host=
+
+## 색상 리스트 = "#D29AFA", "#6BEBFF", "#9AFF5B", "#FFAD36",
+## "#FF8355", "#FCDF2F", "#FF3D2F", "#FF9E97”
+## 색상은 리스트에 있는 것들만 가능합니다!
+
+### 투두 카테고리 생성
+POST {{host}}/api/todo-categories
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "name": "운동",
+  "color": "#D29AFA"
+}
+
+### 카테고리 삭제
+DELETE {{host}}/api/todo-categories/1
+Authorization: Bearer {{accessToken}}
+
+### 카테고리 목록 조회
+GET {{host}}/api/todo-categories
+Authorization: Bearer {{accessToken}}
+
+### 카테고리 수정 (이름만 수정)
+PATCH {{host}}/api/todo-categories/1
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "name": "운동",
+  "color": "#D29AFA"
+
+}
+
+### 카테고리 수정 (색상만 수정)
+PATCH {{host}}/api/todo-categories/1
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "color": "#6BEBFF"
+}
+
+
+###투두 생성 API
+POST {{host}}/api/todos
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "title": "운동 30분 하기",
+  "date": "2026-01-01",
+  "categoryId": 1
+}
+
+
+### 특정 날짜 투두 목록 조회 (카테고리 없음)
+GET {{host}}/api/todos?date=2026-01-01
+Authorization: Bearer {{accessToken}}
+
+### 특정 날짜 투두 목록 조회 (카테고리 포함)
+GET {{host}}/api/todos?date=2026-01-01&categoryId=1
+Authorization: Bearer {{accessToken}}
+
+###투두 삭제 API
+DELETE {{host}}/api/todos/1
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{}
+
+### 투두 수정 (제목 + 카테고리 변경)
+PATCH {{host}}/api/todos/1
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "title": "운영체제 과제하기 (수정)",
+  "categoryId": 1
+}
+
+### 투두 수정 (제목만 변경)
+PATCH {{host}}/api/todos/1
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "title": "운영체제 과제하기 (제목만 수정)"
+}
+
+
+###---------투두 상태 변화 API------------
+
+### 투두 상태 DONE 으로 변경
+PATCH {{host}}/api/todos/1/status
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "status": "DONE"
+}
+
+### 투두 상태 FAILED 로 변경
+PATCH {{host}}/api/todos/1/status
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "status": "FAILED"
+}
+

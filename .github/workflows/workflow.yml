@@ -1,0 +1,103 @@
+# CI/CD할 때 사용되는 workflow.yml
+name: CI/CD
+
+# main, develop branch에 push, pr 올릴 때에 github actions 실행
+on:
+  push:
+    branches: [ "main", "develop" ]
+  pull_request:
+    branches: [ "main", "develop" ]
+
+jobs:
+  build-and-deploy:
+    # ubuntu에서 실행
+    runs-on: ubuntu-latest
+
+    steps:
+      #CI
+      - name: Checkout source
+        uses: actions/checkout@v6
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v5
+        with:
+          java-version: '17'
+          distribution: 'corretto'
+
+      - name: Grant execute permission for Gradle
+        run: chmod +x gradlew
+
+      # 빌드 & 테스트 과정
+      - name: Build & Test
+        run: ./gradlew clean test bootJar --info
+        # github repository secrets (https://github.com/Solux-2025-2-TeamReq2Res/BackEnd/settings/secrets/actions) 에서 변수 주입받아, 빌드 테스트 진행
+        # github workflow에서는 env파일이 없기 때문에 github repository secret을 통해 환경변수를 주입받아야 함
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          JANUS_BASE_URL: ${{ secrets.JANUS_BASE_URL }}
+          JANUS_ADMIN_SECRET: ${{ secrets.JANUS_ADMIN_SECRET }}
+          S3_BUCKET_NAME: ${{ secrets.S3_BUCKET_NAME }}
+          S3_ACCESS_KEY: ${{ secrets.S3_ACCESS_KEY }}
+          S3_SECRET_KEY: ${{ secrets.S3_SECRET_KEY }}
+
+
+      #CD
+      - name: Docker build
+        # github repository secrets에 등록해둔 docker계정으로 도커 이미지 빌드
+        run: |
+          docker build --platform linux/amd64 -t ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_REPO }} .
+
+      #CD
+      # 이하 과정은 전부 머지 시에만 작동 (main, develop 브랜치에 push하는 이벤트에서만 작동)
+      - name: Docker push
+        if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop')
+
+        # github repository secrets에 등록해둔 docker계정으로 빌드했던 도커 이미지 푸쉬
+        run: |
+          docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+          docker push ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_REPO }}
+
+      #EC2
+      - name: Create EC2 app directory
+        if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop')
+        uses: appleboy/ssh-action@master
+        # github repository secrets에 등록한 EC2계정으로 /actionary 폴더를 생성
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_KEY }}
+          script: mkdir -p /home/ubuntu/actionary
+
+      - name: Copy Docker files to EC2
+        if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop')
+        uses: appleboy/scp-action@master
+        # actionary 폴더에 현재 레포지토리의 docker-compose.yml, docker-compose-prod.yml 파일을 복사
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_KEY }}
+
+          source: "docker-compose.yml,docker-compose-prod.yml"
+          target: "/home/ubuntu/actionary"
+
+      - name: Run Docker Compose on EC2
+        if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop')
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_KEY }}
+          # 해당 과정이 30분 이상 넘어가면 timeout
+          command_timeout: 30m
+
+          # github repository secrets에 등록한 ENV_PROD변수 : gitignore에 등록되어있는 현재 레포의 .env파일을 복붙해서 변수로 등록해둠
+          # 해당 환경변수를 EC2 서버의 .env파일로 만들어 웹서버(springboot)에 환경변수 주입
+          # 기존 docker에서 돌고있던 docker-compose.yml, docker-compose-prod.yml의 컨테이너들을 down 및 새 컨테이너로 띄우기
+          # 안 쓰는 도커 이미지 삭제
+          script: |
+            cd /home/ubuntu/actionary
+            echo "${{ secrets.ENV_PROD }}" > .env
+            sudo docker compose -f docker-compose.yml -f docker-compose-prod.yml down
+            docker compose -f docker-compose.yml -f docker-compose-prod.yml pull
+            docker compose -f docker-compose.yml -f docker-compose-prod.yml up -d
+            sudo docker image prune -f

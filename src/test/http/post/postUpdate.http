@@ -1,0 +1,80 @@
+### 게시글 생성
+POST http://localhost:8080/api/posts
+Authorization: {{accessToken}}
+Content-Type: application/json
+
+{
+  "memberId": 1,
+  "type": "인증",
+  "title": "오늘의 스터디2",
+  "content": {
+    "text": "자료구조 스터디 완료1",
+    "imageUrls": [
+      "https://storage.com/aaa.jpg",
+      "https://storage.com/bbb.jpg"
+    ]
+  }
+}
+
+### 게시글 조회
+GET http://localhost:8080/api/posts/1
+Authorization: {{accessToken}}
+Content-Type: application/json
+
+
+
+### 게시글 수정 1 (전체 data 다 보냄)
+PATCH http://localhost:8080/api/posts/1
+Authorization: {{accessToken}}
+Content-Type: application/json
+
+{
+  "type": "인증",
+  "title": "1",
+  "text": "1",
+  "imageUrls": [
+    "1",
+    "1"
+  ]
+}
+
+### 게시글 조회
+GET http://localhost:8080/api/posts/1
+Authorization: {{accessToken}}
+Content-Type: application/json
+
+
+
+### 게시글 수정 2 (일부만 보냄)
+PATCH http://localhost:8080/api/posts/1
+Authorization: {{accessToken}}
+Content-Type: application/json
+
+{
+  "text": "2",
+  "imageUrls": [
+    "2"
+  ]
+}
+
+### 게시글 조회
+GET http://localhost:8080/api/posts/1
+Authorization: {{accessToken}}
+Content-Type: application/json
+
+
+### 게시글 수정 3 (일부만 보냄)
+PATCH http://localhost:8080/api/posts/1
+Authorization: {{accessToken}}
+Content-Type: application/json
+
+{
+  "type": "소통",
+  "title": "3",
+  "text": "3"
+}
+
+### 게시글 조회
+GET http://localhost:8080/api/posts/1
+Authorization: {{accessToken}}
+Content-Type: application/json

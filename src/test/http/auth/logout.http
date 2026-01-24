@@ -1,0 +1,27 @@
+### 회원 탈퇴
+DELETE http://localhost:8080/api/auth/withdraw
+Authorization: {{accessToken}}
+Content-Type: application/json
+
+### 재로그인
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "loginId": "jaehyun99",
+  "password": "securePass!2025"
+}
+
+### 재회원가입
+POST http://localhost:8080/api/auth/signup
+Content-Type: application/json
+
+{
+  "profileImageUrl": "https://cdn.example.com/profiles/user123.jpg",
+  "loginId": "jaehyun99",
+  "password": "securePass!2025",
+  "phoneNumber": "010-8765-4321",
+  "email": "jaehyun.kim99@example.com",
+  "name": "김재현",
+  "birthday": "1999-09-15"
+}

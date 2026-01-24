@@ -1,0 +1,81 @@
+# 배포환경에서만 사용하는 docker-compose.yml
+# 로컬환경에서는 docker compose up -d로 docker-compose.yml만 컨테이너로 올리지만, 배포환경에서는 docker compose -f docker-compose.yml -f docker-compose-prod.yml up -d를 통해 두 개의 yml 파일을 순차적으로 중첩해서 올려 컨테이너를 띄움
+# 중복되는 부분은 docker-compose-prod.yml이 docker-compose.yml을 덮어씌움
+# 로컬 환경에서는 .env에서 환경변수 주입, 배포 환경에서는 github repository secrets에서 환경변수 주입
+services:
+  actionary-db:
+    # 배포 환경에서 db의 내용이 삭제되지 않도록, EC2 서버 내 폴더에 volumes를 연결하여 DB 저장
+    restart: always
+    volumes:
+      - "./mysql_data:/var/lib/mysql"
+    networks:
+      - app-network
+
+  actionary-redis:
+    networks:
+      - app-network
+
+  janus-gateway:
+    # 기존 로컬환경에서는 포트를 지정해 사용했지만, 리눅스를 사용하는 EC2환경에서는 network_mode를 host로 설정해 포트범위에 제약을 두지 않음
+    # host 모드로 바꾸는 것으로 도커를 거치지 않고 EC2의 포트를 바로 사용하는 것으로 서버의 부하를 줄임
+    network_mode: "host"
+    # 기존 .jcfg 설정파일들이 springboot의 root폴더에 있었는데, 배포 환경에서는 웹서버가 컨테이너로 띄워지므로, 도커 환경 내에서 독립적인 컨테이너 구축을 위해서 .jcfg 파일들이 EC2 서버 내에 위치해야 함
+    # ec2 내에 .jcfg파일을 만들어주고 volumes로 연결
+    volumes:
+      - "./janus/janus.jcfg:/usr/local/etc/janus/janus.jcfg"
+      - "./janus/janus.transport.http.jcfg:/usr/local/etc/janus/janus.transport.http.jcfg"
+    restart: always
+
+  # 기존에는 로컬 springboot webserver을 사용했지만, 배포 환경에서는 springboot가 따로 설치되어있지 않으므로 다른 컨테이너들과 마찬가지로 springboot 이미지를 만들어 컨테이너를 띄움
+  # 해당 이미지는 docker hub에서 기본으로 제공되는 다른 이미지와는 달리 직접 개발한 springboot webserver파일을 사용해야하기 때문에, workflow.yml에서 업로드한 docker image 파일을 직접 pull해서 띄워야 함
+  # 따라서 github repository secrets의 ENV_PROD변수에서 만들어진 EC2 서버의 .env에서 환경변수를 주입받아 웹서버 이미지를 pull 받아서 사용함
+  # 해당 과정은 workflow.yml을 통해 자동으로 진행됨
+  actionary-be:
+    image: ${DOCKER_USERNAME}/${DOCKER_REPO}:latest
+    container_name: actionary_webserver
+    restart: always
+
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod # 서버 운영용에서 띄워질 컨테이너이므로, application-prod.yml 설정을 적용할 수 있도록 함
+      - TZ=Asia/Seoul
+
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+
+    # actionary_webserver 도커 컨테이너가 janus와 소통해야하는데 janus는 네트워크 모드를 host로 지정해두어 도커 컨테이너 밖에 있는 판정이 나므로, 백엔드가 janus의 주소에 접근하기 위해 extra_hosts를 설정해줌
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+    # springboot webserver는 db에 의존하므로, actionary-db가 시작된 이후에 웹서버가 띄워짐
+    depends_on:
+      actionary-db:
+        condition: service_started
+
+      # 리버스 프록시를 사용하므로 8080을 외부로 열지 않고 Nginx만 접근하게 함
+    #    ports:
+    #      - "8080:8080"
+    networks:
+      - app-network
+    env_file:
+      - .env
+
+  nginx:
+    image: nginx:latest
+    container_name: actionary_nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/conf.d:/etc/nginx/conf.d
+      - ./nginx/html:/usr/share/nginx/html
+      - ./frontend/dist:/usr/share/nginx/html
+      - /etc/letsencrypt:/etc/letsencrypt:ro
+    depends_on:
+      - actionary-be
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge

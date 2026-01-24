@@ -1,0 +1,10 @@
+POST http://localhost:8080/api/auth/refresh
+Content-Type: application/json
+
+{
+  "refreshToken": "{{refreshToken}}"
+}
+
+> {%
+    client.global.set("accessToken", "Bearer " + response.body.data.accessToken);
+%}
