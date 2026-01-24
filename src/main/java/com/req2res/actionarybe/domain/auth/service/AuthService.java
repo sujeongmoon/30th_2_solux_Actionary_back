@@ -6,14 +6,11 @@ import com.req2res.actionarybe.domain.member.entity.Badge;
 import com.req2res.actionarybe.domain.member.entity.Member;
 import com.req2res.actionarybe.domain.member.repository.BadgeRepository;
 import com.req2res.actionarybe.domain.member.repository.MemberRepository;
-import com.req2res.actionarybe.domain.member.service.MemberService;
-import com.req2res.actionarybe.global.Response;
 import com.req2res.actionarybe.global.exception.CustomException;
 import com.req2res.actionarybe.global.exception.ErrorCode;
 import com.req2res.actionarybe.global.security.JwtTokenProvider;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -22,7 +19,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
 import java.util.Random;
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -51,7 +47,7 @@ public class AuthService {
         String uniqueKey = "_withdrawn_" + member.getId();
 
         member.setWithdrawn(true);
-        member.setSignoutName("(익명)");
+        member.setSignoutName("(탈퇴한 사용자)");
 
         member.setLoginId("login" + uniqueKey);
         member.setEmail("email" + uniqueKey + "@example.com");
@@ -68,7 +64,7 @@ public class AuthService {
     // 탈퇴자면 nickname 대신 signoutName 돌려주는 메서드
     // 의도: nickname은 UNIQUE이고, signoutName은 아니므로, 모든 탈퇴자를 "(익명)" 하나로 처리할 수 있음
     public String chooseNickname(Member member){
-        return member.isWithdrawn()? "(익명)" : member.getNickname();
+        return member.isWithdrawn()? member.getSignoutName() : member.getNickname();
     }
 
     // 로그인
