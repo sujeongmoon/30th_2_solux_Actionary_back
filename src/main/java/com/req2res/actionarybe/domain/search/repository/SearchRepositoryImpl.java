@@ -33,7 +33,14 @@ public class SearchRepositoryImpl implements SearchRepositoryCustom {
 
         // 정렬: POPULAR=즐겨찾기 수, RECENT=createdAt
         if (sort == SearchSort.POPULAR) {
-            cq.orderBy(cb.desc(study.get("bookmarkCount")), cb.desc(study.get("createdAt")));
+            // StudyLike join 후 개수로 정렬
+            Join<Study, ?> likes = study.join("studyLikes", JoinType.LEFT);
+
+            cq.groupBy(study.get("id")); // count 집계 때문에 필요
+            cq.orderBy(
+                    cb.desc(cb.count(likes.get("id"))),
+                    cb.desc(study.get("createdAt"))
+            );
         } else {
             cq.orderBy(cb.desc(study.get("createdAt")));
         }
