@@ -205,11 +205,11 @@ public class SummaryService {
 
 ## 폴더 네이밍
 
-폴더 명은 파스칼 케이스로 작성합니다.
+폴더 & 패키지명 : 소문자
 
 ```
-// 카멜 케이스
-camelCase
+// 소문자
+aisummary
 ```
 
 <br/>
