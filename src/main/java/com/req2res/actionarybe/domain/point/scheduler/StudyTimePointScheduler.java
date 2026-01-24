@@ -21,43 +21,43 @@ public class StudyTimePointScheduler {
     private final PointService pointService;
     private final MemberRepository memberRepository;
 
-    // 매일 00:00 실행
-    // 테스트용으로 1분마다 실행
-    @Scheduled(cron = "0 * * * * *", zone = "Asia/Seoul")
+    // 매일 00:01 (어제 공부시간 기준 정산)
+    @Scheduled(cron = "0 1 0 * * *", zone = "Asia/Seoul")
     public void earnDailyStudyTimePoints() {
 
-        log.info("[Scheduler] Daily study-time point job started");
+        log.info("[Scheduler] Daily study-time point job started (yesterday summary)");
 
         List<Member> members = memberRepository.findAll();
-        log.info("[Scheduler] members size={}", members.size());
 
         for (Member member : members) {
             try {
-                StudyTimePointResponseDTO dto = pointService.earnStudyTimePoint(member.getId());
-                log.info("[Scheduler] earned userId={} point={} todaySeconds={}",
-                        member.getId(), dto.getEarnedPoint(), dto.getTodayStudySeconds());
-
+                pointService.earnStudyTimePoint(member.getId());
             } catch (CustomException e) {
 
-                if (e.getErrorCode() == ErrorCode.STUDY_TIME_POINT_ALREADY_EARNED_TODAY
-                        || e.getErrorCode() == ErrorCode.NOT_FOUND ) {
+                // 정상 스킵 케이스
+                if (e.getErrorCode() == ErrorCode.STUDY_TIME_POINT_ALREADY_EARNED_TODAY ||
+                        e.getMessage().contains("공부시간")) {
 
-                    log.info("[Scheduler] skip userId={} code={} msg={}",
-                            member.getId(), e.getErrorCode(), e.getMessage());
+                    log.info(
+                            "[Scheduler] skip userId={} code={} msg={}",
+                            member.getId(),
+                            e.getErrorCode(),
+                            e.getMessage()
+                    );
                     continue;
                 }
 
-                // 스킵 아닌 실패는 무조건 남기기
-                log.error("[Scheduler] fail userId={} code={} msg={}",
-                        member.getId(), e.getErrorCode(), e.getMessage(), e);
-
-            } catch (Exception e) {
-                log.error("[Scheduler] unexpected fail userId={}", member.getId(), e);
+                // 진짜 에러는 로그로 남김
+                log.error(
+                        "[Scheduler] fail userId={} code={} msg={}",
+                        member.getId(),
+                        e.getErrorCode(),
+                        e.getMessage(),
+                        e
+                );
             }
         }
 
         log.info("[Scheduler] Daily study-time point job finished");
     }
-
 }
-
