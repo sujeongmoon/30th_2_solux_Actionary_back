@@ -135,9 +135,7 @@ public class PostService {
     public void delPostImages(List<String> delImages, Post post) {
         // 이미지 삭제
         for(String imageUrl : delImages){
-            System.out.println("@%#@"+isDelImageInS3(imageUrl)+"@%#@");
             if(isDelImageInS3(imageUrl)){
-                System.out.println("I'm in");
                 imageService.deleteImage(imageUrl);
                 post.removeImage(imageUrl);
             }else{
