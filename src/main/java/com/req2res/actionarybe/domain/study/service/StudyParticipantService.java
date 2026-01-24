@@ -238,7 +238,7 @@ public class StudyParticipantService {
 		messagingTemplate.convertAndSend(
 			"/topic/studies/" + studyId,
 			Event.builder()
-				.type(EventType.NOW_STATE_CHANGED)
+				.type(EventType.PARTICIPANT_LEFT)
 				.data(ParticipantLeftEvent.builder()
 					.studyId(studyId)
 					.studyParticipantId(studyParticipant.getId())

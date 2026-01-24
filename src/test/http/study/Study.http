@@ -25,6 +25,14 @@ Content-Type: application/json
     client.global.set("accessToken", "Bearer " + response.body.data.accessToken);
 %}
 
+#### janus 세션 발급
+POST http://localhost:8080/api/studies/janus
+Authorization: {{accessToken}}
+Content-Type: application/json
+
+{
+  "studyId": 1
+}
 
 #### 스터디 생성 (비공개방)
 #POST http://localhost:8080/api/studies

@@ -1,5 +1,8 @@
 package com.req2res.actionarybe.domain.study.entity;
 
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+
 import com.req2res.actionarybe.domain.member.entity.Member;
 import com.req2res.actionarybe.global.Timestamped;
 
@@ -31,17 +34,17 @@ public class StudyLike extends Timestamped {
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "study_id", nullable = false)
+	@OnDelete(action = OnDeleteAction.CASCADE)
 	private Study study;
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "user_id", nullable = false)
 	private Member member;
 
-
-    public void confirmStudy(Study study) {
-        this.study = study;
-        if (!study.getStudyLikes().contains(this)) {
-            study.getStudyLikes().add(this);
-        }
-    }
+	public void confirmStudy(Study study) {
+		this.study = study;
+		if (!study.getStudyLikes().contains(this)) {
+			study.getStudyLikes().add(this);
+		}
+	}
 }

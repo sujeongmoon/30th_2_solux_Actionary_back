@@ -33,6 +33,10 @@ public class StudyRequestDto {
 	@Schema(description = "스터디 간단 소개글", example = "눈송이 인증 받아요")
 	private String description;
 
+	@Size(min = 1, max = 200, message = "스터디 안내는 200자 이내여야 합니다.")
+	@Schema(description = "스터디 안내", example = "숙명여대생 인증 받습니다! 눈송이들만 모여있는 방이니 다른 분들은 출입 자제해 주세요. 많관부 많관부 ~")
+	private String longDescription;
+
 	@Min(value = 2, message = "인원 제한은 최소 2명 이상이어야 합니다.")
 	@Schema(description = "스터디 인원제한", example = "15")
 	private int memberLimit;

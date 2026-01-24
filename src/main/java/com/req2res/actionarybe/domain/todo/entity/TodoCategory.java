@@ -4,6 +4,8 @@ import com.req2res.actionarybe.global.Timestamped;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDate;
+
 @Entity
 @Table(name = "todo_category")
 @Getter
@@ -25,6 +27,9 @@ public class TodoCategory extends Timestamped {
 
     @Column
     private String color;
+
+    @Column(name = "start_date", nullable = false)
+    private LocalDate startDate;   // 이 날짜부터 카테고리가 보이기 시작(비즈니스 기준)
 
     //----메소드----
     public void updateName(String name) {
