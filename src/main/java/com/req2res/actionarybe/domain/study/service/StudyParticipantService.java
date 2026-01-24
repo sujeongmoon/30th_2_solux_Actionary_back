@@ -229,8 +229,8 @@ public class StudyParticipantService {
 	}
 
     @Transactional
-    public void updateStudyParticipantAuto(Long participantId) {
-        StudyParticipant studyParticipant = studyParticipantRepository.findById(participantId)
+    public void updateStudyParticipantAuto(Long studyParticipantId) {
+        StudyParticipant studyParticipant = studyParticipantRepository.findById(studyParticipantId)
                 .orElseThrow(() -> new CustomException(ErrorCode.STUDY_PARTICIPANT_NOT_JOINED));
 
         Long studyId = studyParticipant.getStudy().getId();

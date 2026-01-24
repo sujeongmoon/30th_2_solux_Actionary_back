@@ -17,11 +17,11 @@ public class WebSocketEventListener {
     public void handleWebSocketDisconnectListener(SessionDisconnectEvent event) {
         StompHeaderAccessor accessor = StompHeaderAccessor.wrap(event.getMessage());
 
-        String participantIdStr = (String) accessor.getSessionAttributes().get("participantId");
+        String studyParticipantIdStr = (String) accessor.getSessionAttributes().get("studyParticipantId");
 
-        if (participantIdStr != null) {
-            Long participantId = Long.parseLong(participantIdStr);
-            studyParticipantService.updateStudyParticipantAuto(participantId);
+        if (studyParticipantIdStr != null) {
+            Long studyParticipantId = Long.parseLong(studyParticipantIdStr);
+            studyParticipantService.updateStudyParticipantAuto(studyParticipantId);
         }
     }
 }
