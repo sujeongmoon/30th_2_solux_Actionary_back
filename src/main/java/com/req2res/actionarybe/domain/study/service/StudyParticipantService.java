@@ -8,6 +8,8 @@ import java.util.Optional;
 
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -53,6 +55,11 @@ public class StudyParticipantService {
 	private final RedisTemplate<String, String> redisTemplate;
 	private final SimpMessagingTemplate messagingTemplate;
 
+	@Retryable(
+		value = {Exception.class},
+		maxAttempts = 3,
+		backoff = @Backoff(delay = 500)
+	)
 	public StudyParticipantResponseDto createStudyParticipantPublic(Member member, Long studyId) {
 
 		Study study = studyRepository.findById(studyId).
@@ -103,6 +110,11 @@ public class StudyParticipantService {
 		return StudyParticipantResponseDto.from(studyParticipant);
 	}
 
+	@Retryable(
+		value = {Exception.class},
+		maxAttempts = 3,
+		backoff = @Backoff(delay = 500)
+	)
 	public StudyParticipantResponseDto createStudyParticipantPrivate(Member member, Long studyId,
 		@Valid StudyParticipantPrivateRequestDto request) {
 
@@ -175,6 +187,11 @@ public class StudyParticipantService {
 			.build();
 	}
 
+	@Retryable(
+		value = {Exception.class},
+		maxAttempts = 3,
+		backoff = @Backoff(delay = 500)
+	)
 	public StudyParticipantNowStateResponseDto updateStudyParticipantNowState(
 		@Valid StudyParticipantNowStateRequestDto request, Member member, Long studyId) {
 
@@ -216,6 +233,11 @@ public class StudyParticipantService {
 	}
 
 	@Transactional
+	@Retryable(
+		value = {Exception.class},
+		maxAttempts = 3,
+		backoff = @Backoff(delay = 500)
+	)
 	public void updateStudyParticipant(Member member, Long studyId, StudyTimeTypeRequestDto request) {
 		Study study = studyRepository.findById(studyId).
 			orElseThrow(() -> new CustomException(ErrorCode.STUDY_NOT_FIND));
@@ -224,39 +246,54 @@ public class StudyParticipantService {
 				study, member)
 			.orElseThrow(() -> new CustomException(ErrorCode.STUDY_PARTICIPANT_NOT_JOINED));
 
-        processParticipantExit(studyId, studyParticipant, request.getType());
+		processParticipantExit(studyId, studyParticipant, request.getType());
 
 	}
 
-    @Transactional
-    public void updateStudyParticipantAuto(Long studyParticipantId) {
-        StudyParticipant studyParticipant = studyParticipantRepository.findById(studyParticipantId)
-                .orElseThrow(() -> new CustomException(ErrorCode.STUDY_PARTICIPANT_NOT_JOINED));
+	@Transactional
+	@Retryable(
+		value = {Exception.class},
+		maxAttempts = 3,
+		backoff = @Backoff(delay = 500)
+	)
+	public void updateStudyParticipantAuto(Long studyParticipantId) {
+		StudyParticipant studyParticipant = studyParticipantRepository.findById(studyParticipantId)
+			.orElseThrow(() -> new CustomException(ErrorCode.STUDY_PARTICIPANT_NOT_JOINED));
 
-        Long studyId = studyParticipant.getStudy().getId();
+		Long studyId = studyParticipant.getStudy().getId();
 
-        processParticipantExit(studyId, studyParticipant, Type.STUDY);
-    }
+		processParticipantExit(studyId, studyParticipant, Type.STUDY);
+	}
 
-    private void processParticipantExit(Long studyId, StudyParticipant studyParticipant, Type type) {
+	@Retryable(
+		value = {Exception.class},
+		maxAttempts = 3,
+		backoff = @Backoff(delay = 500)
+	)
+	public void processParticipantExit(Long studyId, StudyParticipant studyParticipant, Type type) {
 
-        updateStateParticipantStudy(studyParticipant, type);
+		updateStateParticipantStudy(studyParticipant, type);
 
-        String redisKey = "study:" + studyId + ":nowState";
-        redisTemplate.opsForHash().delete(redisKey, studyParticipant.getId().toString());
+		String redisKey = "study:" + studyId + ":nowState";
+		redisTemplate.opsForHash().delete(redisKey, studyParticipant.getId().toString());
 
-        messagingTemplate.convertAndSend(
-                "/topic/studies/" + studyId,
-                Event.builder()
-                        .type(EventType.PARTICIPANT_LEFT)
-                        .data(ParticipantLeftEvent.builder()
-                                .studyId(studyId)
-                                .studyParticipantId(studyParticipant.getId())
-                                .build())
-                        .build()
-        );
-    }
+		messagingTemplate.convertAndSend(
+			"/topic/studies/" + studyId,
+			Event.builder()
+				.type(EventType.PARTICIPANT_LEFT)
+				.data(ParticipantLeftEvent.builder()
+					.studyId(studyId)
+					.studyParticipantId(studyParticipant.getId())
+					.build())
+				.build()
+		);
+	}
 
+	@Retryable(
+		value = {Exception.class},
+		maxAttempts = 3,
+		backoff = @Backoff(delay = 500)
+	)
 	public void sendChatMessage(Long studyId, ChatMessageRequestEvent request) {
 
 		Optional<ChatSenderInfo> chatSenderInfoOpt = studyParticipantRepository.findChatSenderInfo(studyId,
@@ -294,7 +331,12 @@ public class StudyParticipantService {
 
 	}
 
-	private void updateStateParticipantStudy(StudyParticipant studyParticipant, Type type) {
+	@Retryable(
+		value = {Exception.class},
+		maxAttempts = 3,
+		backoff = @Backoff(delay = 500)
+	)
+	public void updateStateParticipantStudy(StudyParticipant studyParticipant, Type type) {
 		studyTimeService.createStudyTime(Type.STUDY, studyParticipant);
 		studyParticipant.updateIsActiveFalse();
 	}
