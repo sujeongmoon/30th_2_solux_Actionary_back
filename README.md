@@ -6,6 +6,24 @@
 <br/>
 <br/>
 
+---
+
+[BE 개발 정리 노션 링크](https://delicate-dish-b60.notion.site/Back-End-259a4c0c427280ab93fdd108790f4b75?source=copy_link)
+
+---
+
+[ERD 링크](https://www.erdcloud.com/d/knbderZkaaRFLL2Rb)
+* ERD
+  <img width="1686" height="724" alt="image" src="https://github.com/user-attachments/assets/89deb4af-5984-482b-a3d3-6412ad2742ee" />
+
+---
+
+[API 명세서 노션 링크](https://delicate-dish-b60.notion.site/API-291a4c0c42728018b399fd9b1fd5638c?source=copy_link)
+* API 명세서 (일부)
+  <img width="1856" height="930" alt="image" src="https://github.com/user-attachments/assets/1c96c52a-5980-439f-8139-1500b8a17b97" />
+
+---
+
 # 0. Getting Started (시작하기)
 
 * 개발환경
