@@ -9,6 +9,17 @@
 ---
 
 [BE 개발 정리 노션 링크](https://delicate-dish-b60.notion.site/Back-End-259a4c0c427280ab93fdd108790f4b75?source=copy_link)
+* 노션 문서
+  <img width="1916" height="1077" alt="image" src="https://github.com/user-attachments/assets/2b209117-9ed4-4b20-b6b1-3b63fb485c14" />
+  <img width="1919" height="1077" alt="image" src="https://github.com/user-attachments/assets/601c045b-6936-4a4e-83af-9bd04f6ab08e" />
+  <img width="1919" height="1077" alt="image" src="https://github.com/user-attachments/assets/5a8ad71c-cea5-4810-962f-876bf7654fb3" />
+  <img width="1917" height="795" alt="image" src="https://github.com/user-attachments/assets/7c4876db-822e-4dbb-83de-b4ff7565054a" />
+
+  
+
+
+
+
 
 ---
 
