@@ -20,10 +20,10 @@ public class JanusClient {
 		this.webClient = WebClient.builder().baseUrl(baseUrl).build();
 	}
 
-	public Long createStudyRoom(Long roomId) {
+	public Long createStudyRoom(Long roomId, int memberLimit) {
 		Long sessionId = createSession();
 		Long handleId = attachVideoRoomPlugin(sessionId);
-		sendCreateRoomCommand(sessionId, handleId, roomId);
+		sendCreateRoomCommand(sessionId, handleId, roomId, memberLimit);
 
 		return roomId;
 	}
@@ -49,11 +49,12 @@ public class JanusClient {
 			.getData().getId();
 	}
 
-	private void sendCreateRoomCommand(Long sessionId, Long handleId, Long roomId) {
+	private void sendCreateRoomCommand(Long sessionId, Long handleId, Long roomId, int publishers) {
 		var body = Map.of(
 			"request", "create",
 			"room", roomId,
-			"permanent", true
+			"permanent", true,
+			"publishers", publishers
 		);
 		var request = JanusRequestDto.builder()
 			.janus("message")

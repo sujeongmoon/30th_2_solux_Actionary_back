@@ -88,7 +88,7 @@ public class StudyService {
 		studyRepository.save(study);
 
 		try {
-			janusClient.createStudyRoom(study.getId());
+			janusClient.createStudyRoom(study.getId(), study.getMemberLimit());
 		} catch (Exception e) {
 			studyRepository.delete(study);
 			throw new CustomException(ErrorCode.STUDY_CREATE_ERROR);
@@ -103,7 +103,7 @@ public class StudyService {
 			orElseThrow(() -> new CustomException(ErrorCode.STUDY_NOT_FIND));
 
 		try {
-			janusClient.createStudyRoom(study.getId());
+			janusClient.createStudyRoom(study.getId(), study.getMemberLimit());
 		} catch (Exception e) {
 			throw new CustomException(ErrorCode.STUDY_CREATE_ERROR);
 		}
